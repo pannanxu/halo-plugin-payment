@@ -1,0 +1,25 @@
+plugins {
+    id "io.github.guqing.plugin-development" version "0.0.6-SNAPSHOT"
+}
+
+jar {
+    enabled = true
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest.attributes(
+            'Plugin-Version': "${project.version}",
+    )
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+
+dependencies {
+    implementation project(':payment-sdk')
+    implementation project(':payment-wechat')
+
+    compileOnly files("../lib/halo-2.0.0-SNAPSHOT-plain.jar")
+
+}

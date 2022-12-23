@@ -1,0 +1,9 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: payment-settings
+spec:
+  forms:
+    - group: basic
+      label: 基本设置
+      formSchema:

@@ -1,0 +1,32 @@
+allprojects {
+    apply plugin: 'java'
+
+    group 'io.mvvm.halo.plugin'
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+subprojects {
+
+    repositories {
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
+        maven { url 'https://repo.spring.io/milestone' }
+        mavenCentral()
+    }
+
+    dependencies {
+        compileOnly platform("run.halo.dependencies:halo-dependencies:1.0.0")
+        testImplementation platform("run.halo.dependencies:halo-dependencies:1.0.0")
+        testImplementation 'io.projectreactor:reactor-test'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        compileOnly 'org.projectlombok:lombok:1.18.22'
+        annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
