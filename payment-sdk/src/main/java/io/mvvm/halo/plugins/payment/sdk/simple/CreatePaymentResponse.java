@@ -19,8 +19,10 @@ public class CreatePaymentResponse implements PaymentResponse {
 
     @Schema(title = "单号")
     private String outTradeNo;
+    @Schema(title = "第三方单号")
+    private String tradeNo;
     @Schema(title = "应付总金额")
-    private Integer totalFee;
+    private int totalFee;
     @Schema(title = "扩展值")
     private Map<String, Object> expand;
     @Schema(title = "订单是否创建成功")

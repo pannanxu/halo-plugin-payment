@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.GVK;
 import run.halo.app.extension.Ref;
+import run.halo.app.infra.ExternalUrlSupplier;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,12 @@ public class SimplePaymentProvider implements PaymentProvider {
 
     private final Map<String, IPayment> PAYMENT_CONTAINER = new ConcurrentHashMap<>();
 
+    private final ExternalUrlSupplier externalUrlSupplier;
+
+    public SimplePaymentProvider(ExternalUrlSupplier externalUrlSupplier) {
+        this.externalUrlSupplier = externalUrlSupplier;
+    }
+
     @Override
     public IPayment register(IPaymentOperator operator) {
         Ref type = operator.type();
@@ -34,7 +41,7 @@ public class SimplePaymentProvider implements PaymentProvider {
         type.setGroup(gvk.group());
         type.setKind(gvk.kind());
         type.setVersion(gvk.version());
-        IPayment payment = new SimplePayment(operator, type);
+        IPayment payment = new SimplePayment(operator, type, externalUrlSupplier);
         PAYMENT_CONTAINER.put(payment.type().getName(), payment);
         log.debug("register payment: {}", type.getName());
         return payment;
@@ -58,9 +65,7 @@ public class SimplePaymentProvider implements PaymentProvider {
 
     @Override
     public Flux<IPaymentOperator> getPayments() {
-        return Flux.concat(PAYMENT_CONTAINER.values()
-                .stream()
-                .map(IPayment::getOperatorReactive)
-                .toList());
+        return Flux.fromStream(PAYMENT_CONTAINER.values()
+                .stream().map(IPayment::getOperator));
     }
 }

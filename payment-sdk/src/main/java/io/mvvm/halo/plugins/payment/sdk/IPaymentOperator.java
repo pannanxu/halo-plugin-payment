@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import run.halo.app.extension.Ref;
 
 /**
- * IPayment.
+ * 支付相关操作.
  *
  * @author: pan
  **/

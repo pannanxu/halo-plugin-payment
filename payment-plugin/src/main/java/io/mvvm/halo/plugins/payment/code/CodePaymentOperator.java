@@ -31,7 +31,7 @@ public class CodePaymentOperator implements IPaymentOperator {
 
     @Override
     public Ref type() {
-        return Ref.of("code");
+        return Ref.of(CodeExtension.group);
     }
 
     @Override
@@ -81,6 +81,8 @@ public class CodePaymentOperator implements IPaymentOperator {
 
     @Override
     public Mono<AsyncNotifyResponse> asyncNotify(ServerRequest request) {
+        String name = request.pathVariable("name");
+        String paymentType = request.pathVariable("paymentType");
         return Mono.empty();
     }
 }

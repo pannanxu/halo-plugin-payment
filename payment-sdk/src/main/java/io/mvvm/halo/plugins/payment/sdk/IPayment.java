@@ -1,10 +1,8 @@
 package io.mvvm.halo.plugins.payment.sdk;
 
-import io.mvvm.halo.plugins.payment.sdk.simple.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.simple.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.simple.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.simple.PaymentInfo;
-import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Ref;
 
@@ -14,41 +12,40 @@ import run.halo.app.extension.Ref;
  * @author: pan
  **/
 public interface IPayment {
-
+    /**
+     * @return 支付 extension 信息
+     */
     Ref type();
 
     IPaymentOperator getOperator();
 
-    default Mono<IPaymentOperator> getOperatorReactive() {
-        return Mono.just(getOperator());
-    }
+    /**
+     * 创建支付订单
+     */
+    Mono<PaymentResponseWrapper<CreatePaymentResponse>> create(CreatePaymentRequest request);
 
-    default Mono<PaymentResponseWrapper<CreatePaymentResponse>> create(CreatePaymentRequest request) {
-        return getOperatorReactive()
-                .flatMap(payment -> payment.create(request))
-                .map(response -> new PaymentResponseWrapper<>(response, type()));
-    }
-
+    /**
+     * 查询支付订单信息
+     */
     default Mono<PaymentResponseWrapper<PaymentInfo>> fetch(PaymentRequest request) {
-        return getOperatorReactive()
-                .flatMap(payment -> payment.fetch(request))
+        return getOperator().fetch(request)
                 .map(response -> new PaymentResponseWrapper<>(response, type()));
     }
 
+    /**
+     * 取消支付订单
+     */
     default Mono<PaymentResponseWrapper<PaymentResponse>> cancel(PaymentRequest request) {
-        return getOperatorReactive()
-                .flatMap(payment -> payment.cancel(request))
+        return getOperator().cancel(request)
                 .map(response -> new PaymentResponseWrapper<>(response, type()));
     }
 
+    /**
+     * 支付订单退款
+     */
     default Mono<PaymentResponseWrapper<PaymentResponse>> refund(PaymentRequest request) {
-        return getOperatorReactive()
-                .flatMap(payment -> payment.refund(request))
+        return getOperator().refund(request)
                 .map(response -> new PaymentResponseWrapper<>(response, type()));
-    }
-
-    default Mono<AsyncNotifyResponse> asyncNotify(ServerRequest request) {
-        return getOperatorReactive().flatMap(payment -> payment.asyncNotify(request));
     }
 
 }

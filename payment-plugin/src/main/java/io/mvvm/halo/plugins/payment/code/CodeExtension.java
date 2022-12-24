@@ -19,6 +19,8 @@ import java.util.Date;
 @GVK(group = "code", version = "v1alpha1", kind = "Payment", plural = "codes", singular = "code")
 public class CodeExtension extends AbstractExtension {
 
+    public static final String group = "code";
+
     private Spec spec;
 
     public enum Status {
