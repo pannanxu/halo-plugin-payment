@@ -3,6 +3,7 @@ package io.mvvm.halo.plugins.payment;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
+import io.mvvm.halo.plugins.payment.sdk.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.simple.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.simple.CreatePaymentResponse;
 import lombok.Getter;
@@ -37,7 +38,22 @@ public class SimplePayment implements IPayment {
 
     @Override
     public Mono<PaymentResponseWrapper<CreatePaymentResponse>> create(CreatePaymentRequest request) {
-        request.setNotifyDomain(externalUrlSupplier.get().toString());
+        // 0 元订单直接返回支付成功
+        if (request.getTotalFee() <= 0) {
+            request.setTotalFee(0);
+            PaymentResponseWrapper<CreatePaymentResponse> wrapper = new PaymentResponseWrapper<>();
+            wrapper.setType(type);
+            wrapper.setResponse(new CreatePaymentResponse()
+                    .setSuccess(true)
+                    .setMode("none")
+                    .setOutTradeNo(request.getOutTradeNo())
+                    .setStatus(PaymentStatus.successful)
+                    .setTotalFee(request.getTotalFee())
+                    .setExpand(request.getExpand()));
+            return Mono.just(wrapper);
+        }
+
+        request.setNotifyUrl(externalUrlSupplier.get().toString(), type().getName());
         return getOperator().create(request)
                 .map(response -> new PaymentResponseWrapper<>(response, type()));
     }

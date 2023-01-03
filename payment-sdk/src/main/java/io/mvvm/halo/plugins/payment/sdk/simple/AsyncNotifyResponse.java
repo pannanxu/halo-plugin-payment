@@ -21,8 +21,8 @@ public class AsyncNotifyResponse implements PaymentResponse {
     @Schema(title = "通知是否成功")
     private boolean success;
     private PaymentStatus status;
-    @Schema(title = "业务模块")
-    private String gvk;
+//    @Schema(title = "业务模块")
+//    private String gvk;
     @Schema(title = "支付模块响应第三方数据")
     private Object response;
 

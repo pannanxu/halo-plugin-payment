@@ -1,3 +1,18 @@
+plugins {
+    id 'maven-publish'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'io.mvvm.halo.plugin'
+            artifactId = 'payment-sdk'
+            version = '1.0'
+            from components.java
+        }
+    }
+}
+
 jar {
     enabled = true
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -12,6 +27,7 @@ jar {
 }
 
 dependencies {
-    compileOnly files("../lib/halo-2.0.0-SNAPSHOT-plain.jar")
 
+    compileOnly files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
+    testImplementation files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
 }

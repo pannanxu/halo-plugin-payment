@@ -12,7 +12,9 @@ jar {
     }
 }
 
-
 dependencies {
+    compileOnly files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
+    testImplementation files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
     implementation project(':payment-sdk')
+    implementation 'com.github.wechatpay-apiv3:wechatpay-java:0.2.4'
 }

@@ -2,7 +2,6 @@ package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
-import io.mvvm.halo.plugins.payment.sdk.PaymentProvider;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 
 /**

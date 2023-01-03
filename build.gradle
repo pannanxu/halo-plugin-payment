@@ -11,6 +11,7 @@ subprojects {
         maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
         maven { url 'https://repo.spring.io/milestone' }
         mavenCentral()
+        mavenLocal()
     }
 
     dependencies {

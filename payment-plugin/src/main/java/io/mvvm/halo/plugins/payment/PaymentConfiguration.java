@@ -1,11 +1,9 @@
 package io.mvvm.halo.plugins.payment;
 
-import io.mvvm.halo.plugins.payment.code.CodePaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.AccessTokenManager;
-import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
-import io.mvvm.halo.plugins.payment.sdk.PaymentProvider;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
+import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import run.halo.app.infra.ExternalUrlSupplier;
@@ -18,10 +16,15 @@ import run.halo.app.infra.ExternalUrlSupplier;
 @Configuration
 public class PaymentConfiguration {
 
-    private final PaymentProvider provider;
+//    private final PaymentProvider provider;
 
-    public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier) {
-        this.provider = new SimplePaymentProvider(externalUrlSupplier);
+    public PaymentConfiguration() {
+//        this.provider = new SimplePaymentProvider(null);
+    }
+
+    @Bean
+    public PaymentProvider paymentProvider(ExternalUrlSupplier externalUrlSupplier) {
+        return new SimplePaymentProvider(externalUrlSupplier);
     }
 
     @Bean
@@ -30,24 +33,23 @@ public class PaymentConfiguration {
     }
 
     @Bean
-    public PaymentRegister paymentRegister() {
+    public PaymentRegister paymentRegister(PaymentProvider provider) {
         return new PaymentOperatorRegister(provider);
     }
 
     @Bean
-    public PaymentDispatcher paymentDispatcher() {
+    public PaymentDispatcher paymentDispatcher(PaymentProvider provider) {
         return new SimplePaymentDispatcher(provider);
-    }
-
-    @Bean
-    public PaymentPluginStarted paymentPluginStarted(PaymentRegister register,
-                                                     AccessTokenManager accessTokenManager,
-                                                     CodePaymentOperator codePaymentOperator) {
-        return new PaymentPluginStarted(register, accessTokenManager, codePaymentOperator);
     }
 
     @Bean
     public AsyncNotifyManager asyncNotifyManager() {
         return new SimpleAsyncNotifyManager();
+    }
+
+    @Bean
+    public IAsyncPayment asyncPayment(PaymentDispatcher dispatcher,
+                                      AsyncNotifyManager asyncNotifyManager) {
+        return new AsyncPayment(dispatcher, asyncNotifyManager);
     }
 }

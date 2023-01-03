@@ -7,6 +7,10 @@ import lombok.ToString;
 import run.halo.app.extension.AbstractExtension;
 import run.halo.app.extension.GVK;
 
+import static io.mvvm.halo.plugins.payment.sdk.PaymentExtension.group;
+import static io.mvvm.halo.plugins.payment.sdk.PaymentExtension.kind;
+import static io.mvvm.halo.plugins.payment.sdk.PaymentExtension.version;
+
 /**
  * 支付.
  *
@@ -15,8 +19,12 @@ import run.halo.app.extension.GVK;
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-@GVK(group = "payment", version = "v1alpha1", kind = "Payment", plural = "payments", singular = "payment")
+@GVK(group = group, version = version, kind = kind, plural = "payments", singular = "payment")
 public class PaymentExtension extends AbstractExtension {
+
+    public static final String group = "payment";
+    public static final String version = "v1alpha1";
+    public static final String kind = "Payment";
 
     @Schema(title = "展示名称")
     private String displayName;

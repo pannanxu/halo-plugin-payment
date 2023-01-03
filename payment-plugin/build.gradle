@@ -1,7 +1,3 @@
-plugins {
-    id "io.github.guqing.plugin-development" version "0.0.6-SNAPSHOT"
-}
-
 jar {
     enabled = true
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -17,9 +13,11 @@ jar {
 
 
 dependencies {
+//    implementation 'io.mvvm.halo.plugin:payment-sdk:1.0'
     implementation project(':payment-sdk')
     implementation project(':payment-wechat')
 
-    compileOnly files("../lib/halo-2.0.0-SNAPSHOT-plain.jar")
+    compileOnly files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
+    testImplementation files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
 
 }

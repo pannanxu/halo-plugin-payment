@@ -1,5 +1,7 @@
-package io.mvvm.halo.plugins.payment.sdk;
+package io.mvvm.halo.plugins.payment;
 
+import io.mvvm.halo.plugins.payment.sdk.IPayment;
+import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -16,5 +18,7 @@ public interface PaymentProvider {
 
     Mono<IPayment> getPayment(String name);
 
-    Flux<IPaymentOperator> getPayments();
+    Flux<IPaymentOperator> getPaymentOperators();
+    
+    Flux<IPayment> getPayments();
 }

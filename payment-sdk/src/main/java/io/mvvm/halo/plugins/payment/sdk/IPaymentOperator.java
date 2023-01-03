@@ -22,6 +22,18 @@ public interface IPaymentOperator {
     Ref type();
 
     /**
+     * @return 支付方式的状态是否可用
+     */
+    boolean status();
+
+    /**
+     * 支付初始化配置
+     */
+    default Mono<Boolean> initConfig() {
+        return Mono.empty();
+    }
+
+    /**
      * 创建支付订单
      */
     Mono<CreatePaymentResponse> create(CreatePaymentRequest request);

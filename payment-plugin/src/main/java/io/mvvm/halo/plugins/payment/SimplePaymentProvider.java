@@ -3,12 +3,10 @@ package io.mvvm.halo.plugins.payment;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentExtension;
-import io.mvvm.halo.plugins.payment.sdk.PaymentProvider;
 import io.mvvm.halo.plugins.payment.sdk.exception.PaymentNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import run.halo.app.extension.GVK;
 import run.halo.app.extension.Ref;
 import run.halo.app.infra.ExternalUrlSupplier;
 
@@ -33,18 +31,21 @@ public class SimplePaymentProvider implements PaymentProvider {
 
     @Override
     public IPayment register(IPaymentOperator operator) {
+        IPayment payment = createPayment(operator);
+        PAYMENT_CONTAINER.put(payment.type().getName(), payment);
+        log.debug("register payment: {}", payment.type().getName());
+        return payment;
+    }
+
+    private IPayment createPayment(IPaymentOperator operator) {
         Ref type = operator.type();
         if (PAYMENT_CONTAINER.containsKey(type.getName())) {
             unregister(operator);
         }
-        GVK gvk = PaymentExtension.class.getAnnotation(GVK.class);
-        type.setGroup(gvk.group());
-        type.setKind(gvk.kind());
-        type.setVersion(gvk.version());
-        IPayment payment = new SimplePayment(operator, type, externalUrlSupplier);
-        PAYMENT_CONTAINER.put(payment.type().getName(), payment);
-        log.debug("register payment: {}", type.getName());
-        return payment;
+        type.setGroup(PaymentExtension.group);
+        type.setKind(PaymentExtension.kind);
+        type.setVersion(PaymentExtension.version);
+        return new SimplePayment(operator, type, externalUrlSupplier);
     }
 
     @Override
@@ -64,8 +65,15 @@ public class SimplePaymentProvider implements PaymentProvider {
     }
 
     @Override
-    public Flux<IPaymentOperator> getPayments() {
+    public Flux<IPaymentOperator> getPaymentOperators() {
         return Flux.fromStream(PAYMENT_CONTAINER.values()
-                .stream().map(IPayment::getOperator));
+                .stream()
+                .map(IPayment::getOperator));
     }
+
+    @Override
+    public Flux<IPayment> getPayments() {
+        return Flux.fromStream(PAYMENT_CONTAINER.values().stream());
+    }
+
 }

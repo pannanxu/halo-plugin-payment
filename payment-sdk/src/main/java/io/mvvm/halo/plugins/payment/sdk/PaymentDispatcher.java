@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment.sdk;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -20,4 +21,6 @@ public interface PaymentDispatcher {
      * 从 reactor 上下文中获取指定支付方式
      */
     Mono<IPayment> dispatch();
+    
+    Flux<IPayment> payments();
 }
