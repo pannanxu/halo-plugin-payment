@@ -7,3 +7,8 @@ spec:
     - group: basic
       label: 基本设置
       formSchema:
+        - $formkit: checkbox
+          help: "tmp checkbox"
+          label: Tmp
+          name: enable
+          value: true

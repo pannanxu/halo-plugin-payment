@@ -16,6 +16,11 @@ public interface AsyncNotifyHandler {
     /**
      * 当支付收到回调后，成功、取消等状态会执行此处理器，在业务中可以实现此处理器来完成业务状态的扭转
      */
-    Mono<Void> handle(AsyncNotifyResponse response);
+    Mono<Boolean> payment(AsyncNotifyResponse response);
+
+    /**
+     * 当退款收到回调后，成功、取消等状态会执行此处理器，在业务中可以实现此处理器来完成业务状态的扭转
+     */
+    Mono<Boolean> refund(AsyncNotifyResponse response);
 
 }

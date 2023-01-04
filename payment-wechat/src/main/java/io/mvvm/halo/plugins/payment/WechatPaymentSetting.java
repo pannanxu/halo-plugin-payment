@@ -10,7 +10,6 @@ import lombok.Data;
 @Data
 public class WechatPaymentSetting {
 
-
     public static final String NAME = "wechat-payment-settings";
     public static final String GROUP = "basic";
 
@@ -23,7 +22,11 @@ public class WechatPaymentSetting {
      */
     private String merchantId;
     /**
-     * 商户API私钥, RSA 字符串
+     * 商户API私钥
+     * <p>
+     * RSA 字符串
+     * <p>
+     * 如果以 "file://" 开头则匹配路径，如："file:///opt/cert/apiclient_key.pem"
      */
     private String privateKey;
     /**

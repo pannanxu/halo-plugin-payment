@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.function.Supplier;
+
 /**
  * 异步通知.
  *
@@ -23,8 +25,10 @@ public class AsyncNotifyResponse implements PaymentResponse {
     private PaymentStatus status;
 //    @Schema(title = "业务模块")
 //    private String gvk;
-    @Schema(title = "支付模块响应第三方数据")
-    private Object response;
+    @Schema(title = "支付模块响应第三方数据-成功")
+    private Supplier<Object> responseSuccess;
+    @Schema(title = "支付模块响应第三方数据-失败")
+    private Supplier<Object> responseFail;
 
     @Override
     public PaymentStatus status() {

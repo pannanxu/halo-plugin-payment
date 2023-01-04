@@ -58,9 +58,16 @@ public interface IPaymentOperator {
     }
 
     /**
-     * 异步通知
+     * 支付异步通知
      */
-    Mono<AsyncNotifyResponse> asyncNotify(ServerRequest request);
+    Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request);
+
+    /**
+     * 退款异步通知
+     */
+    default Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
+        return Mono.empty();
+    }
 
     void destroy();
 }

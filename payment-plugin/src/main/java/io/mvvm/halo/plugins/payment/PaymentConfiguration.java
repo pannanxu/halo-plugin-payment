@@ -16,15 +16,10 @@ import run.halo.app.infra.ExternalUrlSupplier;
 @Configuration
 public class PaymentConfiguration {
 
-//    private final PaymentProvider provider;
+    private final PaymentProvider provider;
 
-    public PaymentConfiguration() {
-//        this.provider = new SimplePaymentProvider(null);
-    }
-
-    @Bean
-    public PaymentProvider paymentProvider(ExternalUrlSupplier externalUrlSupplier) {
-        return new SimplePaymentProvider(externalUrlSupplier);
+    public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier) {
+        this.provider = new SimplePaymentProvider(externalUrlSupplier);
     }
 
     @Bean
@@ -33,12 +28,12 @@ public class PaymentConfiguration {
     }
 
     @Bean
-    public PaymentRegister paymentRegister(PaymentProvider provider) {
+    public PaymentRegister paymentRegister() {
         return new PaymentOperatorRegister(provider);
     }
 
     @Bean
-    public PaymentDispatcher paymentDispatcher(PaymentProvider provider) {
+    public PaymentDispatcher paymentDispatcher() {
         return new SimplePaymentDispatcher(provider);
     }
 

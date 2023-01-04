@@ -114,7 +114,7 @@ public class WechatPayment implements IPaymentOperator {
     }
 
     @Override
-    public Mono<AsyncNotifyResponse> asyncNotify(ServerRequest request) {
+    public Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
         return null;
     }
 
