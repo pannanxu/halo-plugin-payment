@@ -1,6 +1,5 @@
 package io.mvvm.halo.plugins.payment;
 
-import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.service.payments.h5.H5Service;
 import com.wechat.pay.java.service.payments.h5.model.Amount;
@@ -68,13 +67,18 @@ public class WechatPayment implements IPaymentOperator {
     }
 
     private H5Service createWeChatH5Service(WechatPaymentSetting setting) {
-        Config config = new RSAAutoCertificateConfig.Builder()
+        RSAAutoCertificateConfig.Builder builder = new RSAAutoCertificateConfig.Builder()
                 .merchantId(setting.getMerchantId())
-                .privateKey(setting.getPrivateKey())
                 .merchantSerialNumber(setting.getMerchantSerialNumber())
-                .apiV3Key(setting.getApiV3key())
-                .build();
-        return new H5Service.Builder().config(config).build();
+                .apiV3Key(setting.getApiV3key());
+        if (null != setting.getPrivateKey()
+            && setting.getPrivateKey().startsWith("file://")) {
+            builder.privateKeyFromPath(setting.getPrivateKey().replace("file://", ""));
+        } else {
+            builder.privateKey(setting.getPrivateKey());
+        }
+
+        return new H5Service.Builder().config(builder.build()).build();
     }
 
     @Override
