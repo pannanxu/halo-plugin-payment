@@ -6,6 +6,7 @@ import com.wechat.pay.java.service.payments.h5.model.Amount;
 import com.wechat.pay.java.service.payments.h5.model.PrepayRequest;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
+import io.mvvm.halo.plugins.payment.sdk.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.PaymentStatus;
@@ -92,7 +93,7 @@ public class WechatPayment implements IPaymentOperator {
                 .map(response -> new CreatePaymentResponse()
                         .setTotalFee(paymentRequest.getTotalFee())
                         .setStatus(PaymentStatus.created)
-                        .setMode("h5_url")
+                        .setMode(PaymentMode.h5_url.name())
                         .setModeData(response.getH5Url())
                         .setOutTradeNo(paymentRequest.getOutTradeNo())
                         .setTradeNo("")
