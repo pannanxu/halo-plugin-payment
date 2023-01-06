@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment.sdk;
 
+import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -14,9 +15,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  **/
 public abstract class AbstractPaymentOperator implements IPaymentOperator, ApplicationContextAware {
 
-    protected ApplicationContext ctx;
+    @Getter
+    private ApplicationContext ctx;
 
-    protected PayEnvironmentFetcher environmentFetcher;
+    @Getter
+    private PayEnvironmentFetcher environmentFetcher;
 
     protected final AtomicBoolean initStatusFlag = new AtomicBoolean(false);
 

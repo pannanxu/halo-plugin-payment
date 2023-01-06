@@ -56,7 +56,8 @@ public class WechatPayment extends AbstractPaymentOperator {
 
     @Override
     public Mono<Boolean> initConfig() {
-        return environmentFetcher.fetch(WechatPaymentSetting.GROUP, WechatPaymentSetting.NAME, WechatPaymentSetting.class)
+        return getEnvironmentFetcher()
+                .fetch(WechatPaymentSetting.GROUP, WechatPaymentSetting.NAME, WechatPaymentSetting.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无微信支付配置, 请配置后再操作"))))
                 .flatMap(setting -> {
                     settingAtomicReference.set(setting);
@@ -242,7 +243,7 @@ public class WechatPayment extends AbstractPaymentOperator {
     }
 
     private record SettingAndService(WechatPaymentSetting setting, H5Service service) {
-        
+
     }
 
 }
