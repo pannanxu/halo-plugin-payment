@@ -15,19 +15,19 @@ spec:
     - group: wechat
       label: 微信支付设置
       formSchema:
-        - $formkit: input
+        - $formkit: text
           label: AppId
           name: AppId
-        - $formkit: input
+        - $formkit: text
           label: 商户号
           name: merchantId
-        - $formkit: input
+        - $formkit: text
           label: 商户API私钥
           name: privateKey
           help: "默认使用 RSA 字符串。如果以 file:// 开头则匹配路径，如：file:///opt/cert/apiclient_key.pem"
-        - $formkit: input
+        - $formkit: text
           label: 商户证书序列号
           name: merchantSerialNumber
-        - $formkit: input
+        - $formkit: text
           label: 商户APIV3密钥
           name: apiV3key
