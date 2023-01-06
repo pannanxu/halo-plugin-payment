@@ -4,22 +4,21 @@ import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.service.payments.h5.H5Service;
 import com.wechat.pay.java.service.payments.h5.model.Amount;
 import com.wechat.pay.java.service.payments.h5.model.PrepayRequest;
-import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
-import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
+import io.mvvm.halo.plugins.payment.sdk.AbstractPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
-import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
-import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
-import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
+import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Ref;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -29,21 +28,12 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author: pan
  **/
 @Component
-public class WechatPayment implements IPaymentOperator {
+public class WechatPayment extends AbstractPaymentOperator {
 
     public static final Ref type = Ref.of("wechat");
 
-    private final AtomicBoolean initStatusFlag = new AtomicBoolean(false);
     private final AtomicReference<H5Service> h5ServiceAtomicReference = new AtomicReference<>(null);
     private final AtomicReference<WechatPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
-    private final PayEnvironmentFetcher fetcher;
-    private final PaymentRegister register;
-
-    public WechatPayment(PayEnvironmentFetcher fetcher, PaymentRegister register) {
-        this.fetcher = fetcher;
-        this.register = register;
-        register.register(this);
-    }
 
     @Override
     public Ref type() {
@@ -57,7 +47,7 @@ public class WechatPayment implements IPaymentOperator {
 
     @Override
     public Mono<Boolean> initConfig() {
-        return fetcher.fetch(WechatPaymentSetting.GROUP, WechatPaymentSetting.NAME, WechatPaymentSetting.class)
+        return environmentFetcher.fetch(WechatPaymentSetting.GROUP, WechatPaymentSetting.NAME, WechatPaymentSetting.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无微信支付配置, 请配置后再操作"))))
                 .map(setting -> {
                     h5ServiceAtomicReference.set(createWeChatH5Service(setting));
@@ -91,6 +81,7 @@ public class WechatPayment implements IPaymentOperator {
                     return h5ServiceAtomicReference.get().prepay(request);
                 })
                 .map(response -> new CreatePaymentResponse()
+                        .setSuccess(StringUtils.hasLength(response.getH5Url()))
                         .setTotalFee(paymentRequest.getTotalFee())
                         .setStatus(PaymentStatus.created)
                         .setMode(PaymentMode.h5_url.name())
@@ -98,6 +89,36 @@ public class WechatPayment implements IPaymentOperator {
                         .setOutTradeNo(paymentRequest.getOutTradeNo())
                         .setTradeNo("")
                         .setExpand(paymentRequest.getExpand()));
+    }
+
+    @Override
+    public Mono<PaymentInfo> fetch(PaymentRequest request) {
+        return null;
+    }
+
+    @Override
+    public Mono<PaymentResponse> cancel(PaymentRequest request) {
+        return super.cancel(request);
+    }
+
+    @Override
+    public Mono<PaymentResponse> refund(PaymentRequest request) {
+        return super.refund(request);
+    }
+
+    @Override
+    public Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
+        return null;
+    }
+
+    @Override
+    public Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
+        return super.refundAsyncNotify(request);
+    }
+
+    @Override
+    public void destroy() {
+
     }
 
     private PrepayRequest createPrepayRequest(CreatePaymentRequest paymentRequest, WechatPaymentSetting setting) {
@@ -110,21 +131,8 @@ public class WechatPayment implements IPaymentOperator {
         request.setDescription(paymentRequest.getTitle());
         request.setNotifyUrl(paymentRequest.getNotifyUrl());
         request.setOutTradeNo(paymentRequest.getOutTradeNo());
+        request.setAttach(paymentRequest.getBackParams());
         return request;
     }
 
-    @Override
-    public Mono<PaymentInfo> fetch(PaymentRequest request) {
-        return null;
-    }
-
-    @Override
-    public Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
-        return null;
-    }
-
-    @Override
-    public void destroy() {
-
-    }
 }

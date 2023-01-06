@@ -24,6 +24,10 @@ public class AsyncNotifyResponse implements PaymentResponse {
     private PaymentStatus status;
 //    @Schema(title = "业务模块")
 //    private String gvk;
+    @Schema(title = "第三方支付成功后返回的参数", description = "需要第三方支付的支持，如果第三方支付不支持的情况下可以考虑使用数据库存储",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private String backParameters;
+
     @Schema(title = "支付模块响应第三方数据-成功")
     private Supplier<Object> responseSuccess;
     @Schema(title = "支付模块响应第三方数据-失败")

@@ -32,7 +32,7 @@ public class CreatePaymentResponse implements PaymentResponse {
     @Schema(title = "订单支付模式(qr:二维码,h5_url:页面跳转;none:无)")
     private String mode;
     @Schema(title = "订单支付模式数据")
-    private String modeData;
+    private Object modeData;
 
     @Override
     public PaymentStatus status() {

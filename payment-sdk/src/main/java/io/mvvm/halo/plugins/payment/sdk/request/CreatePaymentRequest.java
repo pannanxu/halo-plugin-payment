@@ -20,6 +20,9 @@ public class CreatePaymentRequest implements PaymentRequest {
 
     @Schema(title = "标题", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
+    
+    @Schema(title = "描述", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String description;
 
     @Schema(title = "客户端IP", requiredMode = Schema.RequiredMode.REQUIRED)
     private String clientIp;
@@ -29,12 +32,16 @@ public class CreatePaymentRequest implements PaymentRequest {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String device = "pc";
 
-    @Schema(title = "应付总金额", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "应付总金额(分)", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
     private int totalFee;
 
     @Schema(title = "业务引用标识", description = "在支付成功后的回调中，会通过此值通过AsyncNotifyManager通知到业务层",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String gvk;
+
+    @Schema(title = "第三方支付成功后返回的参数", description = "需要第三方支付的支持，如果第三方支付不支持的情况下可以考虑使用数据库存储", 
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private String backParams;
 
     @Schema(title = "扩展值")
     private Map<String, Object> expand;
