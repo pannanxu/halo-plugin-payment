@@ -20,7 +20,7 @@ public class CreatePaymentRequest implements PaymentRequest {
 
     @Schema(title = "标题", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
-    
+
     @Schema(title = "描述", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String description;
 
@@ -39,7 +39,7 @@ public class CreatePaymentRequest implements PaymentRequest {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String gvk;
 
-    @Schema(title = "第三方支付成功后返回的参数", description = "需要第三方支付的支持，如果第三方支付不支持的情况下可以考虑使用数据库存储", 
+    @Schema(title = "第三方支付成功后返回的参数", description = "需要第三方支付的支持，如果第三方支付不支持的情况下可以考虑使用数据库存储",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String backParams;
 
@@ -55,10 +55,7 @@ public class CreatePaymentRequest implements PaymentRequest {
 
     public void setNotifyUrl(String domain, String paymentType) {
         String domainEnd = domain.endsWith("/") ? "" : "/";
-        this.notifyUrl = domain + domainEnd
-                         + "payment/notify/"
-                         + gvk +
-                         "/" + outTradeNo
-                         + "/" + paymentType;
+        this.notifyUrl = domain + domainEnd + "apis/plugins.payment/notify/%s/%s/%s"
+                .formatted(gvk, outTradeNo, paymentType);
     }
 }

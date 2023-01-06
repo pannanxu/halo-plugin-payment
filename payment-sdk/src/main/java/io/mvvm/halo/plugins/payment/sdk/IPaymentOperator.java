@@ -2,15 +2,14 @@ package io.mvvm.halo.plugins.payment.sdk;
 
 import io.mvvm.halo.plugins.payment.sdk.exception.CloseException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
-import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
-import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
-import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
+import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
-import run.halo.app.extension.Ref;
 
 /**
  * 支付相关操作.
@@ -21,7 +20,7 @@ public interface IPaymentOperator {
     /**
      * @return 支付类型
      */
-    Ref type();
+    PaymentDescriptor getDescriptor();
 
     /**
      * @return 支付方式的状态是否可用

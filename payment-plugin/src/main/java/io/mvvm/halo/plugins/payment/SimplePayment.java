@@ -2,6 +2,7 @@ package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
+import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
@@ -10,7 +11,6 @@ import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
-import run.halo.app.extension.Ref;
 import run.halo.app.infra.ExternalUrlSupplier;
 
 /**
@@ -21,20 +21,22 @@ import run.halo.app.infra.ExternalUrlSupplier;
 @Slf4j
 public class SimplePayment implements IPayment {
 
-    private final Ref type;
+    private final PaymentDescriptor descriptor;
     private final ExternalUrlSupplier externalUrlSupplier;
     @Getter
     private IPaymentOperator operator;
 
-    public SimplePayment(IPaymentOperator operator, Ref type, ExternalUrlSupplier externalUrlSupplier) {
+    public SimplePayment(IPaymentOperator operator, 
+                         PaymentDescriptor descriptor, 
+                         ExternalUrlSupplier externalUrlSupplier) {
         this.operator = operator;
-        this.type = type;
+        this.descriptor = descriptor;
         this.externalUrlSupplier = externalUrlSupplier;
     }
 
     @Override
-    public Ref type() {
-        return type;
+    public PaymentDescriptor getDescriptor() {
+        return descriptor;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class SimplePayment implements IPayment {
         if (request.getTotalFee() <= 0) {
             request.setTotalFee(0);
             PaymentResponseWrapper<CreatePaymentResponse> wrapper = new PaymentResponseWrapper<>();
-            wrapper.setType(type);
+            wrapper.setDescriptor(descriptor);
             wrapper.setResponse(new CreatePaymentResponse()
                     .setSuccess(true)
                     .setPaymentMode(PaymentMode.none.name())
@@ -54,15 +56,15 @@ public class SimplePayment implements IPayment {
             return Mono.just(wrapper);
         }
 
-        request.setNotifyUrl(externalUrlSupplier.get().toString(), type().getName());
+        request.setNotifyUrl(externalUrlSupplier.get().toString(), getDescriptor().getName());
         return getOperator().create(request)
-                .map(response -> new PaymentResponseWrapper<>(response, type()));
+                .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
     }
 
     @Override
     public String toString() {
         return """
                 SimplePayment: %s, name: %s
-                """.formatted(operator, operator.type().getName());
+                """.formatted(operator, operator.getDescriptor().getName());
     }
 }

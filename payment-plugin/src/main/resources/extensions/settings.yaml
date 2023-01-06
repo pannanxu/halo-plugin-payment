@@ -7,11 +7,11 @@ spec:
     - group: basic
       label: 基本设置
       formSchema:
-        - $formkit: checkbox
-          help: "tmp checkbox"
-          label: Tmp
-          name: enable
-          value: true
+        - $formkit: text
+          label: 异步通知Token
+          name: token
+          value: 123456789qwertyuioasdfghjk
+          help: "支付成功后回调通知时会校验此token是否一致"
 
 
     - group: wechat

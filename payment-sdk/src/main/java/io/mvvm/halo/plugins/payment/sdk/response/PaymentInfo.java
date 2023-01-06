@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -30,6 +31,8 @@ public class PaymentInfo implements PaymentResponse {
     private boolean success;
     @Schema(title = "订单状态")
     private PaymentStatus status;
+    @Schema(title = "支付成功时间")
+    private Date paySuccessTime;
     @Schema(title = "第三方支付成功后返回的参数", description = "需要第三方支付的支持，如果第三方支付不支持的情况下可以考虑使用数据库存储",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String backParams;

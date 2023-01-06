@@ -6,7 +6,6 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.ReactiveExtensionClient;
@@ -26,7 +25,6 @@ import java.util.Map;
  * @author guqing
  * @since 2.0.0
  */
-@Component
 public class PayEnvironmentFetcher {
     private final ReactiveExtensionClient extensionClient;
 

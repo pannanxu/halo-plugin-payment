@@ -1,11 +1,13 @@
 package io.mvvm.halo.plugins.payment;
 
-import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
+import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
+import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
 import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.infra.ExternalUrlSupplier;
 
 /**
@@ -20,6 +22,11 @@ public class PaymentConfiguration {
 
     public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier) {
         this.provider = new SimplePaymentProvider(externalUrlSupplier);
+    }
+
+    @Bean
+    public PayEnvironmentFetcher payEnvironmentFetcher(ReactiveExtensionClient extensionClient) {
+        return new PayEnvironmentFetcher(extensionClient);
     }
 
     @Bean
@@ -47,4 +54,10 @@ public class PaymentConfiguration {
                                       AsyncNotifyManager asyncNotifyManager) {
         return new AsyncPayment(dispatcher, asyncNotifyManager);
     }
+
+    @Bean
+    public WechatPayment wechatPayment() {
+        return new WechatPayment();
+    }
+
 }
