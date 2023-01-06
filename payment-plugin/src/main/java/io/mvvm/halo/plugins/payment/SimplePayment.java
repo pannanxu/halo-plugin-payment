@@ -3,6 +3,7 @@ package io.mvvm.halo.plugins.payment;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
+import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
@@ -45,9 +46,9 @@ public class SimplePayment implements IPayment {
             wrapper.setType(type);
             wrapper.setResponse(new CreatePaymentResponse()
                     .setSuccess(true)
-                    .setMode("none")
+                    .setPaymentMode(PaymentMode.none.name())
                     .setOutTradeNo(request.getOutTradeNo())
-                    .setStatus(PaymentStatus.successful)
+                    .setStatus(PaymentStatus.payment_successful)
                     .setTotalFee(request.getTotalFee())
                     .setExpand(request.getExpand()));
             return Mono.just(wrapper);

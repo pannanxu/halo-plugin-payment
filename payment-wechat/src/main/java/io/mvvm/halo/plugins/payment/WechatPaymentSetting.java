@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
+import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 import lombok.Data;
 
@@ -38,4 +39,18 @@ public class WechatPaymentSetting {
      * 商户APIV3密钥
      */
     private String apiV3key;
+
+    /**
+     * 根据 商户API私钥 前缀去决定是构建私钥内容还是私钥路径
+     *
+     * @param builder WeChat sdk config
+     */
+    public void privateKey(RSAAutoCertificateConfig.Builder builder) {
+        if (null != this.getPrivateKey()
+            && this.getPrivateKey().startsWith(PaymentSetting.LOCAL_FILE_PREFIX)) {
+            builder.privateKeyFromPath(this.getPrivateKey().replace(PaymentSetting.LOCAL_FILE_PREFIX, ""));
+        } else {
+            builder.privateKey(this.getPrivateKey());
+        }
+    }
 }

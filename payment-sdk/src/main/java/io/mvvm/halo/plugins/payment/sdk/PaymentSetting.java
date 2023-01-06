@@ -13,5 +13,9 @@ public class PaymentSetting {
     public static final String name = "payment-settings";
     
     public static final String basic = "basic";
+    /**
+     * 本地文件前缀匹配符
+     */
+    public static final String LOCAL_FILE_PREFIX = "file://";
     
 }

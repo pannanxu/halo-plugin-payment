@@ -35,8 +35,8 @@ public class SimplePaymentOperatorTest implements IPaymentOperator {
                 .setOutTradeNo(request.getOutTradeNo())
                 .setTotalFee(request.getTotalFee())
                 .setExpand(request.getExpand())
-                .setMode("url")
-                .setModeData("https://www.baidu.com/payment.html");
+                .setPaymentMode("url")
+                .setPaymentModeData("https://www.baidu.com/payment.html");
         return Mono.just(response);
     }
 

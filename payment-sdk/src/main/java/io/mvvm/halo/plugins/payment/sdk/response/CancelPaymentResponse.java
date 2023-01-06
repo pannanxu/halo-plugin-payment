@@ -8,13 +8,13 @@ import lombok.experimental.Accessors;
 import java.util.Map;
 
 /**
- * PaymentInfo.
+ * CancelPaymentResponse.
  *
  * @author: pan
  **/
 @Data
 @Accessors(chain = true)
-public class PaymentInfo implements PaymentResponse {
+public class CancelPaymentResponse implements PaymentResponse {
 
     @Schema(title = "单号")
     private String outTradeNo;
@@ -22,17 +22,12 @@ public class PaymentInfo implements PaymentResponse {
     private String tradeNo;
     @Schema(title = "应付总金额")
     private int totalFee;
-    @Schema(title = "实际支付金额")
-    private int actualFee;
     @Schema(title = "扩展值")
     private Map<String, Object> expand;
-    @Schema(title = "订单是否查询成功")
+    @Schema(title = "订单是否取消成功")
     private boolean success;
     @Schema(title = "订单状态")
     private PaymentStatus status;
-    @Schema(title = "第三方支付成功后返回的参数", description = "需要第三方支付的支持，如果第三方支付不支持的情况下可以考虑使用数据库存储",
-            requiredMode = Schema.RequiredMode.REQUIRED)
-    private String backParams;
 
     @Override
     public PaymentStatus status() {

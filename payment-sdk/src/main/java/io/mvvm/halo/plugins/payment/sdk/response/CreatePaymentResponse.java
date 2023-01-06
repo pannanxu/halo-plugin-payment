@@ -28,11 +28,13 @@ public class CreatePaymentResponse implements PaymentResponse {
     private boolean success;
     @Schema(title = "订单状态")
     private PaymentStatus status;
-
+    /**
+     * see: {@link io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode}
+     */
     @Schema(title = "订单支付模式(qr:二维码,h5_url:页面跳转;none:无)")
-    private String mode;
+    private String paymentMode;
     @Schema(title = "订单支付模式数据")
-    private Object modeData;
+    private Object paymentModeData;
 
     @Override
     public PaymentStatus status() {

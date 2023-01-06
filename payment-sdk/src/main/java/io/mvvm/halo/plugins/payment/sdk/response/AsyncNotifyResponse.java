@@ -16,17 +16,21 @@ import java.util.function.Supplier;
 @Accessors(chain = true)
 public class AsyncNotifyResponse implements PaymentResponse {
 
+    @Schema(title = "应付总金额")
     private int totalFee;
+    @Schema(title = "实际支付金额")
+    private int actualFee;
+    @Schema(title = "单号")
     private String outTradeNo;
+    @Schema(title = "第三方单号")
     private String tradeNo;
     @Schema(title = "通知是否成功")
     private boolean success;
+    @Schema(title = "订单状态")
     private PaymentStatus status;
-//    @Schema(title = "业务模块")
-//    private String gvk;
     @Schema(title = "第三方支付成功后返回的参数", description = "需要第三方支付的支持，如果第三方支付不支持的情况下可以考虑使用数据库存储",
             requiredMode = Schema.RequiredMode.REQUIRED)
-    private String backParameters;
+    private String backParams;
 
     @Schema(title = "支付模块响应第三方数据-成功")
     private Supplier<Object> responseSuccess;
