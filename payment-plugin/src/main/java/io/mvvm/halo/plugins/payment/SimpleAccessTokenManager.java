@@ -1,9 +1,9 @@
 package io.mvvm.halo.plugins.payment;
 
-import io.mvvm.halo.plugins.payment.sdk.AccessToken;
-import io.mvvm.halo.plugins.payment.sdk.AccessTokenManager;
-import io.mvvm.halo.plugins.payment.sdk.AccessTokenRefresher;
-import io.mvvm.halo.plugins.payment.sdk.AccessTokenWrapper;
+import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessToken;
+import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
+import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenRefresher;
+import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenWrapper;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

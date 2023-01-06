@@ -1,4 +1,6 @@
-package io.mvvm.halo.plugins.payment.sdk;
+package io.mvvm.halo.plugins.payment.sdk.response;
+
+import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 
 import java.util.HashMap;
 import java.util.Map;

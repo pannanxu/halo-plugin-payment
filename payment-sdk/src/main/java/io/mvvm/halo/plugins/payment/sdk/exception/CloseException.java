@@ -1,6 +1,6 @@
 package io.mvvm.halo.plugins.payment.sdk.exception;
 
-import io.mvvm.halo.plugins.payment.sdk.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

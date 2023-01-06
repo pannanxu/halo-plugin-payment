@@ -1,6 +1,6 @@
 package io.mvvm.halo.plugins.payment.sdk.async;
 
-import io.mvvm.halo.plugins.payment.sdk.simple.AsyncNotifyResponse;
+import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Ref;
 

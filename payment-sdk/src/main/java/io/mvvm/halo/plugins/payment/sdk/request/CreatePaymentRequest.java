@@ -1,6 +1,5 @@
-package io.mvvm.halo.plugins.payment.sdk.simple;
+package io.mvvm.halo.plugins.payment.sdk.request;
 
-import io.mvvm.halo.plugins.payment.sdk.PaymentRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;

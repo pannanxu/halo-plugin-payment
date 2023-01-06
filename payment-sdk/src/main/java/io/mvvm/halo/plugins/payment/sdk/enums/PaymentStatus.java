@@ -1,4 +1,4 @@
-package io.mvvm.halo.plugins.payment.sdk;
+package io.mvvm.halo.plugins.payment.sdk.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

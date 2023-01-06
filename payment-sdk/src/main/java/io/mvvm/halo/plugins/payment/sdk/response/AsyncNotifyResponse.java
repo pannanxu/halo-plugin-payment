@@ -1,7 +1,6 @@
-package io.mvvm.halo.plugins.payment.sdk.simple;
+package io.mvvm.halo.plugins.payment.sdk.response;
 
-import io.mvvm.halo.plugins.payment.sdk.PaymentResponse;
-import io.mvvm.halo.plugins.payment.sdk.PaymentStatus;
+import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;

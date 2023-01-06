@@ -1,8 +1,8 @@
 package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
-import io.mvvm.halo.plugins.payment.sdk.PaymentRequest;
-import io.mvvm.halo.plugins.payment.sdk.simple.CreatePaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;

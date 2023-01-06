@@ -1,6 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
-import io.mvvm.halo.plugins.payment.sdk.AccessTokenManager;
+import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;

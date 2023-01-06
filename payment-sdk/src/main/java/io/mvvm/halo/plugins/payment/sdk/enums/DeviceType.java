@@ -1,4 +1,4 @@
-package io.mvvm.halo.plugins.payment.sdk;
+package io.mvvm.halo.plugins.payment.sdk.enums;
 
 /**
  * 设备类型.
