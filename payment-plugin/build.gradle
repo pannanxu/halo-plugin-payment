@@ -17,9 +17,7 @@ jar {
 
 
 dependencies {
-//    implementation 'io.mvvm.halo.plugin:payment-sdk:1.0'
     implementation project(':payment-sdk')
-    implementation project(':payment-wechat')
 
     compileOnly files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
     testImplementation files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")

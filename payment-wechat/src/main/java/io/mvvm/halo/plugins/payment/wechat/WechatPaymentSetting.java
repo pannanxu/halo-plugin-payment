@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class WechatPaymentSetting {
 
-    public static final String NAME = PaymentSetting.name;
+    public static final String NAME = "wechat-payment-settings";
     public static final String GROUP = "wechat";
 
     /**

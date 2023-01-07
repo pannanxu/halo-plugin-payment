@@ -21,6 +21,7 @@ import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
@@ -30,11 +31,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
- * WechatPayment.
+ * 微信支付能力.
  *
  * @author: pan
  **/
 @Slf4j
+@Component
 public class WechatPayment extends AbstractPaymentOperator {
 
     private final AtomicReference<H5Service> h5ServiceAtomicReference = new AtomicReference<>(null);

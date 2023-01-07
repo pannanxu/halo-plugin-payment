@@ -15,17 +15,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
  **/
 public abstract class AbstractPaymentOperator implements IPaymentOperator, ApplicationContextAware {
 
+    protected final AtomicBoolean initStatusFlag = new AtomicBoolean(false);
     @Getter
     private ApplicationContext ctx;
-
     @Getter
     private PayEnvironmentFetcher environmentFetcher;
 
-    protected final AtomicBoolean initStatusFlag = new AtomicBoolean(false);
-
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        ctx = applicationContext;
+        ctx = SdkContext.paymentCtx;
         environmentFetcher = ctx.getBean(PayEnvironmentFetcher.class);
         PaymentRegister register = ctx.getBean(PaymentRegister.class);
         register.register(this);
