@@ -5,6 +5,7 @@ import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
 import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
+import io.mvvm.halo.plugins.payment.wechat.WechatPayment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import run.halo.app.extension.ReactiveExtensionClient;

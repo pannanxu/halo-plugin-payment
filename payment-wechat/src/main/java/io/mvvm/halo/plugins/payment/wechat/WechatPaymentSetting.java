@@ -1,4 +1,4 @@
-package io.mvvm.halo.plugins.payment;
+package io.mvvm.halo.plugins.payment.wechat;
 
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
