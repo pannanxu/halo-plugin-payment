@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,6 +21,9 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
     private ApplicationContext ctx;
     @Getter
     private PayEnvironmentFetcher environmentFetcher;
+
+    @Getter
+    private final WebClient client = WebClient.builder().build();
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {

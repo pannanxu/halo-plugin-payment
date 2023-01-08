@@ -11,4 +11,5 @@ rootProject.name = 'halo-plugin-payment'
 include 'payment-sdk'
 include 'payment-plugin'
 include 'payment-wechat'
+include 'payment-alipay'
 
