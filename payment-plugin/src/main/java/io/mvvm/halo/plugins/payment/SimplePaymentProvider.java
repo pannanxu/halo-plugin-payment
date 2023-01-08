@@ -57,6 +57,9 @@ public class SimplePaymentProvider implements PaymentProvider {
     @Override
     public Mono<IPayment> getPayment(String name) {
         return Mono.fromSupplier(() -> PAYMENT_CONTAINER.get(name))
+                // 如果通过场景下的支付方式不存在时
+                // 尝试通过通用场景再匹配一次
+                .switchIfEmpty(Mono.defer(() -> Mono.justOrEmpty(PAYMENT_CONTAINER.get(name.split("-")[0]))))
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new PaymentNotFoundException())))
                 .doOnNext(payment -> log.debug("get the payment {} to name {}", payment, name));
     }

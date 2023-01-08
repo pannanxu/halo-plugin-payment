@@ -34,7 +34,8 @@ public class PaymentEndpoint {
     public RouterFunction<ServerResponse> enabledList() {
         return route(GET("/apis/io.mvvm.halo.plugins.payment/list/enabled"),
                 request -> {
-                    Flux<PaymentDescriptor> descriptorFlux = dispatcher.payments().map(IPayment::getDescriptor);
+                    String device = request.queryParam("device").orElse(null);
+                    Flux<PaymentDescriptor> descriptorFlux = dispatcher.payments(device).map(IPayment::getDescriptor);
                     return ServerResponse.ok().body(descriptorFlux, PaymentDescriptor.class);
                 });
     }

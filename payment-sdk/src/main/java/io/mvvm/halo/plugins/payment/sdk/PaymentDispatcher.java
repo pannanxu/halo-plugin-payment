@@ -23,4 +23,6 @@ public interface PaymentDispatcher {
     Mono<IPayment> dispatch();
     
     Flux<IPayment> payments();
+    
+    Flux<IPayment> payments(String device);
 }
