@@ -41,7 +41,7 @@ public class MapUtils {
         return builder.toString();
     }
 
-    private static String urlEncoder(String src) {
+    public static String urlEncoder(String src) {
         return URLEncoder.encode(src, StandardCharsets.UTF_8);
     }
 

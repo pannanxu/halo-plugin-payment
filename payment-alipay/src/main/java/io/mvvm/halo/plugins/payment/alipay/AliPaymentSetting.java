@@ -1,9 +1,9 @@
 package io.mvvm.halo.plugins.payment.alipay;
 
+import com.alipay.api.AlipayConfig;
+import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-
-import java.util.Map;
 
 /**
  * AliPaymentSetting.
@@ -35,109 +35,33 @@ public class AliPaymentSetting {
             description = "（证书模式下设置，公钥模式下无需设置）,file:// 开头则寻找本地路径")
     private String rootCert;
 
-
-    /**
-     * 网关地址
-     * 线上：https://openapi.alipay.com/gateway.do
-     * 沙箱：https://openapi.alipaydev.com/gateway.do
-     */
-    private String serverUrl = "https://openapi.alipay.com/gateway.do";
-
-    /**
-     * 开放平台上创建的应用的ID
-     */
-    private String appId;
-
-    /**
-     * 报文格式，推荐：json
-     */
-    private String format = "json";
-
-    /**
-     * 字符串编码，推荐：utf-8
-     */
-    private String charset = "utf-8";
-
-    /**
-     * 签名算法类型，推荐：RSA2
-     */
-    private String signType = "RSA2";
-
-    /**
-     * 商户私钥
-     */
-    private String privateKey;
-
-    /**
-     * 敏感信息对称加密算法类型，推荐：AES
-     */
-    private String encryptType = "AES";
-
-    /**
-     * 敏感信息对称加密算法密钥
-     */
-    private String encryptKey;
-
-    /**
-     * HTTP代理服务器主机地址
-     */
-    private String proxyHost;
-
-    /**
-     * HTTP代理服务器端口
-     */
-    private int proxyPort;
-
-    /**
-     * 自定义HTTP Header
-     */
-    private Map<String, String> customHeaders;
-
-    /**
-     * 连接超时，单位：毫秒
-     */
-    private int connectTimeout = 3000;
-
-    /**
-     * 读取超时，单位：毫秒
-     */
-    private int readTimeout = 15000;
-
-    /**
-     * 连接池最大空闲连接数
-     */
-    private int maxIdleConnections = 0;
-
-    /**
-     * 存活时间，单位：毫秒
-     */
-    private long keepAliveDuration = 10000L;
-
+    @Schema(title = "支付宝具体sdk配置")
+    private AlipayConfig config;
 
     public void setAlipayPublicCert(String alipayPublicCert) {
         this.alipayPublicCert = alipayPublicCert;
-//        if (alipayPublicCert.startsWith(PaymentSetting.LOCAL_FILE_PREFIX)) {
-//            setAlipayPublicCertPath(alipayPublicCert.replace(PaymentSetting.LOCAL_FILE_PREFIX, ""));
-//        } else {
-//            setAlipayPublicCertContent(alipayPublicCert);
-//        }
+        if (alipayPublicCert.startsWith(PaymentSetting.LOCAL_FILE_PREFIX)) {
+            config.setAlipayPublicCertPath(alipayPublicCert.replace(PaymentSetting.LOCAL_FILE_PREFIX, ""));
+        } else {
+            config.setAlipayPublicCertContent(alipayPublicCert);
+        }
     }
 
     public void setAppCert(String appCert) {
         this.appCert = appCert;
-//        if (appCert.startsWith(PaymentSetting.LOCAL_FILE_PREFIX)) {
-//            setAppCertPath(appCert.replace(PaymentSetting.LOCAL_FILE_PREFIX, ""));
-//        } else {
-//            setAppCertContent(appCert);
-//        }
+        if (appCert.startsWith(PaymentSetting.LOCAL_FILE_PREFIX)) {
+            config.setAppCertPath(appCert.replace(PaymentSetting.LOCAL_FILE_PREFIX, ""));
+        } else {
+            config.setAppCertContent(appCert);
+        }
     }
 
     public void setRootCert(String rootCert) {
         this.rootCert = rootCert;
-//        if (rootCert.startsWith(PaymentSetting.LOCAL_FILE_PREFIX)) {
-//            setRootCertPath(rootCert.replace(PaymentSetting.LOCAL_FILE_PREFIX, ""));
-//        } else {
-//            setRootCertContent(rootCert);
-//        }
+        if (rootCert.startsWith(PaymentSetting.LOCAL_FILE_PREFIX)) {
+            config.setRootCertPath(rootCert.replace(PaymentSetting.LOCAL_FILE_PREFIX, ""));
+        } else {
+            config.setRootCertContent(rootCert);
+        }
     }
 }

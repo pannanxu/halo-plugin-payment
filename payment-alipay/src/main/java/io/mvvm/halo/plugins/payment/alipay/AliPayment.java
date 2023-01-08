@@ -1,10 +1,8 @@
 package io.mvvm.halo.plugins.payment.alipay;
 
-import io.mvvm.halo.plugins.payment.sdk.utils.MapUtils;
-import io.mvvm.halo.plugins.payment.alipay.utils.RSA2Encryptor;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
 import io.mvvm.halo.plugins.payment.sdk.AbstractPaymentOperator;
-import io.mvvm.halo.plugins.payment.sdk.Amount;
-import io.mvvm.halo.plugins.payment.sdk.ExpandConst;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
@@ -18,12 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
-import run.halo.app.infra.utils.JsonUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -35,10 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 public class AliPayment extends AbstractPaymentOperator {
 
-    private final RSA2Encryptor encryptor = new RSA2Encryptor();
-
-
     private final AtomicReference<AliPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
+    private final AtomicReference<AlipayClient> alipayClientAtomicReference = new AtomicReference<>(null);
 
     @Override
     public PaymentDescriptor getDescriptor() {
@@ -63,6 +54,8 @@ public class AliPayment extends AbstractPaymentOperator {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请配置后再操作"))))
                 .map(setting -> {
                     try {
+                        AlipayClient alipayClient = new DefaultAlipayClient(setting.getConfig());
+                        alipayClientAtomicReference.set(alipayClient);
                         settingAtomicReference.set(setting);
                         initStatusFlag.set(true);
                     } catch (Exception e) {
@@ -78,36 +71,7 @@ public class AliPayment extends AbstractPaymentOperator {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请初始化后再操作"))))
                 .flatMap(setting -> {
                     try {
-                        Map<String, String> contentMap = new HashMap<>();
-                        contentMap.put("out_trade_no", paymentRequest.getOutTradeNo());
-                        contentMap.put("total_amount", Amount.of(paymentRequest.getTotalFee()).toString());
-                        contentMap.put("subject", paymentRequest.getTitle());
-                        contentMap.put("product_code", "FAST_INSTANT_TRADE_PAY");
-
-                        Map<String, String> params = new HashMap<>();
-                        params.put("app_id", setting.getAppId());
-                        params.put("method", "alipay.trade.page.pay");
-                        params.put("format", "JSON");
-                        params.put("return_url", paymentRequest.getExpand().get(ExpandConst.returnUrl).toString());
-                        params.put("charset", "utf-8");
-                        params.put("sign_type", "RSA2");
-                        params.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-                        params.put("version", "1.0");
-                        params.put("notify_url", paymentRequest.getNotifyUrl());
-                        params.put("biz_content", JsonUtils.objectToJson(contentMap));
-
-                        String singParamStr = MapUtils.sortToString(params);
-                        String sign = encryptor.doSign(singParamStr, "UTF-8", setting.getPrivateKey());
-                        params.put("sign", sign);
-                        String queryParams = MapUtils.getUrlParam(params);
-                        return Mono.just(new CreatePaymentResponse()
-                                .setSuccess(true)
-                                .setPaymentMode(PaymentMode.h5_url.name())
-                                .setPaymentModeData(setting.getServerUrl() + "?" + queryParams)
-                                .setStatus(PaymentStatus.created)
-                                .setExpand(paymentRequest.getExpand())
-                                .setOutTradeNo(paymentRequest.getOutTradeNo())
-                                .setTotalFee(paymentRequest.getTotalFee()));
+                        return Mono.empty();
                     } catch (Exception e) {
                         log.error("支付宝|创建支付宝订单异常|{}", e.getMessage(), e);
                         return Mono.just(new CreatePaymentResponse()
