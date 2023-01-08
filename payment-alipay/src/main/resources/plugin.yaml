@@ -12,8 +12,8 @@ spec:
     name: pannanxu
     website: https://github.com/pannanxu
   logo: https://mvvm.io/logo
-  settingName: ali-payment-settings
-  configMapName: ali-payment-settings
+  settingName: alipay-payment-settings
+  configMapName: alipay-payment-settings
   # 'homepage' usually links to the GitHub repository of the plugin
   homepage: https://github.com/pannanxu/halo-plugin-payment
   # 'displayName' explains what the plugin does in only a few words

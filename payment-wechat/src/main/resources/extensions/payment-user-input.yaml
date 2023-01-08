@@ -1,0 +1,12 @@
+apiVersion: v1alpha1
+kind: PaymentUserInput
+metadata:
+  name: wechat-payment-user-input
+spec:
+  forms:
+    - group: basic
+      label: 基本信息
+      formSchema:
+        - $formkit: text
+          label: 备注
+          name: remark

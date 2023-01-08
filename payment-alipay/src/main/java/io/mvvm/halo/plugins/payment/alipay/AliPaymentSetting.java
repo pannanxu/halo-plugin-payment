@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class AliPaymentSetting {
 
-    public static final String NAME = "ali-payment-settings";
+    public static final String NAME = "alipay-payment-settings";
     public static final String GROUP = "alipay";
 
     @Schema(title = "模式",

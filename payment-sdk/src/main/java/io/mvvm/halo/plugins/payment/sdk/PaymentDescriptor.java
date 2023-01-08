@@ -3,6 +3,7 @@ package io.mvvm.halo.plugins.payment.sdk;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import run.halo.app.extension.Unstructured;
 
 /**
  * PaymentDescriptor.
@@ -24,4 +25,7 @@ public class PaymentDescriptor {
     
     @Schema(title = "展示Logo", description = "base64格式")
     private String logo;
+
+    @Schema(title = "用户需要输入的数据", description = "所选值会设置在expand参数中")
+    private Unstructured userInputFormSchema;
 }

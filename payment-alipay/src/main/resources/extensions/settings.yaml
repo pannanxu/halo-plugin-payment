@@ -1,7 +1,7 @@
 apiVersion: v1alpha1
 kind: Setting
 metadata:
-  name: wechat-payment-settings
+  name: alipay-payment-settings
 spec:
   forms:
     - group: alipay
