@@ -42,6 +42,10 @@ public class WechatPayment extends AbstractPaymentOperator {
     private final AtomicReference<H5Service> h5ServiceAtomicReference = new AtomicReference<>(null);
     private final AtomicReference<WechatPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
 
+    public WechatPayment() {
+        super(false);
+    }
+
     @Override
     public PaymentDescriptor getDescriptor() {
         return PaymentDescriptor.builder()

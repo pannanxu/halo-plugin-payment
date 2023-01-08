@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AbstractPaymentOperator implements IPaymentOperator, ApplicationContextAware {
 
     protected final AtomicBoolean initStatusFlag = new AtomicBoolean(false);
-    protected final Unstructured userInputFormSchema = loadUserInputFormSchema();
+    protected final Unstructured userInputFormSchema;
     @Getter
     private final WebClient client = WebClient.builder().build();
     @Getter
@@ -31,14 +31,27 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
     @Getter
     private PayEnvironmentFetcher environmentFetcher;
 
+    public AbstractPaymentOperator() {
+        this.userInputFormSchema = null;
+    }
+
+    public AbstractPaymentOperator(boolean isLoadFormSchema) {
+        if (isLoadFormSchema) {
+            this.userInputFormSchema = loadUserInputFormSchema();
+        } else {
+            this.userInputFormSchema = null;
+        }
+    }
+
     /**
      * 加载支付时需要用户输入的数据.
      */
     protected Unstructured loadUserInputFormSchema() {
         Unstructured userInput = null;
+        String name = getDescriptor().getName();
         try {
             List<Unstructured> list = new YamlUnstructuredLoader(
-                    new ClassPathResource("extensions/payment-user-input.yaml", this.getClass().getClassLoader()))
+                    new ClassPathResource("extensions/" + name + "-user-input.yaml", this.getClass().getClassLoader()))
                     .load();
             if (!list.isEmpty()) {
                 userInput = list.get(0);

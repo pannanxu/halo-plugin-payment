@@ -30,7 +30,11 @@ public class AliPayment extends AbstractPaymentOperator {
 
     private final AtomicReference<AliPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
     private final AtomicReference<AlipayClient> alipayClientAtomicReference = new AtomicReference<>(null);
-    
+
+    public AliPayment() {
+        super(true);
+    }
+
     @Override
     public PaymentDescriptor getDescriptor() {
         return PaymentDescriptor.builder()

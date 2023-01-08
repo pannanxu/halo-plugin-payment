@@ -19,6 +19,11 @@ import reactor.core.publisher.Mono;
  **/
 @Component
 public class AppWechatPayment extends AbstractPaymentOperator {
+
+    public AppWechatPayment() {
+        super(true);
+    }
+
     @Override
     public PaymentDescriptor getDescriptor() {
         return PaymentDescriptor.builder()
