@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Amount.
@@ -38,6 +39,6 @@ public class Amount {
     }
     
     public BigDecimal toBigDecimal() {
-        return new BigDecimal(this.total * 0.01);
+        return new BigDecimal(this.total * 0.01).setScale(2, RoundingMode.HALF_DOWN);
     }
 }

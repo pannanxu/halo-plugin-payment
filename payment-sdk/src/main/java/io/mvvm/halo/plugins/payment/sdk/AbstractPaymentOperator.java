@@ -1,7 +1,9 @@
 package io.mvvm.halo.plugins.payment.sdk;
 
+import io.mvvm.halo.plugins.payment.sdk.utils.GsonUtils;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -24,8 +26,10 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
 
     protected final AtomicBoolean initStatusFlag = new AtomicBoolean(false);
     protected final Unstructured userInputFormSchema;
+    protected GsonUtils gson;
     @Getter
-    private final WebClient client = WebClient.builder().build();
+    @Setter
+    private WebClient client;
     @Getter
     private ApplicationContext ctx;
     @Getter

@@ -58,6 +58,11 @@ public class SimplePayment implements IPayment {
 
         request.setNotifyUrl(externalUrlSupplier.get().toString(), getDescriptor().getName());
         return getOperator().create(request)
+                .onErrorResume(throwable -> {
+                    CreatePaymentResponse error = new CreatePaymentResponse().setSuccess(false);
+                    error.setError(throwable.getMessage());
+                    return Mono.just(error);
+                })
                 .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
     }
 

@@ -3,6 +3,7 @@ package io.mvvm.halo.plugins.payment.sdk.response;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.Map;
@@ -13,8 +14,9 @@ import java.util.Map;
  * @author: pan
  **/
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class CreatePaymentResponse implements PaymentResponse {
+public class CreatePaymentResponse extends ErrorResponse implements PaymentResponse {
 
     @Schema(title = "单号")
     private String outTradeNo;

@@ -30,6 +30,11 @@ public interface IPayment {
      */
     default Mono<PaymentResponseWrapper<PaymentInfo>> fetch(PaymentRequest request) {
         return getOperator().fetch(request)
+                .onErrorResume(throwable -> {
+                    PaymentInfo error = new PaymentInfo().setSuccess(false);
+                    error.setError(throwable.getMessage());
+                    return Mono.just(error);
+                })
                 .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
     }
 

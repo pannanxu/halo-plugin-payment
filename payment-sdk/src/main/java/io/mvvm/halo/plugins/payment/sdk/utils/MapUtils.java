@@ -22,7 +22,11 @@ public class MapUtils {
         Arrays.sort(keyArray);
         StringBuilder sb = new StringBuilder();
         for (String k : keyArray) {
-            sb.append(k).append("=").append(data.get(k).trim()).append(join);
+            String val = data.get(k);
+            if (null == val) {
+                continue;
+            }
+            sb.append(k).append("=").append(val.trim()).append(join);
         }
         if (sb.length() != 0) {
             sb.deleteCharAt(sb.length() - 1);
@@ -33,6 +37,10 @@ public class MapUtils {
     public static String getUrlParam(Map<String, String> params) {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
+            String val = entry.getValue();
+            if (null == val) {
+                continue;
+            }
             if (builder.length() > 0) {
                 builder.append('&');
             }

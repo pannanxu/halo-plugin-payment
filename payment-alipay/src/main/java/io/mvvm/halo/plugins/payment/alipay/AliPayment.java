@@ -1,8 +1,12 @@
 package io.mvvm.halo.plugins.payment.alipay;
 
-import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import io.mvvm.halo.plugins.payment.alipay.signature.AlipayConstants;
+import io.mvvm.halo.plugins.payment.alipay.signature.Rsa2Signer;
 import io.mvvm.halo.plugins.payment.sdk.AbstractPaymentOperator;
+import io.mvvm.halo.plugins.payment.sdk.Amount;
+import io.mvvm.halo.plugins.payment.sdk.ExpandConst;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
@@ -12,11 +16,26 @@ import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import io.mvvm.halo.plugins.payment.sdk.signature.Signer;
+import io.mvvm.halo.plugins.payment.sdk.utils.GsonUtils;
+import io.mvvm.halo.plugins.payment.sdk.utils.GsonHelper;
+import io.mvvm.halo.plugins.payment.sdk.utils.MapUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
+import run.halo.app.infra.utils.JsonUtils;
 
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -29,10 +48,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AliPayment extends AbstractPaymentOperator {
 
     private final AtomicReference<AliPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
-    private final AtomicReference<AlipayClient> alipayClientAtomicReference = new AtomicReference<>(null);
+    private final AtomicReference<Signer> signerAtomicReference = new AtomicReference<>(null);
 
     public AliPayment() {
         super(true);
+        gson = GsonUtils.getInstance(new GsonBuilder().create());
     }
 
     @Override
@@ -55,14 +75,22 @@ public class AliPayment extends AbstractPaymentOperator {
     @Override
     public Mono<Boolean> initConfig() {
         return getEnvironmentFetcher()
-                .fetch(AliPaymentSetting.GROUP, AliPaymentSetting.NAME, AliPaymentSetting.class)
+                .fetch(AliPaymentSetting.NAME, AliPaymentSetting.GROUP, AliPaymentSetting.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请配置后再操作"))))
                 .map(setting -> {
                     try {
-                        AlipayClient alipayClient = new DefaultAlipayClient(setting.getConfig());
-                        alipayClientAtomicReference.set(alipayClient);
+                        // 初始化 http client
+                        setClient(WebClient.builder()
+                                .baseUrl(setting.getServerUrl())
+                                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded;charset=UTF8")
+                                .build());
+
+                        // 初始化签名方式
+                        signerAtomicReference.set(new Rsa2Signer(setting.getPrivateKey(), setting.getPublicKey()));
+
                         settingAtomicReference.set(setting);
                         initStatusFlag.set(true);
+                        log.debug("支付宝|初始化成功|{}", initStatusFlag.get());
                     } catch (Exception e) {
                         log.error("支付宝|初始化支付宝配置异常|{}", e.getMessage());
                     }
@@ -75,8 +103,27 @@ public class AliPayment extends AbstractPaymentOperator {
         return Mono.justOrEmpty(settingAtomicReference.get())
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请初始化后再操作"))))
                 .flatMap(setting -> {
+                    log.debug("Request: {}", JsonUtils.objectToJson(paymentRequest));
+                    Map<String, String> contentMap = new HashMap<>(Map.of("out_trade_no", paymentRequest.getOutTradeNo(),
+                            "total_amount", Amount.of(paymentRequest.getTotalFee()).toBigDecimal().toString(),
+                            "subject", paymentRequest.getTitle(),
+                            "product_code", "FAST_INSTANT_TRADE_PAY"));
+
+                    Map<String, Object> expand = new HashMap<>(paymentRequest.getExpand());
+
+                    Map<String, String> extMap = new HashMap<>();
+                    extMap.put("return_url", expand.get(ExpandConst.returnUrl) + "");
+                    extMap.put("notify_url", paymentRequest.getNotifyUrl());
                     try {
-                        return Mono.empty();
+                        String body = buildBody("alipay.trade.page.pay", extMap, contentMap);
+                        return Mono.just(new CreatePaymentResponse()
+                                .setSuccess(StringUtils.hasLength(body))
+                                .setPaymentMode(PaymentMode.h5_url.name())
+                                .setPaymentModeData(setting.getServerUrl() + "?" + body)
+                                .setStatus(PaymentStatus.created)
+                                .setExpand(expand)
+                                .setOutTradeNo(paymentRequest.getOutTradeNo())
+                                .setTotalFee(paymentRequest.getTotalFee()));
                     } catch (Exception e) {
                         log.error("支付宝|创建支付宝订单异常|{}", e.getMessage(), e);
                         return Mono.just(new CreatePaymentResponse()
@@ -84,7 +131,7 @@ public class AliPayment extends AbstractPaymentOperator {
                                 .setPaymentMode(PaymentMode.h5_url.name())
                                 .setPaymentModeData(null)
                                 .setStatus(PaymentStatus.created)
-                                .setExpand(paymentRequest.getExpand())
+                                .setExpand(expand)
                                 .setOutTradeNo(paymentRequest.getOutTradeNo())
                                 .setTotalFee(paymentRequest.getTotalFee()));
                     }
@@ -93,7 +140,49 @@ public class AliPayment extends AbstractPaymentOperator {
 
     @Override
     public Mono<PaymentInfo> fetch(PaymentRequest request) {
-        return null;
+        return Mono.justOrEmpty(settingAtomicReference.get())
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请初始化后再操作"))))
+                .flatMap(setting -> {
+                    Map<String, String> contentMap = Map.of("out_trade_no", request.getOutTradeNo());
+                    String body = buildBody("alipay.trade.query", Map.of(), contentMap);
+                    return getClient().post()
+                            .bodyValue(body)
+                            .exchangeToMono(response -> response.bodyToMono(String.class));
+                })
+                .flatMap(response -> {
+                    JsonObject jsonObject = GsonUtils.parse(response);
+                    JsonObject tradeQueryResponse = jsonObject.get("alipay_trade_query_response").getAsJsonObject();
+                    GsonHelper wrapper = GsonHelper.of(tradeQueryResponse);
+                    String code = wrapper.getAsString("code");
+                    if (!"10000".equals(code)) {
+                        log.debug("支付宝|查询订单信息失败|{}", response);
+                        return Mono.error(new RuntimeException("sub_code: " + wrapper.getAsString("sub_code") +
+                                                               "，sub_msg: " + wrapper.getAsString("sub_msg")));
+                    } 
+
+                    /*
+                     * 交易状态：
+                     * WAIT_BUYER_PAY（交易创建，等待买家付款）、
+                     * TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）、
+                     * TRADE_SUCCESS（交易支付成功）、
+                     * TRADE_FINISHED（交易结束，不可退款）
+                     */
+                    String tradeStatus = wrapper.getAsString("trade_status");
+                    PaymentStatus status = PaymentStatus.created;
+                    switch (tradeStatus) {
+                        case "TRADE_CLOSED", "TRADE_FINISHED" -> status = PaymentStatus.closed;
+                        case "TRADE_SUCCESS" -> status = PaymentStatus.payment_successful;
+                    }
+                    PaymentInfo paymentInfo = new PaymentInfo()
+                            .setSuccess(true)
+                            .setStatus(status)
+                            .setOutTradeNo(wrapper.getAsString("out_trade_no"))
+                            .setTradeNo(wrapper.getAsString("trade_no"))
+                            .setTotalFee(new BigDecimal(wrapper.getAsString("total_amount")).multiply(new BigDecimal(100)).intValue())
+                            .setActualFee(new BigDecimal(wrapper.getAsString("receipt_amount")).multiply(new BigDecimal(100)).intValue())
+                            .setPaySuccessTime(wrapper.getAsDate("send_pay_date", "yyyy-MM-dd HH:mm:ss"));
+                    return Mono.just(paymentInfo);
+                });
     }
 
     @Override
@@ -119,5 +208,42 @@ public class AliPayment extends AbstractPaymentOperator {
     @Override
     public void destroy() {
 
+    }
+
+    /**
+     * 构建请求体
+     *
+     * @param method        请求方法
+     * @param extParams     扩展参数
+     * @param bizContentMap 请求参数
+     * @return queryParam
+     */
+    String buildBody(String method,
+                     Map<String, String> extParams,
+                     Map<String, String> bizContentMap) {
+        Signer signer = signerAtomicReference.get();
+        AliPaymentSetting setting = settingAtomicReference.get();
+
+        String content = JsonUtils.objectToJson(bizContentMap);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("app_id", setting.getAppId());
+        params.put("method", method);
+        params.put("format", "json");
+        params.put("charset", "utf-8");
+        params.put("sign_type", "RSA2");
+        params.putAll(extParams);
+
+        long timestamp = System.currentTimeMillis();
+        DateFormat df = new SimpleDateFormat(AlipayConstants.DATE_TIME_FORMAT);
+        df.setTimeZone(TimeZone.getTimeZone(AlipayConstants.DATE_TIMEZONE));
+        String format = df.format(new Date(timestamp));
+        params.put("timestamp", format);
+        params.put("version", "1.0");
+        params.put("biz_content", content);
+
+        String body = MapUtils.sortToString(params);
+        params.put("sign", signer.sign(body));
+        return MapUtils.getUrlParam(params);
     }
 }

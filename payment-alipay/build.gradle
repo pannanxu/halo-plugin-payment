@@ -18,8 +18,7 @@ jar {
 dependencies {
     compileOnly files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
     testImplementation files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
-//    runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.84.Final:osx-aarch_64'
+    runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.84.Final:osx-aarch_64'
     compileOnly project(':payment-sdk')
     testImplementation project(':payment-sdk')
-    implementation 'com.alipay.sdk:alipay-sdk-java:4.35.9.ALL'
 }
