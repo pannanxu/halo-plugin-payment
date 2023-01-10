@@ -7,7 +7,6 @@ import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
-import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
 import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
@@ -71,46 +70,23 @@ public class SimplePayment implements IPayment {
 
         request.setNotifyUrl(externalUrlSupplier.get().toString(), getDescriptor().getName());
         return operator.create(request)
-                .onErrorResume(CreateException.class, ex -> {
-                    CreatePaymentResponse error = new CreatePaymentResponse().setSuccess(false);
-                    error.setError(ex.getMessage());
-                    error.setCode(ex.getCode());
-                    error.setOutTradeNo(request.getOutTradeNo());
-                    return Mono.just(error);
-                })
-                .onErrorResume(ex -> {
-                    CreatePaymentResponse error = new CreatePaymentResponse().setSuccess(false);
-                    error.setError(ex.getMessage());
-                    error.setOutTradeNo(request.getOutTradeNo());
-                    return Mono.just(error);
-                })
+                .onErrorResume(FetchException.class, ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), CreatePaymentResponse.class)))
+                .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage(), CreatePaymentResponse.class)))
                 .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
     }
 
     @Override
     public Mono<PaymentResponseWrapper<PaymentInfo>> fetch(PaymentRequest request) {
         return operator.fetch(request)
-                .onErrorResume(FetchException.class, ex -> {
-                    PaymentInfo error = new PaymentInfo().setSuccess(false);
-                    error.setError(ex.getMessage());
-                    error.setCode(ex.getCode());
-                    error.setOutTradeNo(request.getOutTradeNo());
-                    return Mono.just(error);
-                })
-                .onErrorResume(ex -> {
-                    PaymentInfo error = new PaymentInfo().setSuccess(false);
-                    error.setError(ex.getMessage());
-                    error.setOutTradeNo(request.getOutTradeNo());
-                    return Mono.just(error);
-                })
+                .onErrorResume(FetchException.class, ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), PaymentInfo.class)))
+                .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage(), PaymentInfo.class)))
                 .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
     }
 
     @Override
     public Mono<PaymentResponseWrapper<PaymentResponse>> cancel(PaymentRequest request) {
         return operator.cancel(request)
-                .onErrorResume(CancelException.class,
-                        ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), request.getOutTradeNo())))
+                .onErrorResume(CancelException.class, ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), request.getOutTradeNo())))
                 .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage())))
                 .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
     }

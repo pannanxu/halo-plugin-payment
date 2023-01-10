@@ -37,6 +37,21 @@ public class ErrorResponse implements PaymentResponse {
         return new ErrorResponse("base_error", error, null);
     }
 
+    public static <T extends ErrorResponse> T error(String error, Class<T> clazz) {
+        return error("base_error", error, clazz);
+    }
+
+    public static <T extends ErrorResponse> T error(String code, String error, Class<T> clazz) {
+        try {
+            T instance = clazz.getDeclaredConstructor().newInstance();
+            instance.setCode(code);
+            instance.setError(error);
+            return instance;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public int getTotalFee() {
         return 0;
