@@ -18,17 +18,23 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class ErrorResponse implements PaymentResponse {
 
-    @Schema(title = "单号")
-    private String outTradeNo;
+    @Schema(title = "异常信息")
+    private String code;
     @Schema(title = "异常信息")
     private String error;
+    @Schema(title = "单号")
+    private String outTradeNo;
 
-    public static PaymentResponse error(String error, String outTradeNo) {
-        return new ErrorResponse(error, outTradeNo);
+    public static PaymentResponse error(String code, String error, String outTradeNo) {
+        return new ErrorResponse(code, error, outTradeNo);
+    }
+
+    public static PaymentResponse error(String code, String error) {
+        return new ErrorResponse(code, error, null);
     }
 
     public static PaymentResponse error(String error) {
-        return new ErrorResponse(error, null);
+        return new ErrorResponse("base_error", error, null);
     }
 
     @Override

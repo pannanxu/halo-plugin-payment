@@ -1,6 +1,7 @@
 package io.mvvm.halo.plugins.payment.alipay;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.mvvm.halo.plugins.payment.alipay.signature.AlipayConstants;
 import io.mvvm.halo.plugins.payment.alipay.signature.Rsa2Signer;
@@ -10,6 +11,10 @@ import io.mvvm.halo.plugins.payment.sdk.ExpandConst;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
+import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
+import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
+import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
+import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
@@ -17,8 +22,8 @@ import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.signature.Signer;
-import io.mvvm.halo.plugins.payment.sdk.utils.GsonUtils;
 import io.mvvm.halo.plugins.payment.sdk.utils.GsonHelper;
+import io.mvvm.halo.plugins.payment.sdk.utils.GsonUtils;
 import io.mvvm.halo.plugins.payment.sdk.utils.MapUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -145,21 +150,11 @@ public class AliPayment extends AbstractPaymentOperator {
                 .flatMap(setting -> {
                     Map<String, String> contentMap = Map.of("out_trade_no", request.getOutTradeNo());
                     String body = buildBody("alipay.trade.query", Map.of(), contentMap);
-                    return getClient().post()
-                            .bodyValue(body)
-                            .exchangeToMono(response -> response.bodyToMono(String.class));
+                    return postMono(body, "alipay_trade_query_response");
                 })
-                .flatMap(response -> {
-                    JsonObject jsonObject = GsonUtils.parse(response);
-                    JsonObject tradeQueryResponse = jsonObject.get("alipay_trade_query_response").getAsJsonObject();
-                    GsonHelper wrapper = GsonHelper.of(tradeQueryResponse);
-                    String code = wrapper.getAsString("code");
-                    if (!"10000".equals(code)) {
-                        log.debug("支付宝|查询订单信息失败|{}", response);
-                        return Mono.error(new RuntimeException("sub_code: " + wrapper.getAsString("sub_code") +
-                                                               "，sub_msg: " + wrapper.getAsString("sub_msg")));
-                    } 
-
+                .onErrorResume(BaseException.class,
+                        err -> Mono.error(new FetchException(err.getCode(), err.getMessage())))
+                .flatMap(wrapper -> {
                     /*
                      * 交易状态：
                      * WAIT_BUYER_PAY（交易创建，等待买家付款）、
@@ -187,12 +182,36 @@ public class AliPayment extends AbstractPaymentOperator {
 
     @Override
     public Mono<PaymentResponse> cancel(PaymentRequest request) {
-        return super.cancel(request);
+        return Mono.justOrEmpty(settingAtomicReference.get())
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请初始化后再操作"))))
+                .flatMap(setting -> {
+                    Map<String, String> contentMap = Map.of("out_trade_no", request.getOutTradeNo());
+                    String body = buildBody("alipay.trade.close", Map.of(), contentMap);
+                    return postMono(body, "alipay_trade_close_response");
+                })
+                .onErrorResume(BaseException.class,
+                        err -> Mono.error(new CancelException(err.getCode(), err.getMessage())))
+                .flatMap(wrapper -> Mono.just(new PaymentInfo()
+                        .setSuccess(true)
+                        .setStatus(PaymentStatus.cancel_successful)
+                        .setOutTradeNo(wrapper.getAsString("out_trade_no"))));
     }
 
     @Override
     public Mono<PaymentResponse> refund(PaymentRequest request) {
-        return super.refund(request);
+        return Mono.justOrEmpty(settingAtomicReference.get())
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请初始化后再操作"))))
+                .flatMap(setting -> {
+                    Map<String, String> contentMap = Map.of("out_trade_no", request.getOutTradeNo());
+                    String body = buildBody("alipay.trade.refund", Map.of(), contentMap);
+                    return postMono(body, "alipay_trade_refund_response");
+                })
+                .onErrorResume(BaseException.class,
+                        err -> Mono.error(new RefundException(err.getCode(), err.getMessage())))
+                .flatMap(wrapper -> Mono.just(new PaymentInfo()
+                        .setSuccess(true)
+                        .setStatus(PaymentStatus.refund_successful)
+                        .setOutTradeNo(wrapper.getAsString("out_trade_no"))));
     }
 
     @Override
@@ -208,6 +227,40 @@ public class AliPayment extends AbstractPaymentOperator {
     @Override
     public void destroy() {
 
+    }
+
+    protected Mono<GsonHelper> postMono(String body, String responseKey) {
+        return getClient().post()
+                .bodyValue(body)
+                .exchangeToMono(response -> response.bodyToMono(String.class))
+                .flatMap(response -> {
+                    log.debug("支付宝|响应参数|{}", response);
+                    if (!StringUtils.hasLength(response)) {
+                        log.debug("支付宝|响应参数为空|{}", response);
+                        return Mono.error(new BaseException("支付宝请求响应参数为空"));
+                    }
+
+                    try {
+                        JsonObject jsonObject = GsonUtils.parse(response);
+                        JsonElement alipayTradeCloseResponse = jsonObject.get(responseKey);
+                        if (alipayTradeCloseResponse.isJsonNull()) {
+                            log.debug("支付宝|响应参数错误|{}", response);
+                            return Mono.error(new BaseException("支付宝订单退款响应参数错误"));
+                        }
+                        GsonHelper wrapper = GsonHelper.of(alipayTradeCloseResponse.getAsJsonObject());
+                        String code = wrapper.getAsString("code");
+                        String subCode = wrapper.getAsString("sub_code");
+                        if (StringUtils.hasLength(subCode)) {
+                            log.debug("支付宝|响应code未成功|{}", response);
+                            return Mono.error(new BaseException(subCode, wrapper.getAsString("sub_msg")));
+                        }
+                        log.debug("支付宝|响应成功|{}", wrapper);
+                        return Mono.just(wrapper);
+                    } catch (Exception ex) {
+                        log.error("支付宝|解析响应结果失败|{}", response, ex);
+                        return Mono.error(new BaseException("解析支付宝响应结果失败"));
+                    }
+                });
     }
 
     /**

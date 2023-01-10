@@ -1,6 +1,6 @@
 package io.mvvm.halo.plugins.payment.sdk;
 
-import io.mvvm.halo.plugins.payment.sdk.exception.CloseException;
+import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
@@ -48,14 +48,14 @@ public interface IPaymentOperator {
      * 取消订单
      */
     default Mono<PaymentResponse> cancel(PaymentRequest request) {
-        return Mono.error(new CloseException("暂不支持取消订单", request));
+        return Mono.error(new CancelException("暂不支持取消订单"));
     }
 
     /**
      * 退款
      */
     default Mono<PaymentResponse> refund(PaymentRequest request) {
-        return Mono.error(new RefundException("暂不支持退款", request));
+        return Mono.error(new RefundException("暂不支持退款"));
     }
 
     /**

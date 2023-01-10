@@ -60,7 +60,7 @@ public class SimplePaymentProvider implements PaymentProvider {
                 // 如果通过场景下的支付方式不存在时
                 // 尝试通过通用场景再匹配一次
                 .switchIfEmpty(Mono.defer(() -> Mono.justOrEmpty(PAYMENT_CONTAINER.get(name.split("-")[0]))))
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new PaymentNotFoundException())))
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new PaymentNotFoundException("暂无匹配的支付模式"))))
                 .doOnNext(payment -> log.debug("get the payment {} to name {}", payment, name));
     }
 

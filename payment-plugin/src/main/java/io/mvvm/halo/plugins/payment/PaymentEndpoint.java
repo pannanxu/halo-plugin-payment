@@ -10,6 +10,7 @@ import io.mvvm.halo.plugins.payment.sdk.enums.DeviceType;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
+import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.utils.RandomUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -18,11 +19,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -56,18 +54,6 @@ public class PaymentEndpoint {
                 });
     }
 
-    int x = 1;
-    int y = 1;
-    BiFunction<Integer, ArrayList, StringBuffer> castFunc = (i, map) -> ((StringBuffer)map.get(i));
-    Map<Integer, Consumer<ArrayList>> applyFunc = Map.of(
-            1, (map) -> castFunc.apply(y--, map).setCharAt(x, '.'),
-            2, (map) -> castFunc.apply(x++, map).setCharAt(x, '.')
-    );
-    public void move(int dir, ArrayList map, String name) {
-        applyFunc.get(dir).accept(map);
-    }
-    
-    
 
 
     /**
@@ -118,6 +104,32 @@ public class PaymentEndpoint {
                 request -> {
                     Mono<PaymentResponseWrapper<PaymentInfo>> resp = dispatcher.dispatch(request.pathVariable("name"))
                             .flatMap(payment -> payment.fetch(() -> request.queryParam("outTradeNo").orElse(null)));
+                    return ServerResponse.ok().body(resp, PaymentResponseWrapper.class);
+                });
+    }
+
+    /**
+     * @return 测试使用，取消订单
+     */
+    @Bean
+    public RouterFunction<ServerResponse> cancel() {
+        return route(GET("/apis/io.mvvm.halo.plugins.payment/cancel/{name}"),
+                request -> {
+                    Mono<PaymentResponseWrapper<PaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
+                            .flatMap(payment -> payment.cancel(() -> request.queryParam("outTradeNo").orElse(null)));
+                    return ServerResponse.ok().body(resp, PaymentResponseWrapper.class);
+                });
+    }
+
+    /**
+     * @return 测试使用，订单退款
+     */
+    @Bean
+    public RouterFunction<ServerResponse> refund() {
+        return route(GET("/apis/io.mvvm.halo.plugins.payment/refund/{name}"),
+                request -> {
+                    Mono<PaymentResponseWrapper<PaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
+                            .flatMap(payment -> payment.refund(() -> request.queryParam("outTradeNo").orElse(null)));
                     return ServerResponse.ok().body(resp, PaymentResponseWrapper.class);
                 });
     }

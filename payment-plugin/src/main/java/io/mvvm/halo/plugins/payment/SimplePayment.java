@@ -6,6 +6,7 @@ import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
+import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import lombok.Getter;
@@ -26,8 +27,8 @@ public class SimplePayment implements IPayment {
     @Getter
     private IPaymentOperator operator;
 
-    public SimplePayment(IPaymentOperator operator, 
-                         PaymentDescriptor descriptor, 
+    public SimplePayment(IPaymentOperator operator,
+                         PaymentDescriptor descriptor,
                          ExternalUrlSupplier externalUrlSupplier) {
         this.operator = operator;
         this.descriptor = descriptor;
@@ -58,9 +59,17 @@ public class SimplePayment implements IPayment {
 
         request.setNotifyUrl(externalUrlSupplier.get().toString(), getDescriptor().getName());
         return getOperator().create(request)
-                .onErrorResume(throwable -> {
+                .onErrorResume(CreateException.class, ex -> {
                     CreatePaymentResponse error = new CreatePaymentResponse().setSuccess(false);
-                    error.setError(throwable.getMessage());
+                    error.setError(ex.getMessage());
+                    error.setCode(ex.getCode());
+                    error.setOutTradeNo(request.getOutTradeNo());
+                    return Mono.just(error);
+                })
+                .onErrorResume(ex -> {
+                    CreatePaymentResponse error = new CreatePaymentResponse().setSuccess(false);
+                    error.setError(ex.getMessage());
+                    error.setOutTradeNo(request.getOutTradeNo());
                     return Mono.just(error);
                 })
                 .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
