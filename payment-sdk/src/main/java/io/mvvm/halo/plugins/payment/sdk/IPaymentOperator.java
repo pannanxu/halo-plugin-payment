@@ -3,11 +3,14 @@ package io.mvvm.halo.plugins.payment.sdk;
 import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
@@ -54,8 +57,15 @@ public interface IPaymentOperator {
     /**
      * 退款
      */
-    default Mono<PaymentResponse> refund(PaymentRequest request) {
+    default Mono<RefundPaymentResponse> refund(RefundPaymentRequest request) {
         return Mono.error(new RefundException("暂不支持退款"));
+    }
+
+    /**
+     * 获取退款状态
+     */
+    default Mono<RefundPaymentResponse> fetchRefund(FetchRefundPaymentRequest request) {
+        return Mono.error(new RefundException("暂不支持查询退款状态"));
     }
 
     /**

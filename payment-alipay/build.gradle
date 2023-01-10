@@ -21,4 +21,7 @@ dependencies {
     runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.84.Final:osx-aarch_64'
     compileOnly project(':payment-sdk')
     testImplementation project(':payment-sdk')
+    testImplementation 'com.alipay.sdk:alipay-sdk-java:4.35.9.ALL'
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.64'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.64'
 }

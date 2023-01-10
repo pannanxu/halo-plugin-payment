@@ -4,10 +4,12 @@ import io.mvvm.halo.plugins.payment.sdk.AbstractPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
@@ -56,7 +58,7 @@ public class AppWechatPayment extends AbstractPaymentOperator {
     }
 
     @Override
-    public Mono<PaymentResponse> refund(PaymentRequest request) {
+    public Mono<RefundPaymentResponse> refund(RefundPaymentRequest request) {
         return super.refund(request);
     }
 

@@ -15,11 +15,13 @@ import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CancelPaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -184,7 +186,7 @@ public class WechatPayment extends AbstractPaymentOperator {
     }
 
     @Override
-    public Mono<PaymentResponse> refund(PaymentRequest request) {
+    public Mono<RefundPaymentResponse> refund(RefundPaymentRequest request) {
         return super.refund(request);
     }
 

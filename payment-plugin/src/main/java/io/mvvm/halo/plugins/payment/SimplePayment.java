@@ -10,12 +10,15 @@ import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
 import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.ErrorResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
@@ -92,11 +95,20 @@ public class SimplePayment implements IPayment {
     }
 
     @Override
-    public Mono<PaymentResponseWrapper<PaymentResponse>> refund(PaymentRequest request) {
+    public Mono<PaymentResponseWrapper<RefundPaymentResponse>> refund(RefundPaymentRequest request) {
         return operator.refund(request)
                 .onErrorResume(RefundException.class,
-                        ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), request.getOutTradeNo())))
-                .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage())))
+                        ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), RefundPaymentResponse.class)))
+                .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage(), RefundPaymentResponse.class)))
+                .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+    }
+
+    @Override
+    public Mono<PaymentResponseWrapper<RefundPaymentResponse>> fetchRefund(FetchRefundPaymentRequest request) {
+        return operator.fetchRefund(request)
+                .onErrorResume(RefundException.class,
+                        ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), RefundPaymentResponse.class)))
+                .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage(), RefundPaymentResponse.class)))
                 .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
     }
 

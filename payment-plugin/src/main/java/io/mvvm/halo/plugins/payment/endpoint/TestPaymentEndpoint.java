@@ -1,13 +1,17 @@
 package io.mvvm.halo.plugins.payment.endpoint;
 
+import io.mvvm.halo.plugins.payment.sdk.Amount;
 import io.mvvm.halo.plugins.payment.sdk.ExpandConst;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.enums.DeviceType;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.utils.RandomUtils;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
@@ -39,7 +43,9 @@ public class TestPaymentEndpoint implements PaymentEndpoint {
         return route(GET("/create/{name}"), this::create)
                 .and(route(GET("/fetch/{name}"), this::fetch))
                 .and(route(GET("/refund/{name}"), this::refund))
-                .and(route(GET("/cancel/{name}"), this::cancel));
+                .and(route(GET("/cancel/{name}"), this::cancel))
+                .and(route(GET("/fetchRefund/{name}"), this::fetchRefund))
+                ;
     }
 
     @Override
@@ -78,8 +84,21 @@ public class TestPaymentEndpoint implements PaymentEndpoint {
     }
 
     Mono<ServerResponse> refund(ServerRequest request) {
-        Mono<PaymentResponseWrapper<PaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
-                .flatMap(payment -> payment.refund(() -> request.queryParam("outTradeNo").orElse(null)));
+        RefundPaymentRequest refundPaymentRequest = new RefundPaymentRequest();
+        refundPaymentRequest.setOutTradeNo(request.queryParam("outTradeNo").orElse(null));
+        refundPaymentRequest.setRefundNo(request.queryParam("outTradeNo").orElse(null));
+        refundPaymentRequest.setAmount(Amount.of(Integer.valueOf(request.queryParam("amount").orElse("1"))));
+        Mono<PaymentResponseWrapper<RefundPaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
+                .flatMap(payment -> payment.refund(refundPaymentRequest));
+        return ServerResponse.ok().body(resp, PaymentResponseWrapper.class);
+    }
+
+    Mono<ServerResponse> fetchRefund(ServerRequest request) {
+        FetchRefundPaymentRequest fetchRefundPaymentRequest = new FetchRefundPaymentRequest();
+        fetchRefundPaymentRequest.setOutTradeNo(request.queryParam("outTradeNo").orElse(null));
+        fetchRefundPaymentRequest.setRefundNo(request.queryParam("outTradeNo").orElse(null));
+        Mono<PaymentResponseWrapper<RefundPaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
+                .flatMap(payment -> payment.fetchRefund(fetchRefundPaymentRequest));
         return ServerResponse.ok().body(resp, PaymentResponseWrapper.class);
     }
 

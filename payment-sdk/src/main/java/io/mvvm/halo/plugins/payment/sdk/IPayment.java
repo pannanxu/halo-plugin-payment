@@ -1,11 +1,14 @@
 package io.mvvm.halo.plugins.payment.sdk;
 
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
@@ -41,9 +44,23 @@ public interface IPayment {
     Mono<PaymentResponseWrapper<PaymentResponse>> cancel(PaymentRequest request);
 
     /**
-     * 支付订单退款
+     * 支付订单退款.
+     * <p>
+     * 调用者需注意: 第三方退款存在同步或者异步的情况，
+     * <p>
+     * 如何判断是同步退款？
+     * <p>
+     * success == true && status == PaymentStatus.refund_successful
+     * <p>
+     * 如何判断是异步退款？
+     * success == true && status == PaymentStatus.refund_processing
      */
-    Mono<PaymentResponseWrapper<PaymentResponse>> refund(PaymentRequest request);
+    Mono<PaymentResponseWrapper<RefundPaymentResponse>> refund(RefundPaymentRequest request);
+
+    /**
+     * 获取退款订单
+     */
+    Mono<PaymentResponseWrapper<RefundPaymentResponse>> fetchRefund(FetchRefundPaymentRequest request);
 
     /**
      * 支付异步通知

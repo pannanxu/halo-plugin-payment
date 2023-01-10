@@ -19,8 +19,10 @@ public class AliPaymentSetting {
     private String appId;
     @Schema(title = "应用私钥")
     private String privateKey;
-    @Schema(title = "应用公钥")
-    private String publicKey;
+//    @Schema(title = "应用公钥", description = "公钥模式")
+//    private String publicKey;
+    @Schema(title = "支付宝公钥", description = "公钥模式")
+    private String alipayPublicKey;
 
 //    @Schema(title = "模式",
 //            description = "pub：公钥模式；cert：证书模式")
