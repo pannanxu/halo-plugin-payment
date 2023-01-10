@@ -31,8 +31,6 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
     @Setter
     private WebClient client;
     @Getter
-    private ApplicationContext paymentContext;
-    @Getter
     private PayEnvironmentFetcher environmentFetcher;
 
     public AbstractPaymentOperator() {
@@ -73,7 +71,6 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        paymentContext = SdkContextHolder.getCtx();
         environmentFetcher = SdkContextHolder.getEnvironmentFetcher();
         SdkContextHolder.register(this);
     }

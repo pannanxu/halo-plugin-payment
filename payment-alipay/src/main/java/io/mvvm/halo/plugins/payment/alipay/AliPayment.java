@@ -332,6 +332,16 @@ public class AliPayment extends AbstractPaymentOperator {
         params.put("format", "json");
         params.put("charset", "utf-8");
         params.put("sign_type", "RSA2");
+
+//        // 如果使用证书模式
+//        if (AliPaymentSetting.CERT_MODE.equals(setting.getMode())) {
+//            // 应用公钥证书SN
+//            params.put("app_cert_sn", setting.fetchAppCertContent());
+//            // 支付宝根证书SN
+//            params.put("alipay_root_cert_sn", setting.fetchAlipayRootCertContent());
+//            // 如果SM2根证书序列号非空，添加SM2根证书序列号
+////        params.put("alipay_root_cert_sn", "RSA2");
+//        }
         params.putAll(extParams);
 
         long timestamp = System.currentTimeMillis();

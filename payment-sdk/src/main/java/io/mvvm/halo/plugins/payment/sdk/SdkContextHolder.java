@@ -12,13 +12,6 @@ import org.springframework.context.ApplicationContextAware;
  * @author: pan
  **/
 public final class SdkContextHolder implements ApplicationContextAware {
-    /**
-     * 插件主体的上下文。
-     * <p>
-     * TODO 目前存在问题：子插件无法注入父插件的bean，因此提供父插件的上下文用于获取bean。
-     */
-    @Getter
-    private static ApplicationContext ctx;
 
     private static PaymentRegister register;
     @Getter
@@ -32,7 +25,7 @@ public final class SdkContextHolder implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        SdkContextHolder.ctx = applicationContext;
+//        SdkContextHolder.ctx = applicationContext;
         SdkContextHolder.dispatcher = applicationContext.getBean(PaymentDispatcher.class);
         SdkContextHolder.register = applicationContext.getBean(PaymentRegister.class);
         SdkContextHolder.environmentFetcher = applicationContext.getBean(PayEnvironmentFetcher.class);
