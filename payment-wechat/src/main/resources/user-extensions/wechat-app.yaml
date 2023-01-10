@@ -1,7 +1,7 @@
 apiVersion: v1alpha1
 kind: PaymentUserInput
 metadata:
-  name: wechat-payment-user-input
+  name: wechat-app
 spec:
   forms:
     - group: basic

@@ -55,7 +55,7 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
         String name = getDescriptor().getName();
         try {
             List<Unstructured> list = new YamlUnstructuredLoader(
-                    new ClassPathResource("extensions/" + name + "-user-input.yaml", this.getClass().getClassLoader()))
+                    new ClassPathResource("user-extensions/" + name + ".yaml", this.getClass().getClassLoader()))
                     .load();
             if (!list.isEmpty()) {
                 userInput = list.get(0);
