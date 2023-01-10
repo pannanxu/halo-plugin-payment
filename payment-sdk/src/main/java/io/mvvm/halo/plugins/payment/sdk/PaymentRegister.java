@@ -7,7 +7,7 @@ package io.mvvm.halo.plugins.payment.sdk;
  **/
 public interface PaymentRegister {
 
-    IPayment register(IPaymentOperator operator);
+    void register(IPaymentOperator operator);
 
     void unregister(IPaymentOperator operator);
 }

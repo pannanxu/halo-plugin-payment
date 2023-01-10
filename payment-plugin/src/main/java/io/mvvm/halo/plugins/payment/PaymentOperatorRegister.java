@@ -1,6 +1,5 @@
 package io.mvvm.halo.plugins.payment;
 
-import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 
@@ -17,8 +16,8 @@ public class PaymentOperatorRegister implements PaymentRegister {
     }
 
     @Override
-    public IPayment register(IPaymentOperator operator) {
-        return provider.register(operator);
+    public void register(IPaymentOperator operator) {
+        provider.register(operator);
     }
 
     @Override
