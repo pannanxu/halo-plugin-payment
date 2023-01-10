@@ -79,7 +79,7 @@ public class PaymentConfiguration {
                     e.setProvider(provider);
                     e.setDispatcher(dispatcher);
                 })
-                .forEach(e -> routeBuilder.nest(RequestPredicates.path("/apis/io.mvvm.halo.plugins.payment"),
+                .forEach(e -> routeBuilder.nest(RequestPredicates.path("/apis/" + e.groupVersion().toString()),
                         e::endpoint,
                         builder -> builder.operationId("PaymentCustomEndpoints")
                                 .description("Payment Custom Endpoint")

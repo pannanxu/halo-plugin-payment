@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import run.halo.app.extension.GroupVersion;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,11 @@ public class TestPaymentEndpoint implements PaymentEndpoint {
                 .and(route(GET("/fetch/{name}"), this::fetch))
                 .and(route(GET("/refund/{name}"), this::refund))
                 .and(route(GET("/cancel/{name}"), this::cancel));
+    }
+
+    @Override
+    public GroupVersion groupVersion() {
+        return new GroupVersion("io.mvvm.halo.plugins.payment.test", "v1");
     }
 
     Mono<ServerResponse> create(ServerRequest request) {
