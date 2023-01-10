@@ -13,6 +13,9 @@ import io.mvvm.halo.plugins.payment.sdk.AbstractPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
+import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
+import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
+import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
@@ -99,7 +102,7 @@ public class WechatPayment extends AbstractPaymentOperator {
                         return Mono.just(response);
                     } catch (Exception ex) {
                         log.error("微信支付|创建订单失败|{}, {}", paymentRequest, ex.getMessage(), ex);
-                        return Mono.defer(() -> Mono.error(new RuntimeException("创建微信支付订单失败")));
+                        return Mono.error(new CreateException("创建微信支付订单失败"));
                     }
                 })
                 .map(response -> new CreatePaymentResponse()
@@ -126,7 +129,7 @@ public class WechatPayment extends AbstractPaymentOperator {
                         return Mono.just(service.queryOrderByOutTradeNo(request));
                     } catch (Exception ex) {
                         log.error("微信支付|查询订单信息失败|{}, {}", paymentRequest.getOutTradeNo(), ex.getMessage(), ex);
-                        return Mono.error(new RuntimeException("查询微信支付订单信息失败"));
+                        return Mono.error(new FetchException("查询微信支付订单信息失败"));
                     }
                 })
                 .map(response -> {
@@ -175,7 +178,7 @@ public class WechatPayment extends AbstractPaymentOperator {
                         return Mono.just(paymentRequest.getOutTradeNo());
                     } catch (Exception ex) {
                         log.error("微信支付|取消订单失败|{}, {}", paymentRequest.getOutTradeNo(), ex.getMessage(), ex);
-                        return Mono.error(new RuntimeException("取消微信订单失败"));
+                        return Mono.error(new CancelException("取消微信订单失败"));
                     }
                 })
                 .map(outTradeNo -> new CancelPaymentResponse()
@@ -212,7 +215,9 @@ public class WechatPayment extends AbstractPaymentOperator {
 
     @Override
     public void destroy() {
-
+        initStatusFlag.set(false);
+        settingAtomicReference.set(null);
+        h5ServiceAtomicReference.set(null);
     }
 
     private PrepayRequest createPrepayRequest(CreatePaymentRequest paymentRequest, WechatPaymentSetting setting) {

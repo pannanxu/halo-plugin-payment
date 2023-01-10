@@ -33,7 +33,9 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
     public RouterFunction<ServerResponse> endpoint() {
         return route(GET("/init/{name}"), this::init)
                 .and(route(GET("/list/enabled"), this::list))
-                .and(route(GET("/list/all"), this::listAll));
+                .and(route(GET("/list/all"), this::listAll))
+                .and(route(GET("/destroy/{name}"), this::destroy))
+                ;
     }
 
     @Override
@@ -56,6 +58,20 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
     Mono<ServerResponse> listAll(ServerRequest request) {
         Flux<PaymentDescriptor> descriptorFlux = provider.getPayments().map(IPayment::getDescriptor);
         return ServerResponse.ok().body(descriptorFlux, PaymentDescriptor.class);
+    }
+
+    Mono<ServerResponse> destroy(ServerRequest request) {
+        Mono<Boolean> resp = provider.getOperator(request.pathVariable("name"))
+                .map(operator -> {
+                    try {
+                        operator.destroy();
+                        return true;
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        return false;
+                    }
+                });
+        return ServerResponse.ok().body(resp, Boolean.class);
     }
 
 }

@@ -263,7 +263,9 @@ public class AliPayment extends AbstractPaymentOperator {
 
     @Override
     public void destroy() {
-
+        initStatusFlag.set(false);
+        settingAtomicReference.set(null);
+        signerAtomicReference.set(null);
     }
 
     protected Mono<GsonHelper> postMono(String body, String responseKey) {

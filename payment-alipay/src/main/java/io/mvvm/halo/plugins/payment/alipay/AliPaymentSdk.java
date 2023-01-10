@@ -22,7 +22,6 @@
 //import io.mvvm.halo.plugins.payment.sdk.Amount;
 //import io.mvvm.halo.plugins.payment.sdk.ExpandConst;
 //import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
-//import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 //import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 //import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 //import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
