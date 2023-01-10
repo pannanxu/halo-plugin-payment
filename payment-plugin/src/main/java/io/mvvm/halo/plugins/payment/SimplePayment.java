@@ -50,8 +50,8 @@ public class SimplePayment implements IPayment {
     }
 
     @Override
-    public boolean status() {
-        return operator.status();
+    public Mono<Boolean> status() {
+        return Mono.just(operator.status());
     }
 
     @Override

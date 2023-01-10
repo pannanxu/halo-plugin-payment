@@ -28,8 +28,9 @@ public class PaymentConfiguration {
 
     private final PaymentProvider provider;
 
-    public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier) {
-        this.provider = new SimplePaymentProvider(externalUrlSupplier);
+    public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier,
+                                ReactiveExtensionClient client) {
+        this.provider = new SimplePaymentProvider(externalUrlSupplier, client);
     }
 
     @Bean

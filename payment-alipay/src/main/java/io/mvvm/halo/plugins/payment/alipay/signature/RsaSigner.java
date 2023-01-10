@@ -1,12 +1,14 @@
 package io.mvvm.halo.plugins.payment.alipay.signature;
 
 import io.mvvm.halo.plugins.payment.sdk.signature.Signer;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * RsaSigner.
  *
  * @author: pan
  **/
+@Slf4j
 public class RsaSigner extends RSAEncryptor implements Signer {
 
     private final String privateKey;
@@ -31,6 +33,7 @@ public class RsaSigner extends RSAEncryptor implements Signer {
         try {
             return doVerify(content, "utf-8", publicKey, sign);
         } catch (Exception e) {
+            log.error("RsaSigner|verify error|{}", content, e);
             throw new RuntimeException(e);
         }
     }

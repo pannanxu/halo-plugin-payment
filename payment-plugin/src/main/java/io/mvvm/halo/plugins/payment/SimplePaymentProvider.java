@@ -7,6 +7,7 @@ import io.mvvm.halo.plugins.payment.sdk.exception.PaymentNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.infra.ExternalUrlSupplier;
 
 import java.util.Map;
@@ -23,9 +24,11 @@ public class SimplePaymentProvider implements PaymentProvider {
     private final Map<String, Wrapper> PAYMENT_CONTAINER = new ConcurrentHashMap<>();
 
     private final ExternalUrlSupplier externalUrlSupplier;
+    private final ReactiveExtensionClient client;
 
-    public SimplePaymentProvider(ExternalUrlSupplier externalUrlSupplier) {
+    public SimplePaymentProvider(ExternalUrlSupplier externalUrlSupplier, ReactiveExtensionClient client) {
         this.externalUrlSupplier = externalUrlSupplier;
+        this.client = client;
     }
 
     @Override
@@ -41,7 +44,8 @@ public class SimplePaymentProvider implements PaymentProvider {
         if (PAYMENT_CONTAINER.containsKey(type.getName())) {
             unregister(operator);
         }
-        return new SimplePayment(operator, type, externalUrlSupplier);
+        IPayment payment = new SimplePayment(operator, type, externalUrlSupplier);
+        return new ExtensionPaymentDecorator(payment, client);
     }
 
     @Override

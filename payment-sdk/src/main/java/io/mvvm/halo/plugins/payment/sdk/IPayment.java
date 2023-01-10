@@ -26,7 +26,7 @@ public interface IPayment {
     /**
      * @return 支付方式的状态是否可用
      */
-    boolean status();
+    Mono<Boolean> status();
 
     /**
      * 创建支付订单

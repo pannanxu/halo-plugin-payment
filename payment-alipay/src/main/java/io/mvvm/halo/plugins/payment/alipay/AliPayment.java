@@ -287,12 +287,17 @@ public class AliPayment extends AbstractPaymentOperator {
                             return Mono.error(new BaseException("支付宝订单退款响应参数错误"));
                         }
 
-                        // 验证签名
-                        String json = alipayTradeCloseResponse.toString();
-                        boolean verify = signerAtomicReference.get().verify(json, jsonObject.get("sign").getAsString());
-                        if (!verify) {
-                            log.debug("支付宝|签名验证未通过|{}", response);
-                            return Mono.error(new BaseException("支付宝响应签名验证未通过"));
+                        try {
+                            // 验证签名
+                            String json = alipayTradeCloseResponse.toString();
+                            boolean verify = signerAtomicReference.get().verify(json, jsonObject.get("sign").getAsString());
+                            if (!verify) {
+                                log.debug("支付宝|签名验证未通过|{}", response);
+                                return Mono.error(new BaseException("支付宝响应签名验证未通过"));
+                            }
+                        } catch (Exception ex) {
+                            log.error("支付宝|签名验证异常|{}", ex.getMessage(), ex);
+                            return Mono.error(new BaseException("支付宝响应签名验证异常"));
                         }
 
                         // 验证 subCode 码，如果存在此字段说明请求是失败的

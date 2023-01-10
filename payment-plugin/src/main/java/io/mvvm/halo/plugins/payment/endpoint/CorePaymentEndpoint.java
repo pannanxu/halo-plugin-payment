@@ -5,6 +5,7 @@ import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
+import io.mvvm.halo.plugins.payment.sdk.PaymentExtension;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -13,6 +14,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.GroupVersion;
+import run.halo.app.extension.Metadata;
+import run.halo.app.extension.ReactiveExtensionClient;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -26,15 +29,21 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Component
 public class CorePaymentEndpoint implements PaymentEndpoint {
 
+    private final ReactiveExtensionClient client;
     private PaymentDispatcher dispatcher;
     private PaymentProvider provider;
+
+    public CorePaymentEndpoint(ReactiveExtensionClient client) {
+        this.client = client;
+    }
 
     @Override
     public RouterFunction<ServerResponse> endpoint() {
         return route(GET("/init/{name}"), this::init)
+                .and(route(GET("/enable/{name}"), this::enable))
+                .and(route(GET("/disable/{name}"), this::disable))
                 .and(route(GET("/list/enabled"), this::list))
                 .and(route(GET("/list/all"), this::listAll))
-                .and(route(GET("/destroy/{name}"), this::destroy))
                 ;
     }
 
@@ -49,6 +58,29 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
         return ServerResponse.ok().body(resp, Boolean.class);
     }
 
+    Mono<ServerResponse> enable(ServerRequest request) {
+        String name = request.pathVariable("name");
+        Mono<PaymentExtension> extensionMono = provider.getOperator(request.pathVariable("name"))
+                .flatMap(operator -> client.fetch(PaymentExtension.class, name)
+                        .switchIfEmpty(Mono.defer(() -> {
+                            PaymentExtension ext = new PaymentExtension();
+                            ext.setEnabled(Boolean.TRUE);
+                            ext.setDisplayName(operator.getDescriptor().getTitle());
+                            ext.setMetadata(new Metadata());
+                            ext.getMetadata().setName(operator.getDescriptor().getName());
+                            ext.setKind(PaymentExtension.kind);
+                            ext.setApiVersion(PaymentExtension.version);
+                            ext.getMetadata().setVersion(1L);
+                            return client.create(ext);
+                        }))
+                        .map(ext -> {
+                            ext.setEnabled(Boolean.TRUE);
+                            return ext;
+                        })
+                        .flatMap(client::update));
+        return ServerResponse.ok().body(extensionMono, PaymentExtension.class);
+    }
+
     Mono<ServerResponse> list(ServerRequest request) {
         String device = request.queryParam("device").orElse(null);
         Flux<PaymentDescriptor> descriptorFlux = dispatcher.payments(device).map(IPayment::getDescriptor);
@@ -60,8 +92,13 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
         return ServerResponse.ok().body(descriptorFlux, PaymentDescriptor.class);
     }
 
-    Mono<ServerResponse> destroy(ServerRequest request) {
+    Mono<ServerResponse> disable(ServerRequest request) {
         Mono<Boolean> resp = provider.getOperator(request.pathVariable("name"))
+                .flatMap(operator -> client.fetch(PaymentExtension.class, operator.getDescriptor().getName())
+                        .flatMap(ext -> {
+                            ext.setEnabled(Boolean.FALSE);
+                            return client.update(ext);
+                        }).thenReturn(operator))
                 .map(operator -> {
                     try {
                         operator.destroy();

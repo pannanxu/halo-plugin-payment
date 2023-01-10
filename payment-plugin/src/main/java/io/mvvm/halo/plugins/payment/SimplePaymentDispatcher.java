@@ -31,12 +31,8 @@ public class SimplePaymentDispatcher implements PaymentDispatcher {
     public Mono<IPayment> dispatch(String payment) {
         return Mono.just(payment)
                 .flatMap(provider::getPayment)
-                .flatMap(pay -> {
-                    if (!pay.status()) {
-                        return Mono.error(new BaseException(pay.getDescriptor().getTitle() + "支付暂未启用"));
-                    }
-                    return Mono.just(pay);
-                });
+                .filterWhen(IPayment::status)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new BaseException("暂不支持此支付"))));
     }
 
     @Override
@@ -47,7 +43,7 @@ public class SimplePaymentDispatcher implements PaymentDispatcher {
     @Override
     public Flux<IPayment> payments() {
         return provider.getPayments()
-                .filter(IPayment::status);
+                .filterWhen(IPayment::status);
     }
 
     @Override
