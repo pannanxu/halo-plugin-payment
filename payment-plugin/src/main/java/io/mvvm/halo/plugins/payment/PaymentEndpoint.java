@@ -18,8 +18,11 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -52,6 +55,20 @@ public class PaymentEndpoint {
                     return ServerResponse.ok().body(descriptorFlux, PaymentDescriptor.class);
                 });
     }
+
+    int x = 1;
+    int y = 1;
+    BiFunction<Integer, ArrayList, StringBuffer> castFunc = (i, map) -> ((StringBuffer)map.get(i));
+    Map<Integer, Consumer<ArrayList>> applyFunc = Map.of(
+            1, (map) -> castFunc.apply(y--, map).setCharAt(x, '.'),
+            2, (map) -> castFunc.apply(x++, map).setCharAt(x, '.')
+    );
+    public void move(int dir, ArrayList map, String name) {
+        applyFunc.get(dir).accept(map);
+    }
+    
+    
+
 
     /**
      * @return 初始化一个支付模式

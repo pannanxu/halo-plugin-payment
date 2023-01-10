@@ -3,10 +3,9 @@ package io.mvvm.halo.plugins.payment;
 import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
-import io.mvvm.halo.plugins.payment.sdk.SdkContext;
+import io.mvvm.halo.plugins.payment.sdk.SdkContextHolder;
 import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
 import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import run.halo.app.extension.ReactiveExtensionClient;
@@ -22,10 +21,8 @@ public class PaymentConfiguration {
 
     private final PaymentProvider provider;
 
-    public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier,
-                                ApplicationContext applicationContext) {
+    public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier) {
         this.provider = new SimplePaymentProvider(externalUrlSupplier);
-        SdkContext.paymentCtx = applicationContext;
     }
 
     @Bean
@@ -57,6 +54,11 @@ public class PaymentConfiguration {
     public IAsyncPayment asyncPayment(PaymentDispatcher dispatcher,
                                       AsyncNotifyManager asyncNotifyManager) {
         return new AsyncPayment(dispatcher, asyncNotifyManager);
+    }
+    
+    @Bean
+    public SdkContextHolder sdkContext() {
+        return new SdkContextHolder();
     }
 
 }
