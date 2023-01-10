@@ -16,9 +16,9 @@ public interface PaymentProvider {
 
     void unregister(IPaymentOperator operator);
 
+    Mono<IPaymentOperator> getOperator(String name);
+
     Mono<IPayment> getPayment(String name);
 
-    Flux<IPaymentOperator> getPaymentOperators();
-    
     Flux<IPayment> getPayments();
 }

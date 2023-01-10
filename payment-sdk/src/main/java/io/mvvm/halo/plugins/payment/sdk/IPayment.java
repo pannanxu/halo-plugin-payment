@@ -1,14 +1,12 @@
 package io.mvvm.halo.plugins.payment.sdk;
 
-import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
-import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
-import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
+import io.mvvm.halo.plugins.payment.sdk.response.AsyncNotifyResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
-import io.mvvm.halo.plugins.payment.sdk.response.ErrorResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -22,7 +20,10 @@ public interface IPayment {
      */
     PaymentDescriptor getDescriptor();
 
-    IPaymentOperator getOperator();
+    /**
+     * @return 支付方式的状态是否可用
+     */
+    boolean status();
 
     /**
      * 创建支付订单
@@ -32,44 +33,31 @@ public interface IPayment {
     /**
      * 查询支付订单信息
      */
-    default Mono<PaymentResponseWrapper<PaymentInfo>> fetch(PaymentRequest request) {
-        return getOperator().fetch(request)
-                .onErrorResume(FetchException.class, ex -> {
-                    PaymentInfo error = new PaymentInfo().setSuccess(false);
-                    error.setError(ex.getMessage());
-                    error.setCode(ex.getCode());
-                    error.setOutTradeNo(request.getOutTradeNo());
-                    return Mono.just(error);
-                })
-                .onErrorResume(ex -> {
-                    PaymentInfo error = new PaymentInfo().setSuccess(false);
-                    error.setError(ex.getMessage());
-                    error.setOutTradeNo(request.getOutTradeNo());
-                    return Mono.just(error);
-                })
-                .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
-    }
+    Mono<PaymentResponseWrapper<PaymentInfo>> fetch(PaymentRequest request);
 
     /**
      * 取消支付订单
      */
-    default Mono<PaymentResponseWrapper<PaymentResponse>> cancel(PaymentRequest request) {
-        return getOperator().cancel(request)
-                .onErrorResume(CancelException.class,
-                        ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), request.getOutTradeNo())))
-                .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage())))
-                .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
-    }
+    Mono<PaymentResponseWrapper<PaymentResponse>> cancel(PaymentRequest request);
 
     /**
      * 支付订单退款
      */
-    default Mono<PaymentResponseWrapper<PaymentResponse>> refund(PaymentRequest request) {
-        return getOperator().refund(request)
-                .onErrorResume(RefundException.class,
-                        ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), request.getOutTradeNo())))
-                .onErrorResume(ex -> Mono.just(ErrorResponse.error(ex.getMessage())))
-                .map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+    Mono<PaymentResponseWrapper<PaymentResponse>> refund(PaymentRequest request);
+
+    /**
+     * 支付异步通知
+     */
+    default Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
+        return Mono.empty();
     }
+
+    /**
+     * 退款异步通知
+     */
+    default Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
+        return Mono.empty();
+    }
+
 
 }

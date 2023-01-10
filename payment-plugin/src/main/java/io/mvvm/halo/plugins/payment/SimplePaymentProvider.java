@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class SimplePaymentProvider implements PaymentProvider {
 
-    private final Map<String, IPayment> PAYMENT_CONTAINER = new ConcurrentHashMap<>();
+    private final Map<String, Wrapper> PAYMENT_CONTAINER = new ConcurrentHashMap<>();
 
     private final ExternalUrlSupplier externalUrlSupplier;
 
@@ -31,7 +31,7 @@ public class SimplePaymentProvider implements PaymentProvider {
     @Override
     public IPayment register(IPaymentOperator operator) {
         IPayment payment = createPayment(operator);
-        PAYMENT_CONTAINER.put(payment.getDescriptor().getName(), payment);
+        PAYMENT_CONTAINER.put(payment.getDescriptor().getName(), new Wrapper(operator, payment));
         log.debug("register payment: {}", payment.getDescriptor().getName());
         return payment;
     }
@@ -47,11 +47,19 @@ public class SimplePaymentProvider implements PaymentProvider {
     @Override
     public void unregister(IPaymentOperator operator) {
         PaymentDescriptor descriptor = operator.getDescriptor();
-        IPayment payment = PAYMENT_CONTAINER.remove(descriptor.getName());
-        log.debug("unregister payment: {}", descriptor.getName());
-        if (null != payment && null != payment.getOperator()) {
-            payment.getOperator().destroy();
+        Wrapper wrapper = PAYMENT_CONTAINER.remove(descriptor.getName());
+        log.debug("unregister payment: {}", operator.getDescriptor().getName());
+        if (null != wrapper && null != wrapper.operator) {
+            wrapper.operator.destroy();
         }
+    }
+
+    @Override
+    public Mono<IPaymentOperator> getOperator(String name) {
+        return Mono.fromSupplier(() -> PAYMENT_CONTAINER.get(name))
+                .switchIfEmpty(Mono.defer(() -> Mono.justOrEmpty(PAYMENT_CONTAINER.get(name.split("-")[0]))))
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new PaymentNotFoundException("暂无匹配的支付模式"))))
+                .map(Wrapper::operator);
     }
 
     @Override
@@ -61,19 +69,17 @@ public class SimplePaymentProvider implements PaymentProvider {
                 // 尝试通过通用场景再匹配一次
                 .switchIfEmpty(Mono.defer(() -> Mono.justOrEmpty(PAYMENT_CONTAINER.get(name.split("-")[0]))))
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new PaymentNotFoundException("暂无匹配的支付模式"))))
+                .map(Wrapper::payment)
                 .doOnNext(payment -> log.debug("get the payment {} to name {}", payment, name));
     }
 
     @Override
-    public Flux<IPaymentOperator> getPaymentOperators() {
-        return Flux.fromStream(PAYMENT_CONTAINER.values()
-                .stream()
-                .map(IPayment::getOperator));
+    public Flux<IPayment> getPayments() {
+        return Flux.fromStream(PAYMENT_CONTAINER.values().stream().map(Wrapper::payment));
     }
 
-    @Override
-    public Flux<IPayment> getPayments() {
-        return Flux.fromStream(PAYMENT_CONTAINER.values().stream());
+    public record Wrapper(IPaymentOperator operator, IPayment payment) {
+
     }
 
 }

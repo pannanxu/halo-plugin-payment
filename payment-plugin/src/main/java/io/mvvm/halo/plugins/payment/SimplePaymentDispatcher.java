@@ -2,6 +2,7 @@ package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
+import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -31,8 +32,8 @@ public class SimplePaymentDispatcher implements PaymentDispatcher {
         return Mono.just(payment)
                 .flatMap(provider::getPayment)
                 .flatMap(pay -> {
-                    if (!pay.getOperator().status()) {
-                        return Mono.error(new RuntimeException("支付未启用"));
+                    if (!pay.status()) {
+                        return Mono.error(new BaseException(pay.getDescriptor().getTitle() + "支付暂未启用"));
                     }
                     return Mono.just(pay);
                 });
@@ -46,7 +47,7 @@ public class SimplePaymentDispatcher implements PaymentDispatcher {
     @Override
     public Flux<IPayment> payments() {
         return provider.getPayments()
-                .filter(e -> e.getOperator().status());
+                .filter(IPayment::status);
     }
 
     @Override
@@ -54,12 +55,10 @@ public class SimplePaymentDispatcher implements PaymentDispatcher {
         if (!StringUtils.hasLength(device)) {
             return payments();
         }
-        return provider.getPayments()
-                .filter(e -> e.getOperator().status())
-                .collectList()
+        return payments().collectList()
                 .flatMapMany(list -> {
                     List<IPayment> payments = new ArrayList<>();
-                    Map<String, List<IPayment>> groupName = 
+                    Map<String, List<IPayment>> groupName =
                             list.stream().collect(Collectors.groupingBy((e) -> e.getDescriptor().getName().split("-")[0]));
                     groupName.forEach((key, value) -> {
                         String name = key + "-" + device;

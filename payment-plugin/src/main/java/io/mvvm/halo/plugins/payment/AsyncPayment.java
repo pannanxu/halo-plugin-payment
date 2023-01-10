@@ -1,6 +1,5 @@
 package io.mvvm.halo.plugins.payment;
 
-import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +25,7 @@ public class AsyncPayment implements IAsyncPayment {
     @Override
     public Mono<Object> paymentAsyncNotify(ServerRequest request, String gvk, String paymentType) {
         return dispatcher.dispatch(paymentType)
-                .map(IPayment::getOperator)
-                .flatMap(operator -> operator.paymentAsyncNotify(request))
+                .flatMap(payment -> payment.paymentAsyncNotify(request))
                 .flatMap(response -> {
                     if (!response.isSuccess()) {
                         log.debug("支付异步通知执行失败: {}", response);
@@ -47,8 +45,7 @@ public class AsyncPayment implements IAsyncPayment {
     @Override
     public Mono<Object> refundAsyncNotify(ServerRequest request, String gvk, String paymentType) {
         return dispatcher.dispatch(paymentType)
-                .map(IPayment::getOperator)
-                .flatMap(operator -> operator.refundAsyncNotify(request))
+                .flatMap(payment -> payment.refundAsyncNotify(request))
                 .flatMap(response -> {
                     if (!response.isSuccess()) {
                         log.debug("退款异步通知执行失败: {}", response);

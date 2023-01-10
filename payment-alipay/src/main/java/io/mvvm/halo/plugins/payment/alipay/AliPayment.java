@@ -73,8 +73,7 @@ public class AliPayment extends AbstractPaymentOperator {
 
     @Override
     public boolean status() {
-        return true;
-//        return initStatusFlag.get();
+        return initStatusFlag.get();
     }
 
     @Override
