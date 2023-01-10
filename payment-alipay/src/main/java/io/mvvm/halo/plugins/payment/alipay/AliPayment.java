@@ -72,11 +72,6 @@ public class AliPayment extends AbstractPaymentOperator {
     }
 
     @Override
-    public boolean status() {
-        return initStatusFlag.get();
-    }
-
-    @Override
     public Mono<Boolean> initConfig() {
         return getEnvironmentFetcher()
                 .fetch(AliPaymentSetting.NAME, AliPaymentSetting.GROUP, AliPaymentSetting.class)

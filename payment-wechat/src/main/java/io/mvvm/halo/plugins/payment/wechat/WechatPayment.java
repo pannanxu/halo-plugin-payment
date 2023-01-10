@@ -58,12 +58,6 @@ public class WechatPayment extends AbstractPaymentOperator {
     }
 
     @Override
-    public boolean status() {
-//        return initStatusFlag.get();
-        return true;
-    }
-
-    @Override
     public Mono<Boolean> initConfig() {
         return getEnvironmentFetcher()
                 .fetch(WechatPaymentSetting.GROUP, WechatPaymentSetting.NAME, WechatPaymentSetting.class)

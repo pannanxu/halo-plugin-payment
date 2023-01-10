@@ -67,6 +67,11 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
     }
 
     @Override
+    public boolean status() {
+        return initStatusFlag.get();
+    }
+
+    @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         paymentContext = SdkContextHolder.getCtx();
         environmentFetcher = SdkContextHolder.getEnvironmentFetcher();
