@@ -5,16 +5,45 @@ Payment plugin for Halo2.0
 ## 功能
 
 - [x] 支付sdk
-- [ ] 易支付
-- [ ] 兑换码支付
-- [ ] 微信支付
-- [ ] 支付宝支付
+- [x] 微信支付
+  - [x] PC
+  - [ ] 移动端网页
+  - [ ] App
+  - [ ] 小程序
+  - [ ] 公众号
+- [x] 支付宝支付
+  - [x] PC
+  - [ ] 移动端网页
+  - [ ] App
+  - [ ] 小程序
 
 ## 使用
 
 WIP
 
 ## 自定义支付
+
+```java
+@Component
+public class WechatPayment extends AbstractPaymentOperator {
+    // impl methods...
+}
+```
+
+
+```java
+@Component
+public class WechatPaymentPlugin extends BasePlugin {
+    // ....
+    @Override
+    public void start() {
+        SdkContextHolder.register(this);
+    }
+    // ...
+}
+```
+
+## 业务集成
 
 WIP
 
