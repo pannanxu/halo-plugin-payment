@@ -40,7 +40,8 @@ public class AppWechatPayment extends AbstractPaymentOperator {
 
     @Override
     public Mono<Boolean> initConfig() {
-        return super.initConfig();
+//        return super.initConfig();
+        return Mono.just(false);
     }
 
     @Override
