@@ -13,19 +13,9 @@ import java.util.Map;
 public interface PaymentResponse {
 
     /**
-     * @return 总金额
-     */
-    int getTotalFee();
-
-    /**
      * @return 商户订单号
      */
     String getOutTradeNo();
-
-    /**
-     * @return 第三方订单号
-     */
-    String getTradeNo();
 
     /**
      * @return 操作是否成功

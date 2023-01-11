@@ -7,8 +7,6 @@ import io.mvvm.halo.plugins.payment.sdk.exception.PaymentNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import run.halo.app.extension.ReactiveExtensionClient;
-import run.halo.app.infra.ExternalUrlSupplier;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,29 +21,21 @@ public class SimplePaymentProvider implements PaymentProvider {
 
     private final Map<String, Wrapper> PAYMENT_CONTAINER = new ConcurrentHashMap<>();
 
-    private final ExternalUrlSupplier externalUrlSupplier;
-    private final ReactiveExtensionClient client;
+    private final PaymentFactory factory;
 
-    public SimplePaymentProvider(ExternalUrlSupplier externalUrlSupplier, ReactiveExtensionClient client) {
-        this.externalUrlSupplier = externalUrlSupplier;
-        this.client = client;
+    public SimplePaymentProvider(PaymentFactory factory) {
+        this.factory = factory;
     }
 
     @Override
     public IPayment register(IPaymentOperator operator) {
-        IPayment payment = createPayment(operator);
+        if (PAYMENT_CONTAINER.containsKey(operator.getDescriptor().getName())) {
+            unregister(operator);
+        }
+        IPayment payment = factory.createPayment(operator);
         PAYMENT_CONTAINER.put(payment.getDescriptor().getName(), new Wrapper(operator, payment));
         log.debug("register payment: {}", payment.getDescriptor().getName());
         return payment;
-    }
-
-    private IPayment createPayment(IPaymentOperator operator) {
-        PaymentDescriptor type = operator.getDescriptor();
-        if (PAYMENT_CONTAINER.containsKey(type.getName())) {
-            unregister(operator);
-        }
-        IPayment payment = new SimplePayment(operator, type, externalUrlSupplier);
-        return new ExtensionPaymentDecorator(payment, client);
     }
 
     @Override

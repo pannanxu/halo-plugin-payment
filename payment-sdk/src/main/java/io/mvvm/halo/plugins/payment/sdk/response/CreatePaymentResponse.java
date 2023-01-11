@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment.sdk.response;
 
+import io.mvvm.halo.plugins.payment.sdk.Amount;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -22,8 +23,8 @@ public class CreatePaymentResponse extends ErrorResponse implements PaymentRespo
     private String outTradeNo;
     @Schema(title = "第三方单号")
     private String tradeNo;
-    @Schema(title = "应付总金额")
-    private int totalFee;
+    @Schema(title = "金额", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Amount money;
     @Schema(title = "扩展值")
     private Map<String, Object> expand;
     @Schema(title = "订单是否创建成功")

@@ -14,7 +14,6 @@ import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import run.halo.app.extension.ReactiveExtensionClient;
-import run.halo.app.infra.ExternalUrlSupplier;
 
 import java.util.List;
 
@@ -28,9 +27,8 @@ public class PaymentConfiguration {
 
     private final PaymentProvider provider;
 
-    public PaymentConfiguration(ExternalUrlSupplier externalUrlSupplier,
-                                ReactiveExtensionClient client) {
-        this.provider = new SimplePaymentProvider(externalUrlSupplier, client);
+    public PaymentConfiguration(PaymentFactory factory) {
+        this.provider = new SimplePaymentProvider(factory);
     }
 
     @Bean

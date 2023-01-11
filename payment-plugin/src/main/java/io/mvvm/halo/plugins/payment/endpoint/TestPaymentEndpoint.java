@@ -60,7 +60,7 @@ public class TestPaymentEndpoint implements PaymentEndpoint {
         paymentRequest.setDescription("商品说明");
         paymentRequest.setClientIp("127.0.0.1");
         paymentRequest.setDevice(DeviceType.pc.name());
-        paymentRequest.setTotalFee(1);
+        paymentRequest.setMoney(Amount.of(1));
         paymentRequest.setBackParams("1");
         paymentRequest.setGvk("test");
         Map<String, Object> map = new HashMap<>();
@@ -87,7 +87,7 @@ public class TestPaymentEndpoint implements PaymentEndpoint {
         RefundPaymentRequest refundPaymentRequest = new RefundPaymentRequest();
         refundPaymentRequest.setOutTradeNo(request.queryParam("outTradeNo").orElse(null));
         refundPaymentRequest.setRefundNo(request.queryParam("outTradeNo").orElse(null));
-        refundPaymentRequest.setAmount(Amount.of(Integer.valueOf(request.queryParam("amount").orElse("1"))));
+        refundPaymentRequest.setRefundMoney(Amount.ofYuan(request.queryParam("amount").orElse("1")));
         Mono<PaymentResponseWrapper<RefundPaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
                 .flatMap(payment -> payment.refund(refundPaymentRequest));
         return ServerResponse.ok().body(resp, PaymentResponseWrapper.class);

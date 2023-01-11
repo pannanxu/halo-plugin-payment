@@ -1,8 +1,10 @@
 package io.mvvm.halo.plugins.payment.sdk.response;
 
+import io.mvvm.halo.plugins.payment.sdk.Amount;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.function.Supplier;
@@ -13,13 +15,14 @@ import java.util.function.Supplier;
  * @author: pan
  **/
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class AsyncNotifyResponse implements PaymentResponse {
+public class AsyncNotifyResponse extends ErrorResponse implements PaymentResponse {
 
     @Schema(title = "应付总金额")
-    private int totalFee;
+    private Amount money;
     @Schema(title = "实际支付金额")
-    private int actualFee;
+    private Amount actualFee;
     @Schema(title = "单号")
     private String outTradeNo;
     @Schema(title = "第三方单号")

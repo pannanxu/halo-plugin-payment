@@ -53,16 +53,6 @@ public class ErrorResponse implements PaymentResponse {
     }
 
     @Override
-    public int getTotalFee() {
-        return 0;
-    }
-
-    @Override
-    public String getTradeNo() {
-        return null;
-    }
-
-    @Override
     public boolean isSuccess() {
         return false;
     }

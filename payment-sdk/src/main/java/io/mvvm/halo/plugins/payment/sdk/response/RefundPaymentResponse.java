@@ -27,9 +27,9 @@ public class RefundPaymentResponse extends ErrorResponse implements PaymentRespo
     @Schema(title = "退款单号", requiredMode = Schema.RequiredMode.REQUIRED)
     private String refundNo;
     @Schema(title = "应付总金额")
-    private int totalFee;
+    private Amount money;
     @Schema(title = "退款金额")
-    private Amount refundAmount;
+    private Amount refundMoney;
     @Schema(title = "扩展值")
     private Map<String, Object> expand;
     @Schema(title = "订单是否退款成功")

@@ -17,6 +17,8 @@ import run.halo.app.extension.GroupVersion;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 
+import java.util.Set;
+
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -66,6 +68,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                             PaymentExtension ext = new PaymentExtension();
                             ext.setEnabled(Boolean.TRUE);
                             ext.setDisplayName(operator.getDescriptor().getTitle());
+                            ext.setEnableMethods(Set.of("fetch"));
                             ext.setMetadata(new Metadata());
                             ext.getMetadata().setName(operator.getDescriptor().getName());
                             ext.setKind(PaymentExtension.kind);
@@ -75,6 +78,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                         }))
                         .map(ext -> {
                             ext.setEnabled(Boolean.TRUE);
+                            ext.setEnableMethods(Set.of("fetch"));
                             return ext;
                         })
                         .flatMap(client::update));

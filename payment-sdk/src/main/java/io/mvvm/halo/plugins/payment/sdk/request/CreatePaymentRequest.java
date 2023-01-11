@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment.sdk.request;
 
+import io.mvvm.halo.plugins.payment.sdk.Amount;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -26,14 +27,16 @@ public class CreatePaymentRequest implements PaymentRequest {
 
     @Schema(title = "客户端IP", requiredMode = Schema.RequiredMode.REQUIRED)
     private String clientIp;
-
+    /**
+     * 设备类型: {@link io.mvvm.halo.plugins.payment.sdk.enums.DeviceType}
+     */
     @Schema(title = "设备类型",
             description = "pc：电脑端网页、mobile：手机端网页、mini：小程序、app：手机app",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String device = "pc";
 
-    @Schema(title = "应付总金额(分)", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
-    private int totalFee;
+    @Schema(title = "金额", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Amount money;
 
     @Schema(title = "业务引用标识", description = "在支付成功后的回调中，会通过此值通过AsyncNotifyManager通知到业务层",
             requiredMode = Schema.RequiredMode.REQUIRED)

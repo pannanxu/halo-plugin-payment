@@ -107,7 +107,7 @@ public class WechatPayment extends AbstractPaymentOperator {
                 })
                 .map(response -> new CreatePaymentResponse()
                         .setSuccess(StringUtils.hasLength(response.getH5Url()))
-                        .setTotalFee(paymentRequest.getTotalFee())
+                        .setMoney(paymentRequest.getMoney())
                         .setStatus(PaymentStatus.created)
                         .setPaymentMode(PaymentMode.h5_url.name())
                         .setPaymentModeData(response.getH5Url())
@@ -156,8 +156,8 @@ public class WechatPayment extends AbstractPaymentOperator {
                             .setOutTradeNo(response.getOutTradeNo())
                             .setTradeNo(response.getTransactionId())
                             .setStatus(paymentStatus)
-                            .setActualFee(response.getAmount().getPayerTotal())
-                            .setTotalFee(response.getAmount().getTotal())
+                            .setActualMoney(io.mvvm.halo.plugins.payment.sdk.Amount.of(response.getAmount().getPayerTotal(), 0))
+                            .setMoney(io.mvvm.halo.plugins.payment.sdk.Amount.of(response.getAmount().getTotal(), 0))
                             .setBackParams(response.getAttach())
                             .setExpand(paymentRequest.getExpand());
 //                            .setPaySuccessTime(response.getSuccessTime());
@@ -202,8 +202,8 @@ public class WechatPayment extends AbstractPaymentOperator {
                         .setTradeNo(info.getTradeNo())
                         .setOutTradeNo(info.getOutTradeNo())
                         .setBackParams(info.getBackParams())
-                        .setTotalFee(info.getTotalFee())
-                        .setActualFee(info.getActualFee())
+                        .setMoney(info.getMoney())
+                        .setActualFee(info.getActualMoney())
                         .setResponseFail(() -> Map.of("code", "FAIL", "message", "失败失败"))
                         .setResponseSuccess(() -> Map.of("code", "SUCCESS", "message", "支付成功")));
     }
@@ -223,7 +223,7 @@ public class WechatPayment extends AbstractPaymentOperator {
     private PrepayRequest createPrepayRequest(CreatePaymentRequest paymentRequest, WechatPaymentSetting setting) {
         PrepayRequest request = new PrepayRequest();
         Amount amount = new Amount();
-        amount.setTotal(paymentRequest.getTotalFee());
+        amount.setTotal(paymentRequest.getMoney().getTotal());
         request.setAmount(amount);
         request.setAppid(setting.getAppId());
         request.setMchid(setting.getMerchantId());

@@ -37,7 +37,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 import run.halo.app.infra.utils.JsonUtils;
 
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -107,7 +106,7 @@ public class AliPayment extends AbstractPaymentOperator {
                 .flatMap(setting -> {
                     log.debug("Request: {}", JsonUtils.objectToJson(paymentRequest));
                     Map<String, String> contentMap = new HashMap<>(Map.of("out_trade_no", paymentRequest.getOutTradeNo(),
-                            "total_amount", Amount.of(paymentRequest.getTotalFee()).toBigDecimal().toString(),
+                            "total_amount", paymentRequest.getMoney().toYuanStr(),
                             "subject", paymentRequest.getTitle(),
                             "product_code", "FAST_INSTANT_TRADE_PAY"));
 
@@ -125,7 +124,7 @@ public class AliPayment extends AbstractPaymentOperator {
                                 .setStatus(PaymentStatus.created)
                                 .setExpand(expand)
                                 .setOutTradeNo(paymentRequest.getOutTradeNo())
-                                .setTotalFee(paymentRequest.getTotalFee()));
+                                .setMoney(paymentRequest.getMoney()));
                     } catch (Exception e) {
                         log.error("支付宝|创建支付宝订单异常|{}", e.getMessage(), e);
                         return Mono.just(new CreatePaymentResponse()
@@ -135,7 +134,7 @@ public class AliPayment extends AbstractPaymentOperator {
                                 .setStatus(PaymentStatus.created)
                                 .setExpand(expand)
                                 .setOutTradeNo(paymentRequest.getOutTradeNo())
-                                .setTotalFee(paymentRequest.getTotalFee()));
+                                .setMoney(paymentRequest.getMoney()));
                     }
                 });
     }
@@ -170,8 +169,8 @@ public class AliPayment extends AbstractPaymentOperator {
                             .setStatus(status)
                             .setOutTradeNo(wrapper.getAsString("out_trade_no"))
                             .setTradeNo(wrapper.getAsString("trade_no"))
-                            .setTotalFee(new BigDecimal(wrapper.getAsString("total_amount")).multiply(new BigDecimal(100)).intValue())
-                            .setActualFee(new BigDecimal(wrapper.getAsString("receipt_amount")).multiply(new BigDecimal(100)).intValue())
+                            .setMoney(Amount.ofYuan(wrapper.getAsString("total_amount"), "0.00"))
+                            .setActualMoney(Amount.ofYuan(wrapper.getAsString("receipt_amount"), "0.00"))
                             .setPaySuccessTime(wrapper.getAsDate("send_pay_date", "yyyy-MM-dd HH:mm:ss"));
                     return Mono.just(paymentInfo);
                 });
@@ -201,7 +200,7 @@ public class AliPayment extends AbstractPaymentOperator {
                 .flatMap(setting -> {
                     Map<String, String> contentMap = Map.of("out_trade_no", request.getOutTradeNo(),
                             "out_request_no", request.getRefundNo(),
-                            "refund_amount", request.getAmount().toYuan());
+                            "refund_amount", request.getRefundMoney().toYuanStr());
                     String body = buildBody("alipay.trade.refund", Map.of(), contentMap);
                     return postMono(body, "alipay_trade_refund_response");
                 })
@@ -248,7 +247,7 @@ public class AliPayment extends AbstractPaymentOperator {
                         .setTradeNo(wrapper.getAsString("trade_no"))
                         .setRefundNo(wrapper.getAsString("out_request_no"))
                         .setExpand(request.getExpand())
-                        .setRefundAmount(Amount.ofYuan(wrapper.getAsString("refund_amount"))));
+                        .setRefundMoney(Amount.ofYuan(wrapper.getAsString("refund_amount"))));
     }
 
     @Override
