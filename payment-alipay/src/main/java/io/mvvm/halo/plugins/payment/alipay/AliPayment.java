@@ -13,6 +13,7 @@ import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
+import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
 import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
@@ -29,6 +30,7 @@ import io.mvvm.halo.plugins.payment.sdk.utils.GsonHelper;
 import io.mvvm.halo.plugins.payment.sdk.utils.GsonUtils;
 import io.mvvm.halo.plugins.payment.sdk.utils.MapUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.pf4j.PluginWrapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -57,8 +59,8 @@ public class AliPayment extends AbstractPaymentOperator {
     private final AtomicReference<AliPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
     private final AtomicReference<Signer> signerAtomicReference = new AtomicReference<>(null);
 
-    public AliPayment() {
-        super(true);
+    public AliPayment(PluginWrapper pluginWrapper) {
+        super(pluginWrapper, true);
         gson = GsonUtils.getInstance(new GsonBuilder().create());
     }
 
@@ -78,7 +80,7 @@ public class AliPayment extends AbstractPaymentOperator {
         return getEnvironmentFetcher()
                 .fetch(AliPaymentSetting.NAME, AliPaymentSetting.GROUP, AliPaymentSetting.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请配置后再操作"))))
-                .map(setting -> {
+                .flatMap(setting -> {
                     try {
                         // 初始化 http client
                         setClient(WebClient.builder()
@@ -93,9 +95,10 @@ public class AliPayment extends AbstractPaymentOperator {
                         initStatusFlag.set(true);
                         log.debug("支付宝|初始化成功|{}", initStatusFlag.get());
                     } catch (Exception e) {
-                        log.error("支付宝|初始化支付宝配置异常|{}", e.getMessage());
+                        log.error("支付宝|初始化支付宝配置异常|{}", e.getMessage(), e);
+                        return Mono.error(new BaseException("初始化支付宝配置失败"));
                     }
-                    return initStatusFlag.get();
+                    return Mono.just(initStatusFlag.get());
                 });
     }
 
@@ -104,7 +107,6 @@ public class AliPayment extends AbstractPaymentOperator {
         return Mono.justOrEmpty(settingAtomicReference.get())
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请初始化后再操作"))))
                 .flatMap(setting -> {
-                    log.debug("Request: {}", JsonUtils.objectToJson(paymentRequest));
                     Map<String, String> contentMap = new HashMap<>(Map.of("out_trade_no", paymentRequest.getOutTradeNo(),
                             "total_amount", paymentRequest.getMoney().toYuanStr(),
                             "subject", paymentRequest.getTitle(),
@@ -127,14 +129,7 @@ public class AliPayment extends AbstractPaymentOperator {
                                 .setMoney(paymentRequest.getMoney()));
                     } catch (Exception e) {
                         log.error("支付宝|创建支付宝订单异常|{}", e.getMessage(), e);
-                        return Mono.just(new CreatePaymentResponse()
-                                .setSuccess(false)
-                                .setPaymentMode(PaymentMode.h5_url.name())
-                                .setPaymentModeData(null)
-                                .setStatus(PaymentStatus.created)
-                                .setExpand(expand)
-                                .setOutTradeNo(paymentRequest.getOutTradeNo())
-                                .setMoney(paymentRequest.getMoney()));
+                        return Mono.error(new CreateException("创建支付宝订单失败"));
                     }
                 });
     }
@@ -189,7 +184,7 @@ public class AliPayment extends AbstractPaymentOperator {
                         err -> Mono.error(new CancelException(err.getCode(), err.getMessage())))
                 .flatMap(wrapper -> Mono.just(new PaymentInfo()
                         .setSuccess(true)
-                        .setStatus(PaymentStatus.cancel_successful)
+                        .setStatus(PaymentStatus.closed)
                         .setOutTradeNo(wrapper.getAsString("out_trade_no"))));
     }
 
@@ -252,12 +247,32 @@ public class AliPayment extends AbstractPaymentOperator {
 
     @Override
     public Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
-        return null;
+        return fetch(() -> request.pathVariable("name"))
+                .map(response -> new AsyncNotifyResponse().setMoney(response.getMoney())
+                        .setStatus(response.getStatus())
+                        .setSuccess(response.isSuccess())
+                        .setOutTradeNo(response.getOutTradeNo())
+                        .setTradeNo(response.getTradeNo())
+                        .setActualFee(response.getActualMoney())
+                        .setBackParams(response.getBackParams())
+                        .setResponseSuccess(() -> "success")
+                        .setResponseFail(() -> "fail"));
     }
 
     @Override
     public Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
-        return super.refundAsyncNotify(request);
+        FetchRefundPaymentRequest fetchRefundPaymentRequest = new FetchRefundPaymentRequest()
+                .setRefundNo(request.pathVariable("refundNo"))
+                .setOutTradeNo(request.pathVariable("name"));
+        return fetchRefund(fetchRefundPaymentRequest)
+                .map(response -> new AsyncNotifyResponse().setMoney(response.getMoney())
+                        .setStatus(response.getStatus())
+                        .setSuccess(response.isSuccess())
+                        .setOutTradeNo(response.getOutTradeNo())
+                        .setTradeNo(response.getTradeNo())
+                        .setActualFee(response.getRefundMoney())
+                        .setResponseSuccess(() -> "success")
+                        .setResponseFail(() -> "fail"));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment.alipay;
 
+import io.mvvm.halo.plugins.payment.sdk.SdkContextHolder;
 import org.pf4j.PluginWrapper;
 import org.springframework.stereotype.Component;
 import run.halo.app.plugin.BasePlugin;
@@ -21,6 +22,7 @@ public class AliPaymentPlugin extends BasePlugin {
     @Override
     public void start() {
         System.out.println("支付宝插件启动成功！");
+        SdkContextHolder.register(this);
     }
 
     @Override

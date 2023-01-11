@@ -29,9 +29,9 @@ public class SimplePaymentProvider implements PaymentProvider {
 
     @Override
     public IPayment register(IPaymentOperator operator) {
-        if (PAYMENT_CONTAINER.containsKey(operator.getDescriptor().getName())) {
-            unregister(operator);
-        }
+//        if (PAYMENT_CONTAINER.containsKey(operator.getDescriptor().getName())) {
+//            unregister(operator);
+//        }
         IPayment payment = factory.createPayment(operator);
         PAYMENT_CONTAINER.put(payment.getDescriptor().getName(), new Wrapper(operator, payment));
         log.debug("register payment: {}", payment.getDescriptor().getName());

@@ -63,25 +63,28 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
     Mono<ServerResponse> enable(ServerRequest request) {
         String name = request.pathVariable("name");
         Mono<PaymentExtension> extensionMono = provider.getOperator(request.pathVariable("name"))
-                .flatMap(operator -> client.fetch(PaymentExtension.class, name)
-                        .switchIfEmpty(Mono.defer(() -> {
-                            PaymentExtension ext = new PaymentExtension();
-                            ext.setEnabled(Boolean.TRUE);
-                            ext.setDisplayName(operator.getDescriptor().getTitle());
-                            ext.setEnableMethods(Set.of("fetch"));
-                            ext.setMetadata(new Metadata());
-                            ext.getMetadata().setName(operator.getDescriptor().getName());
-                            ext.setKind(PaymentExtension.kind);
-                            ext.setApiVersion(PaymentExtension.version);
-                            ext.getMetadata().setVersion(1L);
-                            return client.create(ext);
-                        }))
-                        .map(ext -> {
-                            ext.setEnabled(Boolean.TRUE);
-                            ext.setEnableMethods(Set.of("fetch"));
-                            return ext;
-                        })
-                        .flatMap(client::update));
+                .flatMap(operator -> {
+                    operator.getPluginWrapper().getPluginManager().startPlugin(operator.getPluginWrapper().getPluginId());
+                    return client.fetch(PaymentExtension.class, name)
+                            .switchIfEmpty(Mono.defer(() -> {
+                                PaymentExtension ext = new PaymentExtension();
+                                ext.setEnabled(Boolean.TRUE);
+                                ext.setDisplayName(operator.getDescriptor().getTitle());
+                                ext.setEnableMethods(Set.of("fetch"));
+                                ext.setMetadata(new Metadata());
+                                ext.getMetadata().setName(operator.getDescriptor().getName());
+                                ext.setKind(PaymentExtension.kind);
+                                ext.setApiVersion(PaymentExtension.version);
+                                ext.getMetadata().setVersion(1L);
+                                return client.create(ext);
+                            }))
+                            .map(ext -> {
+                                ext.setEnabled(Boolean.TRUE);
+                                ext.setEnableMethods(Set.of("fetch"));
+                                return ext;
+                            })
+                            .flatMap(client::update);
+                });
         return ServerResponse.ok().body(extensionMono, PaymentExtension.class);
     }
 
@@ -103,15 +106,19 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                             ext.setEnabled(Boolean.FALSE);
                             return client.update(ext);
                         }).thenReturn(operator))
-                .map(operator -> {
+                .flatMap(operator -> {
                     try {
                         operator.destroy();
-                        return true;
+                        return Mono.just(operator);
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        return false;
+                        return Mono.error(ex);
                     }
-                });
+                })
+                .doOnNext(operator -> {
+                    operator.getPluginWrapper().getPluginManager().stopPlugin(operator.getPluginWrapper().getPluginId());
+                })
+                .thenReturn(true);
         return ServerResponse.ok().body(resp, Boolean.class);
     }
 

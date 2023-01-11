@@ -11,20 +11,27 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum PaymentStatus {
-
+    /**
+     * 订单已创建、等待用户付款。
+     * <p>
+     * 注意：部分第三方支付在创建订单时并未真实创建，所以查询订单详情是查询不到的
+     */
     created("created", "订单已创建"),
-
-    payment_processing("payment_processing", "支付处理中"),
+    /**
+     * 用户已经支付成功
+     */
     payment_successful("payment_successful", "支付成功"),
-    payment_canceled("payment_canceled", "支付取消"),
-
+    /**
+     * 退款订单已创建、等待第三方支付处理退款
+     */
     refund_processing("refund_processing", "退款处理中"),
+    /**
+     * 退款已成功，第三方支付已经把钱退给用户
+     */
     refund_successful("refund_successful", "退款成功"),
-    refund_canceled("refund_canceled", "退款取消"),
-
-    cancel_successful("cancel_successful", "取消成功"),
-    cancel_failed("cancel_failed", "取消失败"),
-
+    /**
+     * 订单处于已关闭。取消、退款、超时等都是已关闭
+     */
     closed("closed", "订单已关闭"),
     ;
 

@@ -26,7 +26,7 @@ public class NotifyPaymentEndpoint implements PaymentEndpoint {
     @Override
     public RouterFunction<ServerResponse> endpoint() {
         return route(RequestPredicates.path("/payment/{gvk}/{name}/{paymentType}"), this::paymentAsyncNotify)
-                .and(route(RequestPredicates.path("/refund/{gvk}/{name}/{paymentType}"), this::refundAsyncNotify));
+                .and(route(RequestPredicates.path("/refund/{gvk}/{name}/{refundNo}/{paymentType}"), this::refundAsyncNotify));
     }
 
     @Override

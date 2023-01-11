@@ -11,6 +11,8 @@ import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
+import org.pf4j.ExtensionPoint;
+import org.pf4j.PluginWrapper;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
@@ -19,11 +21,13 @@ import reactor.core.publisher.Mono;
  *
  * @author: pan
  **/
-public interface IPaymentOperator {
+public interface IPaymentOperator extends ExtensionPoint {
     /**
      * @return 支付类型
      */
     PaymentDescriptor getDescriptor();
+
+    PluginWrapper getPluginWrapper();
 
     /**
      * @return 支付方式的状态是否可用
@@ -80,5 +84,8 @@ public interface IPaymentOperator {
         return Mono.empty();
     }
 
+    /**
+     * 当前 operator 被停止时出发
+     */
     void destroy();
 }

@@ -26,6 +26,7 @@ import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.pf4j.PluginWrapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -47,8 +48,8 @@ public class WechatPayment extends AbstractPaymentOperator {
     private final AtomicReference<H5Service> h5ServiceAtomicReference = new AtomicReference<>(null);
     private final AtomicReference<WechatPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
 
-    public WechatPayment() {
-        super(false);
+    public WechatPayment(PluginWrapper pluginWrapper) {
+        super(pluginWrapper, false);
     }
 
     @Override
@@ -147,9 +148,7 @@ public class WechatPayment extends AbstractPaymentOperator {
                     switch (response.getTradeState().name()) {
                         case "SUCCESS" -> paymentStatus = PaymentStatus.payment_successful;
                         case "REFUND" -> paymentStatus = PaymentStatus.refund_successful;
-                        case "NOTPAY", "USERPAYING" -> paymentStatus = PaymentStatus.payment_processing;
-                        case "CLOSED" -> paymentStatus = PaymentStatus.closed;
-                        case "REVOKED", "PAYERROR" -> paymentStatus = PaymentStatus.payment_canceled;
+                        case "CLOSED", "REVOKED", "PAYERROR" -> paymentStatus = PaymentStatus.closed;
                     }
                     return new PaymentInfo()
                             .setSuccess(true)
@@ -184,7 +183,7 @@ public class WechatPayment extends AbstractPaymentOperator {
                 .map(outTradeNo -> new CancelPaymentResponse()
                         .setSuccess(true)
                         .setOutTradeNo(outTradeNo)
-                        .setStatus(PaymentStatus.cancel_successful)
+                        .setStatus(PaymentStatus.closed)
                         .setExpand(paymentRequest.getExpand()));
     }
 

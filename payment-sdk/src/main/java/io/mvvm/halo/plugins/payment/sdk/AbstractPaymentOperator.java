@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.pf4j.PluginWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -32,12 +33,16 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
     private WebClient client;
     @Getter
     private PayEnvironmentFetcher environmentFetcher;
+    @Getter
+    private final PluginWrapper pluginWrapper;
 
-    public AbstractPaymentOperator() {
+    public AbstractPaymentOperator(PluginWrapper pluginWrapper) {
+        this.pluginWrapper = pluginWrapper;
         this.userInputFormSchema = null;
     }
 
-    public AbstractPaymentOperator(boolean isLoadFormSchema) {
+    public AbstractPaymentOperator(PluginWrapper pluginWrapper, boolean isLoadFormSchema) {
+        this.pluginWrapper = pluginWrapper;
         if (isLoadFormSchema) {
             this.userInputFormSchema = loadUserInputFormSchema();
         } else {
@@ -71,7 +76,7 @@ public abstract class AbstractPaymentOperator implements IPaymentOperator, Appli
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        environmentFetcher = SdkContextHolder.getEnvironmentFetcher();
-        SdkContextHolder.register(this);
+        SdkContextHolder.Holder holder = SdkContextHolder.holder();
+        environmentFetcher = holder.environmentFetcher();
     }
 }

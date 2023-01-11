@@ -22,6 +22,8 @@ public class RefundPaymentRequest implements PaymentRequest {
     private Amount refundMoney;
     @Schema(title = "退款原因")
     private String refundReason;
+    @Schema(title = "退款回调通知地址")
+    private String refundNotifyUrl;
     @Schema(title = "扩展值")
     private Map<String, Object> expand;
 
