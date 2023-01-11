@@ -31,4 +31,15 @@ public interface PaymentRequest {
         private String outTradeNo;
         private Map<String, Object> expand;
     }
+    
+    default String getExpandAsString(String key) {
+        Map<String, Object> expand = getExpand();
+        if (null != expand) {
+            Object val = expand.get(key);
+            if (null != val) {
+                return val.toString();
+            }
+        }
+        return null;
+    }
 }

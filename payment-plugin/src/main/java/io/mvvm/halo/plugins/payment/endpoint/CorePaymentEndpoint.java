@@ -70,7 +70,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                                 PaymentExtension ext = new PaymentExtension();
                                 ext.setEnabled(Boolean.TRUE);
                                 ext.setDisplayName(operator.getDescriptor().getTitle());
-                                ext.setEnableMethods(Set.of("fetch"));
+                                ext.setEnableMethods(Set.of("fetch", "create", "cancel", "refund"));
                                 ext.setMetadata(new Metadata());
                                 ext.getMetadata().setName(operator.getDescriptor().getName());
                                 ext.setKind(PaymentExtension.kind);
@@ -80,7 +80,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                             }))
                             .map(ext -> {
                                 ext.setEnabled(Boolean.TRUE);
-                                ext.setEnableMethods(Set.of("fetch"));
+                                ext.setEnableMethods(Set.of("fetch", "create", "cancel", "refund"));
                                 return ext;
                             })
                             .flatMap(client::update);

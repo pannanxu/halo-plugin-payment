@@ -13,6 +13,16 @@ jar {
             it.isDirectory() ? it : zipTree(it)
         }
     }
+
+    // 解决 alipay sdk 依赖中出现的启动异常
+    doFirst {
+        from {
+            configurations.runtimeClasspath.collect {
+                it.isDirectory() ? it : zipTree(it)
+            }
+        }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
 }
 
 dependencies {
@@ -21,5 +31,5 @@ dependencies {
 //    runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.84.Final:osx-aarch_64'
     compileOnly project(':payment-sdk')
     testImplementation project(':payment-sdk')
-    testImplementation 'com.alipay.sdk:alipay-sdk-java:4.35.9.ALL'
+    implementation 'com.alipay.sdk:alipay-sdk-java:4.35.9.ALL'
 }
