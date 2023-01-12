@@ -12,15 +12,18 @@ import org.pf4j.PluginWrapper;
 @Slf4j
 public class PaymentOperatorRegister implements PaymentRegister {
     private final PaymentProvider provider;
+    private final NotifyCallbackProvider notifyCallbackProvider;
 
-    public PaymentOperatorRegister(PaymentProvider provider) {
+    public PaymentOperatorRegister(PaymentProvider provider,
+                                   NotifyCallbackProvider notifyCallbackProvider) {
         this.provider = provider;
+        this.notifyCallbackProvider = notifyCallbackProvider;
     }
 
     @Override
     public void register(PluginWrapper wrapper) {
         log.debug("准备注册插件: {}", wrapper.getPluginId());
-        new PluginStartedListener(provider, wrapper).init();
+        new PluginStartedListener(provider, notifyCallbackProvider, wrapper).init();
     }
 
 }

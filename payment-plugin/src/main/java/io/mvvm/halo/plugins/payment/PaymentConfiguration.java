@@ -6,7 +6,6 @@ import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 import io.mvvm.halo.plugins.payment.sdk.SdkContextHolder;
 import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
-import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
 import org.springdoc.webflux.core.fn.SpringdocRouteBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +25,11 @@ import java.util.List;
 public class PaymentConfiguration {
 
     private final PaymentProvider provider;
+    private final SimpleNotifyCallbackProvider notifyProvider;
 
     public PaymentConfiguration(PaymentFactory factory) {
         this.provider = new SimplePaymentProvider(factory);
+        this.notifyProvider = new SimpleNotifyCallbackProvider();
     }
 
     @Bean
@@ -43,7 +44,7 @@ public class PaymentConfiguration {
 
     @Bean
     public PaymentRegister paymentRegister() {
-        return new PaymentOperatorRegister(provider);
+        return new PaymentOperatorRegister(provider, notifyProvider);
     }
 
     @Bean
@@ -52,14 +53,8 @@ public class PaymentConfiguration {
     }
 
     @Bean
-    public AsyncNotifyManager asyncNotifyManager() {
-        return new SimpleAsyncNotifyManager();
-    }
-
-    @Bean
-    public IAsyncPayment asyncPayment(PaymentDispatcher dispatcher,
-                                      AsyncNotifyManager asyncNotifyManager) {
-        return new AsyncPayment(dispatcher, asyncNotifyManager);
+    public IAsyncPayment asyncPayment(PaymentDispatcher dispatcher) {
+        return new AsyncPayment(dispatcher, notifyProvider);
     }
 
     @Bean

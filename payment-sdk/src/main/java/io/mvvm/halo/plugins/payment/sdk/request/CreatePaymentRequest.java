@@ -38,7 +38,7 @@ public class CreatePaymentRequest implements PaymentRequest {
     @Schema(title = "金额", requiredMode = Schema.RequiredMode.REQUIRED)
     private Amount money;
 
-    @Schema(title = "业务引用标识", description = "在支付成功后的回调中，会通过此值通过AsyncNotifyManager通知到业务层",
+    @Schema(title = "业务引用标识", description = "在支付成功后的回调中，会通过此字段通知到业务层",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String gvk;
 

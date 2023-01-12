@@ -114,6 +114,7 @@ public class SimplePayment implements IPayment {
     @Override
     public Mono<PaymentResponseWrapper<RefundPaymentResponse>> refund(RefundPaymentRequest request) {
         try {
+            request.setRefundNotifyUrl(externalUrlSupplier.get().toString(), getDescriptor().getName());
             return operator.refund(request)
                     .onErrorResume(RefundException.class,
                             ex -> Mono.just(ErrorResponse.error(ex.getCode(), ex.getMessage(), RefundPaymentResponse.class)))

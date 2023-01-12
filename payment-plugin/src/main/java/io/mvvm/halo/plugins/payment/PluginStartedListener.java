@@ -1,6 +1,7 @@
 package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
+import io.mvvm.halo.plugins.payment.sdk.NotifyCallback;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
@@ -17,9 +18,13 @@ public class PluginStartedListener {
 
     private final PaymentProvider provider;
     private final PluginWrapper wrapper;
+    private final NotifyCallbackProvider notifyCallbackProvider;
 
-    public PluginStartedListener(PaymentProvider provider, PluginWrapper wrapper) {
+    public PluginStartedListener(PaymentProvider provider,
+                                 NotifyCallbackProvider notifyCallbackProvider,
+                                 PluginWrapper wrapper) {
         this.provider = provider;
+        this.notifyCallbackProvider = notifyCallbackProvider;
         this.wrapper = wrapper;
     }
 
@@ -36,15 +41,24 @@ public class PluginStartedListener {
 
     private void started() {
         getWrapperOperatorExtensions().forEach(provider::register);
+        getBizExtensions().forEach(notifyCallbackProvider::register);
     }
 
     private void stopped() {
         getWrapperOperatorExtensions().forEach(provider::unregister);
+        getBizExtensions().forEach(notifyCallbackProvider::unregister);
     }
 
     Stream<IPaymentOperator> getWrapperOperatorExtensions() {
         return this.wrapper.getPluginManager()
                 .getExtensions(IPaymentOperator.class)
+                .stream()
+                .filter(e -> e.getPluginWrapper().equals(wrapper));
+    }
+
+    Stream<NotifyCallback> getBizExtensions() {
+        return this.wrapper.getPluginManager()
+                .getExtensions(NotifyCallback.class)
                 .stream()
                 .filter(e -> e.getPluginWrapper().equals(wrapper));
     }

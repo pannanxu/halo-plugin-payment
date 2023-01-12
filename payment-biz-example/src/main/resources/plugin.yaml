@@ -1,0 +1,25 @@
+apiVersion: plugin.halo.run/v1alpha1
+kind: Plugin
+metadata:
+  # The name defines how the plugin is invoked,A unique name
+  name: PaymentBizExample
+spec:
+  enabled: true
+  # 'version' is a valid semantic version string (see semver.org).
+  version: 1.0.0
+  requires: "*"
+  author:
+    name: pannanxu
+    website: https://github.com/pannanxu
+  logo: https://mvvm.io/logo
+  settingName: biz-example-payment-settings
+  configMapName: biz-example-payment-settings
+  # 'homepage' usually links to the GitHub repository of the plugin
+  homepage: https://github.com/pannanxu/halo-plugin-payment
+  # 'displayName' explains what the plugin does in only a few words
+  displayName: "Ali Payment"
+  description: "Halo2.0 Payment 业务集成测试插件 "
+  license:
+    - name: "MIT"
+  pluginDependencies:
+    "Payment": "*"

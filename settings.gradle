@@ -12,4 +12,5 @@ include 'payment-sdk'
 include 'payment-plugin'
 include 'payment-wechat'
 include 'payment-alipay'
+include 'payment-biz-example'
 

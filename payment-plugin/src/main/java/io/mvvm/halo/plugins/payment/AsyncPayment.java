@@ -1,7 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
-import io.mvvm.halo.plugins.payment.sdk.async.AsyncNotifyManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
@@ -14,12 +13,11 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class AsyncPayment implements IAsyncPayment {
     private final PaymentDispatcher dispatcher;
-    private final AsyncNotifyManager asyncNotifyManager;
+    private final NotifyCallbackProvider provider;
 
-    public AsyncPayment(PaymentDispatcher dispatcher,
-                        AsyncNotifyManager asyncNotifyManager) {
+    public AsyncPayment(PaymentDispatcher dispatcher, NotifyCallbackProvider provider) {
         this.dispatcher = dispatcher;
-        this.asyncNotifyManager = asyncNotifyManager;
+        this.provider = provider;
     }
 
     @Override
@@ -31,7 +29,7 @@ public class AsyncPayment implements IAsyncPayment {
                         log.debug("支付异步通知执行失败: {}", response);
                         return Mono.justOrEmpty(response.getResponseFail().get());
                     }
-                    return asyncNotifyManager.get(gvk)
+                    return provider.getPoint(gvk)
                             .payment(response)
                             .map(res -> {
                                 if (res) {
@@ -51,7 +49,7 @@ public class AsyncPayment implements IAsyncPayment {
                         log.debug("退款异步通知执行失败: {}", response);
                         return Mono.justOrEmpty(response.getResponseFail().get());
                     }
-                    return asyncNotifyManager.get(gvk)
+                    return provider.getPoint(gvk)
                             .refund(response)
                             .map(res -> {
                                 if (res) {
