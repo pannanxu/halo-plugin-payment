@@ -6,6 +6,7 @@ import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
 import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
+import io.mvvm.halo.plugins.payment.sdk.exception.ExceptionCode;
 import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
@@ -30,7 +31,7 @@ import java.util.function.Function;
  **/
 @Slf4j
 public class PaymentStatusRule extends BasePaymentRule {
-    
+
     public PaymentStatusRule(IPayment payment) {
         super(payment);
     }
@@ -55,7 +56,7 @@ public class PaymentStatusRule extends BasePaymentRule {
                 log.debug("PaymentStatusRule success");
                 return super.create(request);
             }
-            return Mono.error(new CreateException(ext.getSpec().getDisplayName() + "暂未启用创建订单功能"));
+            return Mono.error(new CreateException(ExceptionCode.create_method_closed, ext.getSpec().getDisplayName() + "暂未启用创建订单功能"));
         });
     }
 
@@ -65,7 +66,7 @@ public class PaymentStatusRule extends BasePaymentRule {
             if (contains(ext, "fetch")) {
                 return super.fetch(request);
             }
-            return Mono.error(new FetchException(ext.getSpec().getDisplayName() + "暂未启用查询订单功能"));
+            return Mono.error(new FetchException(ExceptionCode.fetch_method_closed, ext.getSpec().getDisplayName() + "暂未启用查询订单功能"));
         });
     }
 
@@ -75,7 +76,7 @@ public class PaymentStatusRule extends BasePaymentRule {
             if (contains(ext, "cancel")) {
                 return super.cancel(request);
             }
-            return Mono.error(new CancelException(ext.getSpec().getDisplayName() + "暂未启用取消订单功能"));
+            return Mono.error(new CancelException(ExceptionCode.cancel_method_closed, ext.getSpec().getDisplayName() + "暂未启用取消订单功能"));
         });
     }
 
@@ -85,7 +86,7 @@ public class PaymentStatusRule extends BasePaymentRule {
             if (contains(ext, "refund")) {
                 return super.refund(request);
             }
-            return Mono.error(new RefundException(ext.getSpec().getDisplayName() + "暂未启用退款功能"));
+            return Mono.error(new RefundException(ExceptionCode.refund_method_closed, ext.getSpec().getDisplayName() + "暂未启用退款功能"));
         });
     }
 
@@ -95,7 +96,7 @@ public class PaymentStatusRule extends BasePaymentRule {
             if (contains(ext, "refund")) {
                 return super.fetchRefund(request);
             }
-            return Mono.error(new RefundException(ext.getSpec().getDisplayName() + "暂未启用退款功能"));
+            return Mono.error(new RefundException(ExceptionCode.refund_method_closed, ext.getSpec().getDisplayName() + "暂未启用退款功能"));
         });
     }
 
@@ -105,7 +106,7 @@ public class PaymentStatusRule extends BasePaymentRule {
             if (contains(ext, "create")) {
                 return super.paymentAsyncNotify(request);
             }
-            return Mono.error(new BaseException(ext.getSpec().getDisplayName() + "暂未启用创建订单功能"));
+            return Mono.error(new BaseException(ExceptionCode.create_method_closed, ext.getSpec().getDisplayName() + "暂未启用创建订单功能"));
         });
     }
 
@@ -115,7 +116,7 @@ public class PaymentStatusRule extends BasePaymentRule {
             if (contains(ext, "refund")) {
                 return super.refundAsyncNotify(request);
             }
-            return Mono.error(new BaseException(ext.getSpec().getDisplayName() + "暂未启用退款功能"));
+            return Mono.error(new BaseException(ExceptionCode.refund_method_closed, ext.getSpec().getDisplayName() + "暂未启用退款功能"));
         });
     }
 
@@ -127,7 +128,7 @@ public class PaymentStatusRule extends BasePaymentRule {
                     if (Boolean.TRUE.equals(ext.getSpec().getEnabled())) {
                         return Mono.just(ext);
                     }
-                    return Mono.error(new BaseException(ext.getSpec().getDisplayName() + "插件已关闭"));
+                    return Mono.error(new BaseException(ExceptionCode.payment_closed, ext.getSpec().getDisplayName() + "插件已关闭"));
                 })
                 .flatMap(fn);
     }

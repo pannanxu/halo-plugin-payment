@@ -18,4 +18,8 @@ public class RefundException extends BaseException {
     public RefundException(String code, String message) {
         super(code, message);
     }
+
+    public RefundException(ExceptionCode code, String message) {
+        super(code, message);
+    }
 }

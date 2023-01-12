@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment.alipay;
 
+import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConfig;
 import com.alipay.api.AlipayRequest;
@@ -30,6 +31,7 @@ import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
 import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
+import io.mvvm.halo.plugins.payment.sdk.exception.ExceptionCode;
 import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
 import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
@@ -85,7 +87,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
         return getEnvironmentFetcher()
                 .fetch(AliPaymentSetting.NAME, AliPaymentSetting.GROUP, AliPaymentSetting.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无支付宝配置, 请配置后再操作"))))
-                .map(setting -> {
+                .flatMap(setting -> {
                     try {
                         log.debug("initConfig: {}", JsonUtils.objectToJson(setting));
                         AlipayConfig config = new AlipayConfig();
@@ -118,8 +120,9 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         log.debug("支付宝|初始化成功|{}", initStatusFlag.get());
                     } catch (Exception e) {
                         log.error("支付宝|初始化支付宝配置异常|{}", e.getMessage());
+                        return Mono.error(e);
                     }
-                    return initStatusFlag.get();
+                    return Mono.just(initStatusFlag.get());
                 });
     }
 
@@ -146,7 +149,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         AlipayTradePagePayResponse response = alipayClientAtomicReference.get()
                                 .pageExecute(payRequest, "GET");
                         if (!response.isSuccess()) {
-                            return Mono.error(new CreateException("创建支付宝订单失败"));
+                            return Mono.error(new CreateException(ExceptionCode.biz_error, "创建支付宝订单失败"));
                         }
                         return Mono.just(new CreatePaymentResponse()
                                 .setStatus(PaymentStatus.created)
@@ -156,8 +159,11 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                                 .setMoney(request.getMoney())
                                 .setOutTradeNo(request.getOutTradeNo())
                                 .setPaymentMode(PaymentMode.h5_url.name()));
-                    } catch (Exception e) {
+                    } catch (AlipayApiException e) {
                         log.error("支付宝|创建订单失败|{}", e.getMessage(), e);
+                        return Mono.error(new CreateException(e.getErrCode(), e.getErrMsg()));
+                    } catch (Exception e) {
+                        log.error("支付宝|创建订单未知异常|{}", e.getMessage(), e);
                         return Mono.error(new CreateException("创建支付宝订单失败"));
                     }
                 });
@@ -175,7 +181,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                     try {
                         AlipayTradeQueryResponse response = exec(setting, queryRequest);
                         if (!response.isSuccess()) {
-                            return Mono.error(new FetchException(response.getSubCode(), response.getSubMsg()));
+                            return Mono.error(new FetchException(ExceptionCode.biz_error, response.getSubMsg()));
                         }
                         PaymentStatus status = null;
                         switch (response.getTradeStatus()) {
@@ -211,7 +217,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                     try {
                         AlipayTradeCloseResponse response = exec(setting, closeRequest);
                         if (!response.isSuccess()) {
-                            return Mono.error(new CancelException(response.getSubCode(), response.getSubMsg()));
+                            return Mono.error(new CancelException(ExceptionCode.biz_error, response.getSubMsg()));
                         }
                         return Mono.just(new PaymentInfo()
                                 .setOutTradeNo(response.getOutTradeNo())
@@ -242,7 +248,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         AlipayTradeRefundResponse response = exec(setting, refundRequest);
 
                         if (!response.isSuccess()) {
-                            return Mono.error(new RefundException(response.getSubCode(), response.getSubMsg()));
+                            return Mono.error(new RefundException(ExceptionCode.biz_error, response.getSubMsg()));
                         }
                         if (!"Y".equals(response.getFundChange())) {
                             FetchRefundPaymentRequest fetchRefundPaymentRequest = new FetchRefundPaymentRequest();
@@ -277,7 +283,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         refundQueryRequest.setBizModel(model);
                         AlipayTradeFastpayRefundQueryResponse response = exec(setting, refundQueryRequest);
                         if (!response.isSuccess()) {
-                            return Mono.error(new RefundException(response.getSubCode(), response.getSubMsg()));
+                            return Mono.error(new RefundException(ExceptionCode.biz_error, response.getSubMsg()));
                         }
                         PaymentStatus status;
                         if (!"REFUND_SUCCESS".equals(response.getRefundStatus())) {
@@ -285,7 +291,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         } else {
                             status = PaymentStatus.refund_successful;
                         }
-                        
+
                         return Mono.just(new RefundPaymentResponse()
                                 .setOutTradeNo(response.getOutTradeNo())
                                 .setSuccess(true)

@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class BaseException extends RuntimeException {
 
-    private String code;
+    private String code = ExceptionCode.error.name();
     private String outTradeNo;
 
     public BaseException(String code, String message, String outTradeNo) {
@@ -28,5 +28,10 @@ public class BaseException extends RuntimeException {
     public BaseException(String code, String message) {
         super(message);
         this.code = code;
+    }
+
+    public BaseException(ExceptionCode code, String message) {
+        super(message);
+        this.code = code.name();
     }
 }

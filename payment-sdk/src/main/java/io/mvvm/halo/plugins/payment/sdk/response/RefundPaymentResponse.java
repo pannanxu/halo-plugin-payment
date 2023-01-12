@@ -3,6 +3,7 @@ package io.mvvm.halo.plugins.payment.sdk.response;
 import io.mvvm.halo.plugins.payment.sdk.Amount;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
+import io.mvvm.halo.plugins.payment.sdk.exception.ExceptionCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -53,6 +54,7 @@ public class RefundPaymentResponse extends ErrorResponse implements PaymentRespo
     public static RefundPaymentResponse onError(Throwable ex) {
         RefundPaymentResponse response = new RefundPaymentResponse();
         response.setError(ex.getMessage());
+        response.setCode(ExceptionCode.error.name());
         return response;
     }
 }

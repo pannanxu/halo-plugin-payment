@@ -18,4 +18,8 @@ public class CreateException extends BaseException {
     public CreateException(String code, String message) {
         super(code, message);
     }
+
+    public CreateException(ExceptionCode code, String message) {
+        super(code, message);
+    }
 }

@@ -4,6 +4,7 @@ import io.mvvm.halo.plugins.payment.sdk.ExpandConst;
 import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
+import io.mvvm.halo.plugins.payment.sdk.exception.ExceptionCode;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class LimitRuleContext {
                     .flatMap(setting -> {
                         PaymentSetting.Limit limit = setting.getLimit();
                         if (!counter.ping(limit.getSecond(), limit.getCount())) {
-                            return Mono.error(new BaseException("访问频繁，请稍后重试"));
+                            return Mono.error(new BaseException(ExceptionCode.limit_request, "访问频繁，请稍后重试"));
                         }
                         return Mono.just(Boolean.TRUE);
                     });

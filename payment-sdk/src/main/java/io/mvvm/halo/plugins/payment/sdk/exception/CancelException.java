@@ -18,4 +18,8 @@ public class CancelException extends BaseException {
     public CancelException(String code, String message) {
         super(code, message);
     }
+
+    public CancelException(ExceptionCode code, String message) {
+        super(code, message);
+    }
 }

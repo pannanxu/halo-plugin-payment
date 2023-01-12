@@ -18,4 +18,8 @@ public class FetchException extends BaseException {
     public FetchException(String code, String message) {
         super(code, message);
     }
+
+    public FetchException(ExceptionCode code, String message) {
+        super(code, message);
+    }
 }

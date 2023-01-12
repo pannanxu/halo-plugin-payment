@@ -6,6 +6,7 @@ import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
+import io.mvvm.halo.plugins.payment.sdk.exception.ExceptionCode;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
@@ -66,7 +67,7 @@ public class BlackListRule extends BasePaymentRule {
         return fetcher.fetchPaymentConfig(PaymentSetting.basic)
                 .flatMap(setting -> {
                     if (null != setting.getBlackListIp() && setting.getBlackListIp().contains(black)) {
-                        return Mono.error(new BaseException("您已被拉入黑名单列表"));
+                        return Mono.error(new BaseException(ExceptionCode.black_list, "您已被拉入黑名单列表"));
                     }
                     return Mono.just(Boolean.TRUE);
                 });
