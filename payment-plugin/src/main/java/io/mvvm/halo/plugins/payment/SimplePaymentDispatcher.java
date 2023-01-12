@@ -2,16 +2,11 @@ package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
+import io.mvvm.halo.plugins.payment.sdk.PaymentQuery;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * PaymentWrapper. 支付调度
@@ -47,25 +42,10 @@ public class SimplePaymentDispatcher implements PaymentDispatcher {
     }
 
     @Override
-    public Flux<IPayment> payments(String device) {
-        if (!StringUtils.hasLength(device)) {
+    public Flux<IPayment> payments(PaymentQuery query) {
+        if (null == query) {
             return payments();
         }
-        return payments().collectList()
-                .flatMapMany(list -> {
-                    List<IPayment> payments = new ArrayList<>();
-                    Map<String, List<IPayment>> groupName =
-                            list.stream().collect(Collectors.groupingBy((e) -> e.getDescriptor().getName().split("-")[0]));
-                    groupName.forEach((key, value) -> {
-                        String name = key + "-" + device;
-                        IPayment iPayment = value.stream().filter(e -> e.getDescriptor().getName().equals(name)).findFirst()
-                                .orElseGet(() -> value.stream()
-                                        .filter(x -> x.getDescriptor().getName().equals(key))
-                                        .findFirst()
-                                        .orElse(null));
-                        payments.add(iPayment);
-                    });
-                    return Flux.fromStream(payments.stream());
-                });
+        return payments().filter(query.buildQueryPredicate());
     }
 }

@@ -27,9 +27,5 @@ public interface PaymentDispatcher {
      */
     Flux<IPayment> payments();
 
-    /**
-     * @param device 设备标识
-     * @return 获取具备指定设备的支付方式。如果同一种支付方式没有此设备时会返回默认的方式
-     */
-    Flux<IPayment> payments(String device);
+    Flux<IPayment> payments(PaymentQuery query);
 }

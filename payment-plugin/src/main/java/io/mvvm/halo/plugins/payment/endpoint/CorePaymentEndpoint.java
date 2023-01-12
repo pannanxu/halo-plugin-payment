@@ -6,6 +6,8 @@ import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentExtension;
+import io.mvvm.halo.plugins.payment.sdk.PaymentQuery;
+import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMethod;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -70,7 +72,10 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                                 PaymentExtension ext = new PaymentExtension();
                                 ext.setEnabled(Boolean.TRUE);
                                 ext.setDisplayName(operator.getDescriptor().getTitle());
-                                ext.setEnableMethods(Set.of("fetch", "create", "cancel", "refund"));
+                                ext.setEnableMethods(Set.of(PaymentMethod.fetch.name(),
+                                        PaymentMethod.create.name(),
+                                        PaymentMethod.cancel.name(),
+                                        PaymentMethod.refund.name()));
                                 ext.setMetadata(new Metadata());
                                 ext.getMetadata().setName(operator.getDescriptor().getName());
                                 ext.setKind(PaymentExtension.kind);
@@ -80,7 +85,10 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                             }))
                             .map(ext -> {
                                 ext.setEnabled(Boolean.TRUE);
-                                ext.setEnableMethods(Set.of("fetch", "create", "cancel", "refund"));
+                                ext.setEnableMethods(Set.of(PaymentMethod.fetch.name(),
+                                        PaymentMethod.create.name(),
+                                        PaymentMethod.cancel.name(),
+                                        PaymentMethod.refund.name()));
                                 return ext;
                             })
                             .flatMap(client::update);
@@ -90,7 +98,9 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
 
     Mono<ServerResponse> list(ServerRequest request) {
         String device = request.queryParam("device").orElse(null);
-        Flux<PaymentDescriptor> descriptorFlux = dispatcher.payments(device).map(IPayment::getDescriptor);
+        PaymentQuery query = new PaymentQuery();
+        query.setEndpoint(device);
+        Flux<PaymentDescriptor> descriptorFlux = dispatcher.payments(query).map(IPayment::getDescriptor);
         return ServerResponse.ok().body(descriptorFlux, PaymentDescriptor.class);
     }
 
