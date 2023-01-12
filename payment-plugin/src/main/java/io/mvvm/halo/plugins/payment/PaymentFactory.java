@@ -33,7 +33,7 @@ public class PaymentFactory {
 
     public IPayment createPayment(IPaymentOperator operator) {
         PaymentDescriptor type = operator.getDescriptor();
-        IPayment payment = new SimplePayment(operator, type, externalUrlSupplier);
+        IPayment payment = new SimplePayment(operator, type, externalUrlSupplier, fetcher);
         return new PaymentRuleDecorator(payment, client, fetcher, limitRuleContext);
     }
 

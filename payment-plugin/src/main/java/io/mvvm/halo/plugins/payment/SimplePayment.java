@@ -2,10 +2,13 @@ package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
+import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
+import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
+import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
@@ -31,13 +34,15 @@ public class SimplePayment implements IPayment {
     private final PaymentDescriptor descriptor;
     private final ExternalUrlSupplier externalUrlSupplier;
     private final IPaymentOperator operator;
+    private final PayEnvironmentFetcher fetcher;
 
     public SimplePayment(IPaymentOperator operator,
                          PaymentDescriptor descriptor,
-                         ExternalUrlSupplier externalUrlSupplier) {
+                         ExternalUrlSupplier externalUrlSupplier, PayEnvironmentFetcher fetcher) {
         this.operator = operator;
         this.descriptor = descriptor;
         this.externalUrlSupplier = externalUrlSupplier;
+        this.fetcher = fetcher;
     }
 
     @Override
@@ -66,8 +71,12 @@ public class SimplePayment implements IPayment {
             return Mono.just(wrapper);
         }
 
-        request.setNotifyUrl(externalUrlSupplier.get().toString(), getDescriptor().getName());
-        return operator.create(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                .flatMap(setting -> {
+                    String token = setting.getToken();
+                    request.setNotifyUrl(externalUrlSupplier.get().toString(), token, getDescriptor().getName());
+                    return operator.create(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+                });
     }
 
     @Override
@@ -82,24 +91,40 @@ public class SimplePayment implements IPayment {
 
     @Override
     public Mono<PaymentResponseWrapper<RefundPaymentResponse>> refund(RefundPaymentRequest request) {
-        request.setRefundNotifyUrl(externalUrlSupplier.get().toString(), getDescriptor().getName());
-        return operator.refund(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                .flatMap(setting -> {
+                    request.setRefundNotifyUrl(externalUrlSupplier.get().toString(), setting.getToken(), getDescriptor().getName());
+                    return operator.refund(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+                });
     }
 
     @Override
     public Mono<PaymentResponseWrapper<RefundPaymentResponse>> fetchRefund(FetchRefundPaymentRequest request) {
         return operator.fetchRefund(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
-
     }
 
     @Override
     public Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
-        return operator.paymentAsyncNotify(request);
+        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                .flatMap(setting -> {
+                    String token = request.pathVariable("token");
+                    if (setting.getToken().equals(token)) {
+                        return operator.paymentAsyncNotify(request);
+                    }
+                    return Mono.error(new BaseException("token 不匹配"));
+                });
     }
 
     @Override
     public Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
-        return operator.refundAsyncNotify(request);
+        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                .flatMap(setting -> {
+                    String token = request.pathVariable("token");
+                    if (setting.getToken().equals(token)) {
+                        return operator.refundAsyncNotify(request);
+                    }
+                    return Mono.error(new BaseException("token 不匹配"));
+                });
     }
 
     @Override

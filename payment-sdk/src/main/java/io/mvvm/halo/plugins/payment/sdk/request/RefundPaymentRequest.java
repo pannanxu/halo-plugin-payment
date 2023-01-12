@@ -37,10 +37,11 @@ public class RefundPaymentRequest implements PaymentRequest {
         throw new RuntimeException("use setRefundNotifyUrl(String refundNotifyUrl, String paymentType)");
     }
 
-    public void setRefundNotifyUrl(String refundNotifyUrl, String paymentType) {
-//        /refund/{gvk}/{name}/{refundNo}/{paymentType}
-        String spl = refundNotifyUrl.endsWith("/") ? "" : "/";
-        this.refundNotifyUrl = refundNotifyUrl + spl + "refund/" + this.gvk + "/" + this.outTradeNo + "/" + this.refundNo + "/" + paymentType;
+    public void setRefundNotifyUrl(String domain, String token, String paymentType) {
+        String domainEnd = domain.endsWith("/") ? "" : "/";
+        // /apis/payment/notify/refund/{token}/{gvk}/{name}/{refundNo}/{paymentType}
+        this.refundNotifyUrl = domain + domainEnd + "apis/payment/notify/refund/%s/%s/%s/%s/%s"
+                .formatted(token, gvk, outTradeNo, refundNo, paymentType);
     }
 
 

@@ -56,9 +56,10 @@ public class CreatePaymentRequest implements PaymentRequest {
         throw new RuntimeException("see: setNotifyUrl(String domain, String paymentType)");
     }
 
-    public void setNotifyUrl(String domain, String paymentType) {
+    public void setNotifyUrl(String domain, String token, String paymentType) {
         String domainEnd = domain.endsWith("/") ? "" : "/";
-        this.notifyUrl = domain + domainEnd + "apis/plugins.payment/notify/%s/%s/%s"
-                .formatted(gvk, outTradeNo, paymentType);
+        // /apis/payment/notify/payment/{token}/{gvk}/{name}/{paymentType}
+        this.notifyUrl = domain + domainEnd + "apis/payment/notify/%s/%s/%s/%s"
+                .formatted(token, gvk, outTradeNo, paymentType);
     }
 }

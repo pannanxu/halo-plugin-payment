@@ -13,8 +13,8 @@ spec:
           value: "127.0.0.1"
           help: "多个IP使用,分割"
         - $formkit: text
-          label: 异步通知Token1
+          label: 异步通知Token
           name: token
-          value: "123456789qwertyuioasdfghjk"
-          help: "支付成功后回调通知时会校验此token是否一致"
+          value: "XZ0JV7t3IFNG7BLKOzJdwEFZOU42Ap5V"
+          help: "回调通知会校验此Token是否一致, 建议使用随机的UUID去除-后的值"
 
