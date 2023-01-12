@@ -70,6 +70,7 @@ public class TestPaymentEndpoint {
         paymentRequest.setGvk(ExampleNotifyCallback.gvk);
         Map<String, Object> map = new HashMap<>();
         map.put(ExpandConst.returnUrl, "https://www.baidu.com");
+        map.put(ExpandConst.limitRuleKey, "localhost");
         paymentRequest.setExpand(map);
         Mono<PaymentResponseWrapper<CreatePaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
                 .flatMap(payment -> payment.create(paymentRequest));

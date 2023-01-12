@@ -70,9 +70,10 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                     return client.fetch(PaymentExtension.class, name)
                             .switchIfEmpty(Mono.defer(() -> {
                                 PaymentExtension ext = new PaymentExtension();
-                                ext.setEnabled(Boolean.TRUE);
-                                ext.setDisplayName(operator.getDescriptor().getTitle());
-                                ext.setEnableMethods(Set.of(PaymentMethod.fetch.name(),
+                                ext.setSpec(new PaymentExtension.Spec());
+                                ext.getSpec().setEnabled(Boolean.TRUE);
+                                ext.getSpec().setDisplayName(operator.getDescriptor().getTitle());
+                                ext.getSpec().setEnableMethods(Set.of(PaymentMethod.fetch.name(),
                                         PaymentMethod.create.name(),
                                         PaymentMethod.cancel.name(),
                                         PaymentMethod.refund.name()));
@@ -84,8 +85,8 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                                 return client.create(ext);
                             }))
                             .map(ext -> {
-                                ext.setEnabled(Boolean.TRUE);
-                                ext.setEnableMethods(Set.of(PaymentMethod.fetch.name(),
+                                ext.getSpec().setEnabled(Boolean.TRUE);
+                                ext.getSpec().setEnableMethods(Set.of(PaymentMethod.fetch.name(),
                                         PaymentMethod.create.name(),
                                         PaymentMethod.cancel.name(),
                                         PaymentMethod.refund.name()));
@@ -113,7 +114,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
         Mono<Boolean> resp = provider.getOperator(request.pathVariable("name"))
                 .flatMap(operator -> client.fetch(PaymentExtension.class, operator.getDescriptor().getName())
                         .flatMap(ext -> {
-                            ext.setEnabled(Boolean.FALSE);
+                            ext.getSpec().setEnabled(Boolean.FALSE);
                             return client.update(ext);
                         }).thenReturn(operator))
                 .flatMap(operator -> {

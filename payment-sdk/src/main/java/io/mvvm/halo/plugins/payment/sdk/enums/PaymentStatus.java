@@ -30,6 +30,10 @@ public enum PaymentStatus {
      */
     refund_successful("refund_successful", "退款成功"),
     /**
+     * 退款异常
+     */
+    refund_failed("refund_failed", "退款异常"),
+    /**
      * 订单处于已关闭。取消、退款、超时等都是已关闭
      */
     closed("closed", "订单已关闭"),

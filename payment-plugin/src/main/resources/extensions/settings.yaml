@@ -8,8 +8,13 @@ spec:
       label: 基本设置
       formSchema:
         - $formkit: text
-          label: 异步通知Token
+          label: IP黑名单
+          name: blackListIp
+          value: "127.0.0.1"
+          help: "多个IP使用,分割"
+        - $formkit: text
+          label: 异步通知Token1
           name: token
-          value: 123456789qwertyuioasdfghjk
+          value: "123456789qwertyuioasdfghjk"
           help: "支付成功后回调通知时会校验此token是否一致"
 

@@ -11,7 +11,6 @@ import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import org.pf4j.PluginWrapper;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
@@ -20,7 +19,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: pan
  **/
-@Component
+//@Component
 public class AppWechatPayment extends AbstractPaymentOperator {
 
     public AppWechatPayment(PluginWrapper pluginWrapper) {

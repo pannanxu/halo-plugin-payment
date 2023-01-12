@@ -1,0 +1,33 @@
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: role-template-payment-view
+  labels:
+    halo.run/role-template: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "Payment Management"
+    rbac.authorization.halo.run/display-name: "支付查看"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:payments:view"]
+rules:
+  - apiGroups: [ "payment.mvvm.io" ]
+    resources: [ "payments" ]
+    verbs: [ "get", "list" ]
+---
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: role-template-payment-manage
+  labels:
+    halo.run/role-template: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "Payment Management"
+    rbac.authorization.halo.run/display-name: "支付管理"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:payments:manage"]
+    rbac.authorization.halo.run/dependencies: |
+      ["role-template-payment-view"]
+rules:
+  - apiGroups: [ "payment.mvvm.io" ]
+    resources: [ "payments" ]
+    verbs: [ "create", "patch", "update", "delete", "deletecollection" ]

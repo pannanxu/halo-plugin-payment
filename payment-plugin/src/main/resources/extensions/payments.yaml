@@ -1,0 +1,15 @@
+apiVersion: payment.mvvm.io/v1alpha1
+kind: Payment
+metadata:
+  name: wechat
+spec:
+  enabled: true
+  displayName: 微信支付
+---
+apiVersion: payment.mvvm.io/v1alpha1
+kind: Payment
+metadata:
+  name: alipay
+spec:
+  enabled: true
+  displayName: 支付宝支付

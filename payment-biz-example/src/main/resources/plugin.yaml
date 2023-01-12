@@ -17,7 +17,7 @@ spec:
   # 'homepage' usually links to the GitHub repository of the plugin
   homepage: https://github.com/pannanxu/halo-plugin-payment
   # 'displayName' explains what the plugin does in only a few words
-  displayName: "Ali Payment"
+  displayName: "支付业务集成测试插件"
   description: "Halo2.0 Payment 业务集成测试插件 "
   license:
     - name: "MIT"

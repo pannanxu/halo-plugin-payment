@@ -18,6 +18,8 @@ public class RefundPaymentRequest implements PaymentRequest {
     private String outTradeNo;
     @Schema(title = "退款单号", requiredMode = Schema.RequiredMode.REQUIRED)
     private String refundNo;
+    @Schema(title = "订单金额", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Amount money;
     @Schema(title = "退款金额", requiredMode = Schema.RequiredMode.REQUIRED)
     private Amount refundMoney;
     @Schema(title = "退款原因")

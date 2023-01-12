@@ -1,6 +1,8 @@
 package io.mvvm.halo.plugins.payment.wechat;
 
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
+import com.wechat.pay.java.core.notification.NotificationParser;
+import com.wechat.pay.java.core.notification.RequestParam;
 import com.wechat.pay.java.service.payments.h5.H5Service;
 import com.wechat.pay.java.service.payments.h5.model.Amount;
 import com.wechat.pay.java.service.payments.h5.model.CloseOrderRequest;
@@ -9,6 +11,10 @@ import com.wechat.pay.java.service.payments.h5.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.h5.model.PrepayResponse;
 import com.wechat.pay.java.service.payments.h5.model.QueryOrderByOutTradeNoRequest;
 import com.wechat.pay.java.service.payments.h5.model.SceneInfo;
+import com.wechat.pay.java.service.refund.RefundService;
+import com.wechat.pay.java.service.refund.model.AmountReq;
+import com.wechat.pay.java.service.refund.model.CreateRequest;
+import com.wechat.pay.java.service.refund.model.RefundNotification;
 import io.mvvm.halo.plugins.payment.sdk.AbstractPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.enums.Endpoint;
@@ -17,6 +23,7 @@ import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
 import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
 import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
+import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.RefundPaymentRequest;
@@ -48,7 +55,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class WechatPayment extends AbstractPaymentOperator {
 
     private final AtomicReference<H5Service> h5ServiceAtomicReference = new AtomicReference<>(null);
+    private final AtomicReference<RefundService> refundServiceAtomicReference = new AtomicReference<>(null);
     private final AtomicReference<WechatPaymentSetting> settingAtomicReference = new AtomicReference<>(null);
+    private final AtomicReference<RSAAutoCertificateConfig> configAtomicReference = new AtomicReference<>(null);
 
     public WechatPayment(PluginWrapper pluginWrapper) {
         super(pluginWrapper, false);
@@ -72,25 +81,24 @@ public class WechatPayment extends AbstractPaymentOperator {
                 .fetch(WechatPaymentSetting.GROUP, WechatPaymentSetting.NAME, WechatPaymentSetting.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new RuntimeException("暂无微信支付配置, 请配置后再操作"))))
                 .flatMap(setting -> {
-                    settingAtomicReference.set(setting);
                     try {
                         RSAAutoCertificateConfig.Builder builder = new RSAAutoCertificateConfig.Builder()
                                 .merchantId(setting.getMerchantId())
                                 .merchantSerialNumber(setting.getMerchantSerialNumber())
                                 .apiV3Key(setting.getApiV3key());
                         setting.privateKey(builder);
-                        H5Service service = new H5Service.Builder().config(builder.build()).build();
-                        log.debug("微信支付|初始化H5成功|{}", service);
-                        return Mono.just(service);
+                        RSAAutoCertificateConfig config = builder.build();
+                        configAtomicReference.set(config);
+                        h5ServiceAtomicReference.set(new H5Service.Builder().config(config).build());
+                        refundServiceAtomicReference.set(new RefundService.Builder().config(config).build());
+                        settingAtomicReference.set(setting);
+                        initStatusFlag.set(null != h5ServiceAtomicReference.get());
+                        log.debug("微信支付|初始化H5成功|");
+                        return Mono.just(initStatusFlag.get());
                     } catch (Exception ex) {
                         log.error("微信支付|初始化H5失败|{}", ex.getMessage(), ex);
                         return Mono.error(ex);
                     }
-                })
-                .map(service -> {
-                    h5ServiceAtomicReference.set(service);
-                    initStatusFlag.set(null != h5ServiceAtomicReference.get());
-                    return initStatusFlag.get();
                 });
     }
 
@@ -191,8 +199,42 @@ public class WechatPayment extends AbstractPaymentOperator {
     }
 
     @Override
-    public Mono<RefundPaymentResponse> refund(RefundPaymentRequest request) {
-        return super.refund(request);
+    public Mono<RefundPaymentResponse> refund(RefundPaymentRequest refundPaymentRequest) {
+        return getSettingAndService()
+                .flatMap(t2 -> {
+                    RefundService refundService = refundServiceAtomicReference.get();
+                    try {
+                        CreateRequest request = new CreateRequest();
+                        request.setOutRefundNo(refundPaymentRequest.getRefundNo());
+                        request.setOutTradeNo(refundPaymentRequest.getOutTradeNo());
+                        request.setReason(refundPaymentRequest.getRefundReason());
+                        request.setNotifyUrl(refundPaymentRequest.getRefundNotifyUrl());
+                        AmountReq amountReq = new AmountReq();
+                        amountReq.setRefund(refundPaymentRequest.getRefundMoney().getTotal().longValue());
+                        amountReq.setTotal(refundPaymentRequest.getMoney().getTotal().longValue());
+                        amountReq.setCurrency(refundPaymentRequest.getRefundMoney().getCurrency());
+                        request.setAmount(amountReq);
+                        return Mono.just(refundService.create(request));
+                    } catch (Exception ex) {
+                        log.error("微信支付|订单退款申请失败|{}, {}", refundPaymentRequest.getOutTradeNo(), ex.getMessage(), ex);
+                        return Mono.error(new RefundException("微信订单退款申请失败"));
+                    }
+                })
+                .map(response -> {
+                    PaymentStatus status = PaymentStatus.refund_processing;
+                    switch (response.getStatus()) {
+                        case SUCCESS -> status = PaymentStatus.refund_successful;
+                        case CLOSED -> status = PaymentStatus.closed;
+                        case ABNORMAL -> status = PaymentStatus.refund_failed;
+                    }
+                    return new RefundPaymentResponse()
+                            .setSuccess(true)
+                            .setStatus(status)
+                            .setRefundNo(response.getOutRefundNo())
+                            .setOutTradeNo(response.getOutTradeNo())
+                            .setTradeNo(response.getTransactionId())
+                            .setRefundMoney(io.mvvm.halo.plugins.payment.sdk.Amount.of(response.getAmount().getTotal().intValue()));
+                });
     }
 
     @Override
@@ -212,7 +254,34 @@ public class WechatPayment extends AbstractPaymentOperator {
 
     @Override
     public Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
-        return super.refundAsyncNotify(request);
+        // 构造 RequestParam
+        return request.bodyToMono(String.class)
+                .flatMap(body -> {
+                    RequestParam requestParam = new RequestParam.Builder()
+                            .serialNumber(request.headers().firstHeader("Wechatpay-Serial"))
+                            .nonce(request.headers().firstHeader("Wechatpay-Nonce"))
+                            .signature(request.headers().firstHeader("Wechatpay-Signature"))
+                            .timestamp(request.headers().firstHeader("Wechatpay-Timestamp"))
+                            // 若未设置signType，默认值为 WECHATPAY2-SHA256-RSA2048
+                            .signType(request.headers().firstHeader("Wechatpay-Signature-Type"))
+                            .body(body)
+                            .build();
+                    NotificationParser parser = new NotificationParser(configAtomicReference.get());
+                    RefundNotification notification = parser.parse(requestParam, RefundNotification.class);
+                    log.debug("wechat refund notification: {}", notification);
+                    return Mono.empty();
+                });
+
+//        RefundPaymentRequest refundRequest = new RefundPaymentRequest();
+//        return refund(refundRequest)
+//                .map(response -> new AsyncNotifyResponse()
+//                        .setSuccess(RefundPaymentResponse.Status.successful.equals(response.getRefundStatus()))
+//                        .setStatus(response.getStatus())
+//                        .setTradeNo(response.getTradeNo())
+//                        .setOutTradeNo(response.getOutTradeNo())
+//                        .setMoney(response.getMoney())
+//                        .setResponseFail(() -> Map.of("code", "FAIL", "message", "失败失败"))
+//                        .setResponseSuccess(() -> Map.of("code", "SUCCESS", "message", "支付成功")));
     }
 
     @Override

@@ -1,10 +1,13 @@
-package io.mvvm.halo.plugins.payment;
+package io.mvvm.halo.plugins.payment.rule;
 
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
-import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentExtension;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
+import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
+import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
+import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
+import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
@@ -14,30 +17,22 @@ import io.mvvm.halo.plugins.payment.sdk.response.CreatePaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentInfo;
 import io.mvvm.halo.plugins.payment.sdk.response.PaymentResponse;
 import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
-import run.halo.app.extension.ReactiveExtensionClient;
 
 import java.util.function.Function;
 
 /**
- * ExtensionPaymentDecorator.
+ * 支付开关配置.
  *
  * @author: pan
  **/
-public class ExtensionPaymentDecorator implements IPayment {
-
-    private final IPayment payment;
-    private final ReactiveExtensionClient client;
-
-    public ExtensionPaymentDecorator(IPayment payment, ReactiveExtensionClient client) {
-        this.payment = payment;
-        this.client = client;
-    }
-
-    @Override
-    public PaymentDescriptor getDescriptor() {
-        return payment.getDescriptor();
+@Slf4j
+public class PaymentStatusRule extends BasePaymentRule {
+    
+    public PaymentStatusRule(IPayment payment) {
+        super(payment);
     }
 
     @Override
@@ -46,7 +41,7 @@ public class ExtensionPaymentDecorator implements IPayment {
                 .flatMap(status -> {
                     if (status) {
                         return client.fetch(PaymentExtension.class, payment.getDescriptor().getName())
-                                .map(PaymentExtension::getEnabled)
+                                .map(e -> e.getSpec().getEnabled())
                                 .switchIfEmpty(Mono.just(false));
                     }
                     return Mono.just(false);
@@ -57,9 +52,10 @@ public class ExtensionPaymentDecorator implements IPayment {
     public Mono<PaymentResponseWrapper<CreatePaymentResponse>> create(CreatePaymentRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "create")) {
-                return payment.create(request);
+                log.debug("PaymentStatusRule success");
+                return super.create(request);
             }
-            return Mono.error(new BaseException(ext.getDisplayName() + "暂未启用创建订单功能"));
+            return Mono.error(new CreateException(ext.getSpec().getDisplayName() + "暂未启用创建订单功能"));
         });
     }
 
@@ -67,9 +63,9 @@ public class ExtensionPaymentDecorator implements IPayment {
     public Mono<PaymentResponseWrapper<PaymentInfo>> fetch(PaymentRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "fetch")) {
-                return payment.fetch(request);
+                return super.fetch(request);
             }
-            return Mono.error(new BaseException(ext.getDisplayName() + "暂未启用查询订单功能"));
+            return Mono.error(new FetchException(ext.getSpec().getDisplayName() + "暂未启用查询订单功能"));
         });
     }
 
@@ -77,9 +73,9 @@ public class ExtensionPaymentDecorator implements IPayment {
     public Mono<PaymentResponseWrapper<PaymentResponse>> cancel(PaymentRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "cancel")) {
-                return payment.cancel(request);
+                return super.cancel(request);
             }
-            return Mono.error(new BaseException(ext.getDisplayName() + "暂未启用取消订单功能"));
+            return Mono.error(new CancelException(ext.getSpec().getDisplayName() + "暂未启用取消订单功能"));
         });
     }
 
@@ -87,9 +83,9 @@ public class ExtensionPaymentDecorator implements IPayment {
     public Mono<PaymentResponseWrapper<RefundPaymentResponse>> refund(RefundPaymentRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "refund")) {
-                return payment.refund(request);
+                return super.refund(request);
             }
-            return Mono.error(new BaseException(ext.getDisplayName() + "暂未启用退款功能"));
+            return Mono.error(new RefundException(ext.getSpec().getDisplayName() + "暂未启用退款功能"));
         });
     }
 
@@ -97,9 +93,9 @@ public class ExtensionPaymentDecorator implements IPayment {
     public Mono<PaymentResponseWrapper<RefundPaymentResponse>> fetchRefund(FetchRefundPaymentRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "refund")) {
-                return payment.fetchRefund(request);
+                return super.fetchRefund(request);
             }
-            return Mono.error(new BaseException(ext.getDisplayName() + "暂未启用退款功能"));
+            return Mono.error(new RefundException(ext.getSpec().getDisplayName() + "暂未启用退款功能"));
         });
     }
 
@@ -107,9 +103,9 @@ public class ExtensionPaymentDecorator implements IPayment {
     public Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "create")) {
-                return payment.paymentAsyncNotify(request);
+                return super.paymentAsyncNotify(request);
             }
-            return Mono.error(new BaseException(ext.getDisplayName() + "暂未启用创建订单功能"));
+            return Mono.error(new BaseException(ext.getSpec().getDisplayName() + "暂未启用创建订单功能"));
         });
     }
 
@@ -117,26 +113,27 @@ public class ExtensionPaymentDecorator implements IPayment {
     public Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "refund")) {
-                return payment.refundAsyncNotify(request);
+                return super.refundAsyncNotify(request);
             }
-            return Mono.error(new BaseException(ext.getDisplayName() + "暂未启用退款功能"));
+            return Mono.error(new BaseException(ext.getSpec().getDisplayName() + "暂未启用退款功能"));
         });
     }
 
     <T> Mono<T> enabled(Function<PaymentExtension, Mono<T>> fn) {
         return client.fetch(PaymentExtension.class, payment.getDescriptor().getName())
-                .filter(PaymentExtension::getEnabled)
+                .filter(e -> e.getSpec().getEnabled())
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new BaseException("插件暂无配置，请配置后重试"))))
                 .flatMap(ext -> {
-                    if (Boolean.TRUE.equals(ext.getEnabled())) {
+                    if (Boolean.TRUE.equals(ext.getSpec().getEnabled())) {
                         return Mono.just(ext);
                     }
-                    return Mono.error(new BaseException(ext.getDisplayName() + "插件已关闭"));
+                    return Mono.error(new BaseException(ext.getSpec().getDisplayName() + "插件已关闭"));
                 })
                 .flatMap(fn);
     }
 
     boolean contains(PaymentExtension ext, String method) {
-        return null != ext && null != ext.getEnableMethods() && ext.getEnableMethods().contains(method);
+        return null != ext && null != ext.getSpec().getEnableMethods() && ext.getSpec().getEnableMethods().contains(method);
     }
+
 }

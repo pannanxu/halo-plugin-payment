@@ -1,7 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.endpoint.PaymentEndpoint;
-import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 import io.mvvm.halo.plugins.payment.sdk.SdkContextHolder;
@@ -12,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import run.halo.app.extension.ReactiveExtensionClient;
 
 import java.util.List;
 
@@ -30,11 +28,6 @@ public class PaymentConfiguration {
     public PaymentConfiguration(PaymentFactory factory) {
         this.provider = new SimplePaymentProvider(factory);
         this.notifyProvider = new SimpleNotifyCallbackProvider();
-    }
-
-    @Bean
-    public PayEnvironmentFetcher payEnvironmentFetcher(ReactiveExtensionClient extensionClient) {
-        return new PayEnvironmentFetcher(extensionClient);
     }
 
     @Bean

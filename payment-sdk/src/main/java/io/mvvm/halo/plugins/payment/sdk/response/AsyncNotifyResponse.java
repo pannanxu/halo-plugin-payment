@@ -2,6 +2,7 @@ package io.mvvm.halo.plugins.payment.sdk.response;
 
 import io.mvvm.halo.plugins.payment.sdk.Amount;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
+import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -39,6 +40,19 @@ public class AsyncNotifyResponse extends ErrorResponse implements PaymentRespons
     private Supplier<Object> responseSuccess;
     @Schema(title = "支付模块响应第三方数据-失败")
     private Supplier<Object> responseFail;
+
+    public static AsyncNotifyResponse onError(BaseException ex) {
+        AsyncNotifyResponse response = new AsyncNotifyResponse();
+        response.setError(ex.getMessage());
+        response.setCode(ex.getCode());
+        return response;
+    }
+
+    public static AsyncNotifyResponse onError(Throwable ex) {
+        AsyncNotifyResponse response = new AsyncNotifyResponse();
+        response.setError(ex.getMessage());
+        return response;
+    }
 
     @Override
     public PaymentStatus status() {

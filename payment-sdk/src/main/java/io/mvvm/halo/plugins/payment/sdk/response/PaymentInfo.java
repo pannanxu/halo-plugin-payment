@@ -2,6 +2,7 @@ package io.mvvm.halo.plugins.payment.sdk.response;
 
 import io.mvvm.halo.plugins.payment.sdk.Amount;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
+import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -43,5 +44,19 @@ public class PaymentInfo extends ErrorResponse implements PaymentResponse {
     @Override
     public PaymentStatus status() {
         return status;
+    }
+
+
+    public static PaymentInfo onError(BaseException ex) {
+        PaymentInfo response = new PaymentInfo();
+        response.setError(ex.getMessage());
+        response.setCode(ex.getCode());
+        return response;
+    }
+
+    public static PaymentInfo onError(Throwable ex) {
+        PaymentInfo response = new PaymentInfo();
+        response.setError(ex.getMessage());
+        return response;
     }
 }

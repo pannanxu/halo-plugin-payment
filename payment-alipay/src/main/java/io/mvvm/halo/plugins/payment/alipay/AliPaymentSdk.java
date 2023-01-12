@@ -279,15 +279,21 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         if (!response.isSuccess()) {
                             return Mono.error(new RefundException(response.getSubCode(), response.getSubMsg()));
                         }
+                        PaymentStatus status;
                         if (!"REFUND_SUCCESS".equals(response.getRefundStatus())) {
-                            return Mono.error(new RefundException("支付宝订单退款失败"));
+                            status = PaymentStatus.refund_failed;
+                        } else {
+                            status = PaymentStatus.refund_successful;
                         }
+                        
                         return Mono.just(new RefundPaymentResponse()
                                 .setOutTradeNo(response.getOutTradeNo())
                                 .setSuccess(true)
-                                .setStatus(PaymentStatus.refund_successful)
+                                .setStatus(status)
                                 .setTradeNo(response.getTradeNo())
-                                .setRefundMoney(Amount.ofYuan(response.getSendBackFee(), "0.00")));
+                                .setRefundMoney(Amount.ofYuan(response.getRefundAmount(), "0.00"))
+                                .setRefundNo(response.getOutRequestNo())
+                                .setMoney(Amount.ofYuan(response.getTotalAmount(), "0.00")));
                     } catch (Exception e) {
                         log.error("支付宝|订单查询退款失败|{}", e.getMessage(), e);
                         return Mono.error(new RefundException("支付宝订单查询退款失败"));
