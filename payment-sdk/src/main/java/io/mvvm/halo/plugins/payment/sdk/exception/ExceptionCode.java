@@ -39,6 +39,10 @@ public enum ExceptionCode {
      */
     biz_error,
     /**
+     * 参数错误，通常出现此错误直接弹出提示即可
+     */
+    parameter_error,
+    /**
      * 未知异常
      */
     error

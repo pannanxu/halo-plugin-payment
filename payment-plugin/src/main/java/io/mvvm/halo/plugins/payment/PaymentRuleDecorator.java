@@ -3,6 +3,7 @@ package io.mvvm.halo.plugins.payment;
 import io.mvvm.halo.plugins.payment.rule.BlackListRule;
 import io.mvvm.halo.plugins.payment.rule.LimitRule;
 import io.mvvm.halo.plugins.payment.rule.LimitRuleContext;
+import io.mvvm.halo.plugins.payment.rule.ParameterVerificationRule;
 import io.mvvm.halo.plugins.payment.rule.PaymentRule;
 import io.mvvm.halo.plugins.payment.rule.PaymentRuleContext;
 import io.mvvm.halo.plugins.payment.rule.PaymentStatusRule;
@@ -45,6 +46,7 @@ public class PaymentRuleDecorator implements IPayment {
                 .addHead(new BlackListRule(payment, fetcher))
                 .addLast(new LimitRule(payment, limitRuleContext))
                 .addLast(new PaymentStatusRule(payment))
+                .addLast(new ParameterVerificationRule(payment))
                 .getFirst();
     }
 
