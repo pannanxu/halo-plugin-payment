@@ -2,6 +2,7 @@ package io.mvvm.halo.plugins.payment.endpoint;
 
 import io.mvvm.halo.plugins.payment.IAsyncPayment;
 import lombok.Setter;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -39,14 +40,14 @@ public class NotifyPaymentEndpoint implements PaymentEndpoint {
         String gvk = request.pathVariable("gvk");
         String paymentType = request.pathVariable("paymentType");
         Mono<Object> response = asyncPayment.paymentAsyncNotify(request, gvk, paymentType);
-        return ServerResponse.ok().body(response, Object.class);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(response, Object.class);
     }
 
     Mono<ServerResponse> refundAsyncNotify(ServerRequest request) {
         String gvk = request.pathVariable("gvk");
         String paymentType = request.pathVariable("paymentType");
         Mono<Object> response = asyncPayment.refundAsyncNotify(request, gvk, paymentType);
-        return ServerResponse.ok().body(response, Object.class);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(response, Object.class);
     }
 
 }

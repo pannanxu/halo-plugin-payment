@@ -53,7 +53,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
 
     @Override
     public GroupVersion groupVersion() {
-        return new GroupVersion("io.mvvm.halo.plugins.payment", "v1");
+        return new GroupVersion("/apis/io.mvvm.halo.plugins.payment", "v1");
     }
 
     Mono<ServerResponse> init(ServerRequest request) {

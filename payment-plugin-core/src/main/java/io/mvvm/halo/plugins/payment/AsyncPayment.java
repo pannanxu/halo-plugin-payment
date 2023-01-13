@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
+import java.util.function.Supplier;
+
 /**
  * AsyncPayment.
  *
@@ -27,15 +29,15 @@ public class AsyncPayment implements IAsyncPayment {
                 .flatMap(response -> {
                     if (!response.isSuccess()) {
                         log.debug("支付异步通知执行失败: {}", response);
-                        return Mono.justOrEmpty(response.getResponseFail().get());
+                        return Mono.justOrEmpty(response.getResponseFail()).map(Supplier::get);
                     }
                     return provider.getPoint(gvk)
                             .payment(response)
-                            .map(res -> {
+                            .flatMap(res -> {
                                 if (res) {
-                                    return response.getResponseSuccess().get();
+                                    return Mono.justOrEmpty(response.getResponseSuccess()).map(Supplier::get);
                                 }
-                                return response.getResponseFail().get();
+                                return Mono.justOrEmpty(response.getResponseFail()).map(Supplier::get);
                             });
                 });
     }
@@ -47,15 +49,15 @@ public class AsyncPayment implements IAsyncPayment {
                 .flatMap(response -> {
                     if (!response.isSuccess()) {
                         log.debug("退款异步通知执行失败: {}", response);
-                        return Mono.justOrEmpty(response.getResponseFail().get());
+                        return Mono.justOrEmpty(response.getResponseFail()).map(Supplier::get);
                     }
                     return provider.getPoint(gvk)
                             .refund(response)
                             .map(res -> {
                                 if (res) {
-                                    return response.getResponseSuccess().get();
+                                    return Mono.justOrEmpty(response.getResponseSuccess()).map(Supplier::get);
                                 }
-                                return response.getResponseFail().get();
+                                return Mono.justOrEmpty(response.getResponseFail()).map(Supplier::get);
                             });
                 });
     }
