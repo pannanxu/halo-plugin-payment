@@ -9,8 +9,8 @@ pluginManagement {
 }
 rootProject.name = 'halo-plugin-payment'
 include 'payment-sdk'
-include 'payment-plugin'
-include 'payment-wechat'
-include 'payment-alipay'
-include 'payment-biz-example'
+include 'payment-plugin-core'
+include 'payment-plugin-wechat'
+include 'payment-plugin-alipay'
+include 'payment-plugin-biz-example'
 
