@@ -4,7 +4,6 @@ import io.mvvm.halo.plugins.payment.endpoint.PaymentEndpoint;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 import io.mvvm.halo.plugins.payment.sdk.SdkContextHolder;
-import io.mvvm.halo.plugins.payment.sdk.accesstoken.AccessTokenManager;
 import org.springdoc.webflux.core.fn.SpringdocRouteBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,11 +27,6 @@ public class PaymentConfiguration {
     public PaymentConfiguration(PaymentFactory factory) {
         this.provider = new SimplePaymentProvider(factory);
         this.notifyProvider = new SimpleNotifyCallbackProvider();
-    }
-
-    @Bean
-    public AccessTokenManager accessTokenManager() {
-        return new SimpleAccessTokenManager();
     }
 
     @Bean
