@@ -53,6 +53,7 @@ import run.halo.app.infra.utils.JsonUtils;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 /**
  * AliPayment SDK 的实现.
@@ -166,7 +167,8 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         log.error("支付宝|创建订单未知异常|{}", e.getMessage(), e);
                         return Mono.error(new CreateException("创建支付宝订单失败"));
                     }
-                });
+                })
+                .log("payment.plugin.alipay", log.isDebugEnabled() ? Level.INFO : Level.OFF);
     }
 
     @Override

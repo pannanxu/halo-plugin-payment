@@ -53,7 +53,6 @@ public class PaymentStatusRule extends BasePaymentRule {
     public Mono<PaymentResponseWrapper<CreatePaymentResponse>> create(CreatePaymentRequest request) {
         return enabled((ext) -> {
             if (contains(ext, "create")) {
-                log.debug("PaymentStatusRule success");
                 return super.create(request);
             }
             return Mono.error(new CreateException(ExceptionCode.create_method_closed, ext.getSpec().getDisplayName() + "暂未启用创建订单功能"));

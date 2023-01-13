@@ -60,7 +60,8 @@ public class TestPaymentEndpoint {
 
     Mono<ServerResponse> create(ServerRequest request) {
         CreatePaymentRequest paymentRequest = new CreatePaymentRequest();
-        paymentRequest.setOutTradeNo(RandomUtils.createNonce(10));
+        String name = request.queryParam("name").orElse(RandomUtils.createNonce(10));
+        paymentRequest.setOutTradeNo(name);
         paymentRequest.setTitle("测试商品");
         paymentRequest.setDescription("商品说明");
         paymentRequest.setClientIp("127.0.0.1");
@@ -71,6 +72,7 @@ public class TestPaymentEndpoint {
         Map<String, Object> map = new HashMap<>();
         map.put(ExpandConst.returnUrl, "https://www.baidu.com");
         map.put(ExpandConst.limitRuleKey, "localhost");
+        map.put(ExpandConst.blackListRuleKey, "localhost");
         paymentRequest.setExpand(map);
         Mono<PaymentResponseWrapper<CreatePaymentResponse>> resp = dispatcher.dispatch(request.pathVariable("name"))
                 .flatMap(payment -> payment.create(paymentRequest));

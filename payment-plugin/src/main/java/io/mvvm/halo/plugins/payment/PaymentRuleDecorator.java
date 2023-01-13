@@ -1,6 +1,7 @@
 package io.mvvm.halo.plugins.payment;
 
 import io.mvvm.halo.plugins.payment.rule.BlackListRule;
+import io.mvvm.halo.plugins.payment.rule.CacheRule;
 import io.mvvm.halo.plugins.payment.rule.LimitRule;
 import io.mvvm.halo.plugins.payment.rule.LimitRuleContext;
 import io.mvvm.halo.plugins.payment.rule.ParameterVerificationRule;
@@ -11,6 +12,7 @@ import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
+import io.mvvm.halo.plugins.payment.sdk.cache.CacheManager;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
@@ -40,13 +42,15 @@ public class PaymentRuleDecorator implements IPayment {
     public PaymentRuleDecorator(IPayment payment,
                                 ReactiveExtensionClient client,
                                 PayEnvironmentFetcher fetcher,
-                                LimitRuleContext limitRuleContext) {
+                                LimitRuleContext limitRuleContext,
+                                CacheManager cacheManager) {
         this.payment = payment;
         this.rootRule = new PaymentRuleContext(client)
                 .addHead(new BlackListRule(payment, fetcher))
                 .addLast(new LimitRule(payment, limitRuleContext))
                 .addLast(new PaymentStatusRule(payment))
                 .addLast(new ParameterVerificationRule(payment))
+                .addLast(new CacheRule(payment, cacheManager))
                 .getFirst();
     }
 
