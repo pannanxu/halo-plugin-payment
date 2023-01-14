@@ -21,4 +21,6 @@ public interface PaymentProvider {
     Mono<IPayment> getPayment(String name);
 
     Flux<IPayment> getPayments();
+
+    void unregister(String pluginId);
 }

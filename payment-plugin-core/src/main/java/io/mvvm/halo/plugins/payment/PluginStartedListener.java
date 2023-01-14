@@ -17,49 +17,46 @@ import java.util.stream.Stream;
 public class PluginStartedListener {
 
     private final PaymentProvider provider;
-    private final PluginWrapper wrapper;
     private final NotifyCallbackProvider notifyCallbackProvider;
 
     public PluginStartedListener(PaymentProvider provider,
-                                 NotifyCallbackProvider notifyCallbackProvider,
-                                 PluginWrapper wrapper) {
+                                 NotifyCallbackProvider notifyCallbackProvider) {
         this.provider = provider;
         this.notifyCallbackProvider = notifyCallbackProvider;
-        this.wrapper = wrapper;
     }
 
-    public void init() {
+    public void init(PluginWrapper wrapper) {
         // 添加插件启动停止的事件
-        this.wrapper.getPluginManager().addPluginStateListener(event -> {
+        wrapper.getPluginManager().addPluginStateListener(event -> {
             if (PluginState.STARTED.equals(event.getPluginState())) {
-                started();
+                started(event.getPlugin());
             } else if (PluginState.STOPPED.equals(event.getPluginState())) {
-                stopped();
+                stopped(event.getPlugin());
+                log.debug("支付插件 {} 卸载成功", event.getPlugin().getPluginId());
             }
         });
     }
 
-    private void started() {
-        getWrapperOperatorExtensions().forEach(provider::register);
-        getBizExtensions().forEach(notifyCallbackProvider::register);
+    private void started(PluginWrapper wrapper) {
+        getWrapperOperatorExtensions(wrapper).forEach(provider::register);
+        getBizExtensions(wrapper).forEach(notifyCallbackProvider::register);
     }
 
-    private void stopped() {
-        getWrapperOperatorExtensions().forEach(provider::unregister);
-        getBizExtensions().forEach(notifyCallbackProvider::unregister);
+    private void stopped(PluginWrapper wrapper) {
+        provider.unregister(wrapper.getPluginId());
     }
 
-    Stream<IPaymentOperator> getWrapperOperatorExtensions() {
-        return this.wrapper.getPluginManager()
+    Stream<IPaymentOperator> getWrapperOperatorExtensions(PluginWrapper wrapper) {
+        return wrapper.getPluginManager()
                 .getExtensions(IPaymentOperator.class)
                 .stream()
-                .filter(e -> e.getPluginWrapper().equals(wrapper));
+                .filter(e -> e.getPluginWrapper().getPluginId().equals(wrapper.getPluginId()));
     }
 
-    Stream<NotifyCallback> getBizExtensions() {
-        return this.wrapper.getPluginManager()
+    Stream<NotifyCallback> getBizExtensions(PluginWrapper wrapper) {
+        return wrapper.getPluginManager()
                 .getExtensions(NotifyCallback.class)
                 .stream()
-                .filter(e -> e.getPluginWrapper().equals(wrapper));
+                .filter(e -> e.getPluginWrapper().getPluginId().equals(wrapper.getPluginId()));
     }
 }

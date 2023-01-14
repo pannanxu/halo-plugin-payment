@@ -45,7 +45,7 @@ public class SimplePayment implements IPayment {
         this.descriptor = descriptor;
         this.externalUrlSupplier = externalUrlSupplier;
         this.fetcher = fetcher;
-        descriptorGetter = PaymentDescriptorGetter.of(descriptor, operator::status);
+        descriptorGetter = PaymentDescriptorGetter.of(operator, operator::status);
     }
 
     @Override

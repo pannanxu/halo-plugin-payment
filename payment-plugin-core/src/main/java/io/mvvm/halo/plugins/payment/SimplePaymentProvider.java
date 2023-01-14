@@ -3,11 +3,13 @@ package io.mvvm.halo.plugins.payment;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
+import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptorGetter;
 import io.mvvm.halo.plugins.payment.sdk.exception.PaymentNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -70,6 +72,19 @@ public class SimplePaymentProvider implements PaymentProvider {
     @Override
     public Flux<IPayment> getPayments() {
         return Flux.fromStream(PAYMENT_CONTAINER.values().stream().map(Wrapper::payment));
+    }
+
+    @Override
+    public void unregister(String pluginId) {
+        Iterator<String> iterator = PAYMENT_CONTAINER.keySet().iterator();
+        while (iterator.hasNext()) {
+            Wrapper wrapper = PAYMENT_CONTAINER.get(iterator.next());
+            PaymentDescriptorGetter descriptor = wrapper.payment.getDescriptor();
+            if (pluginId.equals(descriptor.getPluginId())) {
+                iterator.remove();
+                log.debug("unregister payment: {}", descriptor.getName());
+            }
+        }
     }
 
     public record Wrapper(IPaymentOperator operator, IPayment payment) {

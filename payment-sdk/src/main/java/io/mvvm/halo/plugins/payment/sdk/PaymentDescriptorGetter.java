@@ -12,8 +12,14 @@ import java.util.function.Supplier;
  **/
 public interface PaymentDescriptorGetter {
 
-    static PaymentDescriptorGetter of(PaymentDescriptor descriptor, Supplier<Boolean> status) {
+    static PaymentDescriptorGetter of(IPaymentOperator operator, Supplier<Boolean> status) {
+        PaymentDescriptor descriptor = operator.getDescriptor();
         return new PaymentDescriptorGetter() {
+            @Override
+            public String getPluginId() {
+                return operator.getPluginWrapper().getPluginId();
+            }
+
             @Override
             public String getName() {
                 return descriptor.getName();
@@ -53,6 +59,8 @@ public interface PaymentDescriptorGetter {
             }
         };
     }
+
+    String getPluginId();
 
     String getName();
 
