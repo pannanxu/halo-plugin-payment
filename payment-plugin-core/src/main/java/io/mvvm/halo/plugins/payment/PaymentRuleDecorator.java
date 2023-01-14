@@ -10,7 +10,7 @@ import io.mvvm.halo.plugins.payment.rule.PaymentRuleContext;
 import io.mvvm.halo.plugins.payment.rule.PaymentStatusRule;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
-import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
+import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptorGetter;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.cache.CacheManager;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
@@ -55,7 +55,7 @@ public class PaymentRuleDecorator implements IPayment {
     }
 
     @Override
-    public PaymentDescriptor getDescriptor() {
+    public PaymentDescriptorGetter getDescriptor() {
         return payment.getDescriptor();
     }
 

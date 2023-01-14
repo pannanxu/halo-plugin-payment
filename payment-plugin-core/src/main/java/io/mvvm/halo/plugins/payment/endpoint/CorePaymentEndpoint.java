@@ -1,9 +1,11 @@
 package io.mvvm.halo.plugins.payment.endpoint;
 
 import io.mvvm.halo.plugins.payment.PaymentProvider;
+import io.mvvm.halo.plugins.payment.endpoint.vo.PaymentExtensionVo;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
+import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptorGetter;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentExtension;
 import io.mvvm.halo.plugins.payment.sdk.PaymentQuery;
@@ -53,18 +55,27 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
 
     @Override
     public GroupVersion groupVersion() {
-        return new GroupVersion("/apis/io.mvvm.halo.plugins.payment", "v1");
+        return new GroupVersion("/apis/payment.mvvm.io", "v1");
     }
 
     Mono<ServerResponse> init(ServerRequest request) {
-        Mono<Boolean> resp = provider.getOperator(request.pathVariable("name"))
-                .flatMap(IPaymentOperator::initConfig);
-        return ServerResponse.ok().body(resp, Boolean.class);
+        try {
+            Mono<ApiResponse> resp = provider.getOperator(request.pathVariable("name"))
+                    .flatMap(IPaymentOperator::initConfig)
+                    .map(res -> new ApiResponse(res, null, res))
+                    .onErrorResume(ex -> Mono.just(new ApiResponse(false, ex.getMessage(), false)));
+            return ServerResponse.ok().body(resp, Boolean.class);
+        } catch (Exception ex) {
+            return ServerResponse.ok().body(Mono.just(new ApiResponse(false, ex.getMessage(), false)), Boolean.class);
+        }
     }
 
+    /**
+     * TODO 目前是直接写死在这里，未来需要在页面中进行选配
+     */
     Mono<ServerResponse> enable(ServerRequest request) {
         String name = request.pathVariable("name");
-        Mono<PaymentExtension> extensionMono = provider.getOperator(request.pathVariable("name"))
+        Mono<ApiResponse> extensionMono = provider.getOperator(request.pathVariable("name"))
                 .flatMap(operator -> {
                     operator.getPluginWrapper().getPluginManager().startPlugin(operator.getPluginWrapper().getPluginId());
                     return client.fetch(PaymentExtension.class, name)
@@ -93,43 +104,37 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
                                 return ext;
                             })
                             .flatMap(client::update);
-                });
-        return ServerResponse.ok().body(extensionMono, PaymentExtension.class);
+                })
+                .map(ext -> new ApiResponse(true, null, ext))
+                .onErrorResume(ex -> Mono.just(new ApiResponse(false, ex.getMessage(), false)));
+        return ServerResponse.ok().body(extensionMono, ApiResponse.class);
     }
 
     Mono<ServerResponse> list(ServerRequest request) {
         String device = request.queryParam("device").orElse(null);
         PaymentQuery query = new PaymentQuery();
         query.setEndpoint(device);
-        Flux<PaymentDescriptor> descriptorFlux = dispatcher.payments(query).map(IPayment::getDescriptor);
+        Flux<PaymentDescriptorGetter> descriptorFlux = dispatcher.payments(query).map(IPayment::getDescriptor);
         return ServerResponse.ok().body(descriptorFlux, PaymentDescriptor.class);
     }
 
     Mono<ServerResponse> listAll(ServerRequest request) {
-        Flux<PaymentDescriptor> descriptorFlux = provider.getPayments().map(IPayment::getDescriptor);
-        return ServerResponse.ok().body(descriptorFlux, PaymentDescriptor.class);
+        Flux<PaymentExtensionVo> list = provider.getPayments()
+                .flatMap(payment -> client.fetch(PaymentExtension.class, payment.getDescriptor().getName())
+                        .map(ext -> new PaymentExtensionVo(ext, payment.getDescriptor()))
+                        .switchIfEmpty(Mono.just(new PaymentExtensionVo(null, payment.getDescriptor()))));
+        return ServerResponse.ok().body(list, PaymentExtensionVo.class);
     }
 
     Mono<ServerResponse> disable(ServerRequest request) {
-        Mono<Boolean> resp = provider.getOperator(request.pathVariable("name"))
+        Mono<ApiResponse> resp = provider.getOperator(request.pathVariable("name"))
                 .flatMap(operator -> client.fetch(PaymentExtension.class, operator.getDescriptor().getName())
                         .flatMap(ext -> {
                             ext.getSpec().setEnabled(Boolean.FALSE);
                             return client.update(ext);
-                        }).thenReturn(operator))
-                .flatMap(operator -> {
-                    try {
-                        operator.destroy();
-                        return Mono.just(operator);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        return Mono.error(ex);
-                    }
-                })
-                .doOnNext(operator -> {
-                    operator.getPluginWrapper().getPluginManager().stopPlugin(operator.getPluginWrapper().getPluginId());
-                })
-                .thenReturn(true);
+                        }))
+                .map(ext -> new ApiResponse(true, null, ext))
+                .onErrorResume(ex -> Mono.just(new ApiResponse(false, ex.getMessage(), false)));
         return ServerResponse.ok().body(resp, Boolean.class);
     }
 

@@ -1,7 +1,7 @@
 package io.mvvm.halo.plugins.payment.rule;
 
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
-import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
+import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptorGetter;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
@@ -38,7 +38,7 @@ public abstract class BasePaymentRule implements PaymentRule {
     }
 
     @Override
-    public PaymentDescriptor getDescriptor() {
+    public PaymentDescriptorGetter getDescriptor() {
         if (null == next) {
             return payment.getDescriptor();
         }

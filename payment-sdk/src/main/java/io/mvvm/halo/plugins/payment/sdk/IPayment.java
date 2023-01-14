@@ -21,7 +21,7 @@ public interface IPayment {
     /**
      * @return 支付 extension 信息
      */
-    PaymentDescriptor getDescriptor();
+    PaymentDescriptorGetter getDescriptor();
 
     /**
      * @return 支付方式的状态是否可用

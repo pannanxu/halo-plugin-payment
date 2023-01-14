@@ -24,7 +24,7 @@ public class PaymentQuery {
     public Predicate<IPayment> buildQueryPredicate() {
         return payment -> {
             if (StringUtils.hasLength(this.getEndpoint())
-                && !payment.getDescriptor().hasEndpoint(this.getEndpoint())) {
+                && !payment.getDescriptor().getEndpoint().contains(this.getEndpoint())) {
                 return Boolean.FALSE;
             }
             if (StringUtils.hasLength(this.getName())

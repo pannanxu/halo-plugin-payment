@@ -4,6 +4,7 @@ import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
+import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptorGetter;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
@@ -32,6 +33,7 @@ import run.halo.app.infra.ExternalUrlSupplier;
 public class SimplePayment implements IPayment {
 
     private final PaymentDescriptor descriptor;
+    private final PaymentDescriptorGetter descriptorGetter;
     private final ExternalUrlSupplier externalUrlSupplier;
     private final IPaymentOperator operator;
     private final PayEnvironmentFetcher fetcher;
@@ -43,11 +45,12 @@ public class SimplePayment implements IPayment {
         this.descriptor = descriptor;
         this.externalUrlSupplier = externalUrlSupplier;
         this.fetcher = fetcher;
+        descriptorGetter = PaymentDescriptorGetter.of(descriptor, operator::status);
     }
 
     @Override
-    public PaymentDescriptor getDescriptor() {
-        return descriptor;
+    public PaymentDescriptorGetter getDescriptor() {
+        return descriptorGetter;
     }
 
     @Override
@@ -60,7 +63,7 @@ public class SimplePayment implements IPayment {
         // 0 元订单直接返回支付成功
         if (request.getMoney().isFree()) {
             PaymentResponseWrapper<CreatePaymentResponse> wrapper = new PaymentResponseWrapper<>();
-            wrapper.setDescriptor(descriptor);
+            wrapper.setDescriptor(descriptorGetter);
             wrapper.setResponse(new CreatePaymentResponse()
                     .setSuccess(true)
                     .setPaymentMode(PaymentMode.none.name())

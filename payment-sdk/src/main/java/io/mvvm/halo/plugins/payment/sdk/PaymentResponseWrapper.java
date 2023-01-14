@@ -16,6 +16,6 @@ public class PaymentResponseWrapper<T> {
 
     private T response;
 
-    private PaymentDescriptor descriptor;
+    private PaymentDescriptorGetter descriptor;
 
 }
