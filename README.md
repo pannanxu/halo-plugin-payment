@@ -4,14 +4,18 @@ Payment plugin for Halo2.0
 
 ## 功能
 
-- [x] 支付sdk
-- [x] 微信支付
+- [x] SDK
+- [x] Core Plugin
+  - [x] IP黑名单
+  - [x] 限流规则
+  - [x] 动态管理支付模式
+- [x] 微信支付 Plugin
   - [x] PC
   - [ ] 移动端网页
   - [ ] App
   - [ ] 小程序
   - [ ] 公众号
-- [x] 支付宝支付
+- [x] 支付宝支付 Plugin
   - [x] PC
   - [ ] 移动端网页
   - [ ] App
