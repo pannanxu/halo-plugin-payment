@@ -4,24 +4,34 @@ import {definePlugin} from "@halo-dev/console-shared";
 
 import {IconGrid} from "@halo-dev/components";
 import {markRaw} from "vue";
+
 export default definePlugin({
-  components: {},
+  name: "PluginUmami",
+  components: [],
   routes: [
     {
       parentName: "Root",
       route: {
-        path: "/payments",
-        name: "Payments",
-        component: DefaultView,
-        meta: {
-          permissions: ["plugin:payments:view"],
-          menu: {
-            name: "Payment Core",
-            group: "content",
-            icon: markRaw(IconGrid),
+        path: "/payment",
+        children: [
+          {
+            path: "",
+            name: "Payment",
+            component: DefaultView,
+            meta: {
+              title: "Payment Core",
+              searchable: true,
+              menu: {
+                name: "Core",
+                group: "支付插件",
+                icon: markRaw(IconGrid),
+                priority: 0,
+              },
+            },
           },
-        },
+        ],
       },
     },
-  ]
+  ],
+  extensionPoints: {},
 });
