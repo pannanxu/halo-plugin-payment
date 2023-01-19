@@ -18,6 +18,7 @@ jar {
 
 dependencies {
     implementation project(':payment-sdk')
+    implementation 'eu.bitwalker:UserAgentUtils:1.21'
 
     compileOnly files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")
     testImplementation files("../lib/halo-2.2.0-SNAPSHOT-plain.jar")

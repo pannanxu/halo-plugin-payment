@@ -51,6 +51,13 @@ public class RefundPaymentResponse extends ErrorResponse implements PaymentRespo
         return response;
     }
 
+    public static RefundPaymentResponse onError(String code, String msg) {
+        RefundPaymentResponse response = new RefundPaymentResponse();
+        response.setError(code);
+        response.setCode(msg);
+        return response;
+    }
+
     public static RefundPaymentResponse onError(Throwable ex) {
         RefundPaymentResponse response = new RefundPaymentResponse();
         response.setError(ex.getMessage());

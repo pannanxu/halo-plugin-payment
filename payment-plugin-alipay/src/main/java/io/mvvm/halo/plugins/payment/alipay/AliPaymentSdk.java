@@ -1,6 +1,5 @@
 package io.mvvm.halo.plugins.payment.alipay;
 
-import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConfig;
 import com.alipay.api.AlipayRequest;
@@ -29,11 +28,7 @@ import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
 import io.mvvm.halo.plugins.payment.sdk.enums.Endpoint;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
-import io.mvvm.halo.plugins.payment.sdk.exception.CancelException;
-import io.mvvm.halo.plugins.payment.sdk.exception.CreateException;
 import io.mvvm.halo.plugins.payment.sdk.exception.ExceptionCode;
-import io.mvvm.halo.plugins.payment.sdk.exception.FetchException;
-import io.mvvm.halo.plugins.payment.sdk.exception.RefundException;
 import io.mvvm.halo.plugins.payment.sdk.request.CreatePaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.FetchRefundPaymentRequest;
 import io.mvvm.halo.plugins.payment.sdk.request.PaymentRequest;
@@ -149,23 +144,17 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                     try {
                         AlipayTradePagePayResponse response = alipayClientAtomicReference.get()
                                 .pageExecute(payRequest, "GET");
-                        if (!response.isSuccess()) {
-                            return Mono.error(new CreateException(ExceptionCode.biz_error, "创建支付宝订单失败"));
-                        }
                         return Mono.just(new CreatePaymentResponse()
                                 .setStatus(PaymentStatus.created)
                                 .setPaymentModeData(response.getBody())
-                                .setSuccess(true)
+                                .setSuccess(response.isSuccess())
                                 .setExpand(request.getExpand())
                                 .setMoney(request.getMoney())
                                 .setOutTradeNo(request.getOutTradeNo())
                                 .setPaymentMode(PaymentMode.h5_url.name()));
-                    } catch (AlipayApiException e) {
-                        log.error("支付宝|创建订单失败|{}", e.getMessage(), e);
-                        return Mono.error(new CreateException(e.getErrCode(), e.getErrMsg()));
                     } catch (Exception e) {
                         log.error("支付宝|创建订单未知异常|{}", e.getMessage(), e);
-                        return Mono.error(new CreateException("创建支付宝订单失败"));
+                        return Mono.just(CreatePaymentResponse.onError(e));
                     }
                 })
                 .log("payment.plugin.alipay", log.isDebugEnabled() ? Level.INFO : Level.OFF);
@@ -183,7 +172,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                     try {
                         AlipayTradeQueryResponse response = exec(setting, queryRequest);
                         if (!response.isSuccess()) {
-                            return Mono.error(new FetchException(ExceptionCode.biz_error, response.getSubMsg()));
+                            return Mono.just(PaymentInfo.onError(ExceptionCode.biz_error.name(), "查询支付宝订单失败"));
                         }
                         PaymentStatus status = null;
                         switch (response.getTradeStatus()) {
@@ -202,7 +191,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                                 .setBackParams(response.getPassbackParams()));
                     } catch (Exception e) {
                         log.error("支付宝|查询订单失败|{}", e.getMessage(), e);
-                        return Mono.error(new FetchException("支付宝订单查询失败"));
+                        return Mono.just(PaymentInfo.onError(e));
                     }
                 });
     }
@@ -219,7 +208,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                     try {
                         AlipayTradeCloseResponse response = exec(setting, closeRequest);
                         if (!response.isSuccess()) {
-                            return Mono.error(new CancelException(ExceptionCode.biz_error, response.getSubMsg()));
+                            return Mono.just(PaymentInfo.onError(ExceptionCode.biz_error.name(), response.getMsg()));
                         }
                         return Mono.just(new PaymentInfo()
                                 .setOutTradeNo(response.getOutTradeNo())
@@ -228,7 +217,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                                 .setTradeNo(response.getTradeNo()));
                     } catch (Exception e) {
                         log.error("支付宝|关闭订单失败|{}", e.getMessage(), e);
-                        return Mono.error(new CancelException("支付宝订单关闭失败"));
+                        return Mono.just(PaymentInfo.onError(e));
                     }
                 });
     }
@@ -250,7 +239,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         AlipayTradeRefundResponse response = exec(setting, refundRequest);
 
                         if (!response.isSuccess()) {
-                            return Mono.error(new RefundException(ExceptionCode.biz_error, response.getSubMsg()));
+                            return Mono.just(RefundPaymentResponse.onError(ExceptionCode.biz_error.name(), response.getMsg()));
                         }
                         if (!"Y".equals(response.getFundChange())) {
                             FetchRefundPaymentRequest fetchRefundPaymentRequest = new FetchRefundPaymentRequest();
@@ -267,7 +256,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                                 .setRefundMoney(Amount.ofYuan(response.getSendBackFee(), "0.00")));
                     } catch (Exception e) {
                         log.error("支付宝|订单退款失败|{}", e.getMessage(), e);
-                        return Mono.error(new RefundException("支付宝订单退款失败"));
+                        return Mono.just(RefundPaymentResponse.onError(e));
                     }
                 });
     }
@@ -285,7 +274,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                         refundQueryRequest.setBizModel(model);
                         AlipayTradeFastpayRefundQueryResponse response = exec(setting, refundQueryRequest);
                         if (!response.isSuccess()) {
-                            return Mono.error(new RefundException(ExceptionCode.biz_error, response.getSubMsg()));
+                            return Mono.just(RefundPaymentResponse.onError(ExceptionCode.biz_error.name(), response.getMsg()));
                         }
                         PaymentStatus status;
                         if (!"REFUND_SUCCESS".equals(response.getRefundStatus())) {
@@ -304,7 +293,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                                 .setMoney(Amount.ofYuan(response.getTotalAmount(), "0.00")));
                     } catch (Exception e) {
                         log.error("支付宝|订单查询退款失败|{}", e.getMessage(), e);
-                        return Mono.error(new RefundException("支付宝订单查询退款失败"));
+                        return Mono.just(RefundPaymentResponse.onError(e));
                     }
                 });
     }

@@ -55,6 +55,13 @@ public class PaymentInfo extends ErrorResponse implements PaymentResponse {
         return response;
     }
 
+    public static PaymentInfo onError(String code, String msg) {
+        PaymentInfo response = new PaymentInfo();
+        response.setError(msg);
+        response.setCode(code);
+        return response;
+    }
+
     public static PaymentInfo onError(Throwable ex) {
         PaymentInfo response = new PaymentInfo();
         response.setError(ex.getMessage());
