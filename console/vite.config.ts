@@ -21,7 +21,7 @@ export default defineConfig({
     ),
     emptyOutDir: true,
     lib: {
-      entry: "src/index.types.ts",
+      entry: "src/index.ts",
       name: "Payment",
       formats: ["iife"],
       fileName: () => "main.js",

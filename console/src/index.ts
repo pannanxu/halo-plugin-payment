@@ -1,12 +1,12 @@
 import DefaultView from "./views/DefaultView.vue";
-import "./styles/index.css";
+import "@/styles/index.css";
 import {definePlugin} from "@halo-dev/console-shared";
 
 import {IconGrid} from "@halo-dev/components";
 import {markRaw} from "vue";
 
 export default definePlugin({
-  name: "PluginUmami",
+  name: "Payment",
   components: [],
   routes: [
     {

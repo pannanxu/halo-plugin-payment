@@ -3,7 +3,7 @@ import {VButton, VPageHeader, VSwitch,} from "@halo-dev/components";
 
 import apiClient from "@/utils/api-client";
 import {ref} from "vue";
-import type {PaymentExtensionItem} from "@/index.types";
+import type {PaymentExtensionItem} from "@/types";
 
 const payments = ref<PaymentExtensionItem[]>([] as PaymentExtensionItem[]);
 
