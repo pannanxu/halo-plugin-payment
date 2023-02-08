@@ -32,7 +32,7 @@ public class RefundPaymentResponse extends ErrorResponse implements PaymentRespo
     @Schema(title = "退款金额")
     private Amount refundMoney;
     @Schema(title = "扩展值")
-    private Map<String, Object> expand;
+    private Map<String, String> expand;
     @Schema(title = "订单退款请求是否成功")
     private boolean success;
     @Schema(title = "订单状态")

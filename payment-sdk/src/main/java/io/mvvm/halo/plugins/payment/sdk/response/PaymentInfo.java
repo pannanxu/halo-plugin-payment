@@ -31,7 +31,7 @@ public class PaymentInfo extends ErrorResponse implements PaymentResponse {
     @Schema(title = "实际支付金额")
     private Amount actualMoney;
     @Schema(title = "扩展值")
-    private Map<String, Object> expand;
+    private Map<String, String> expand;
     @Schema(title = "订单是否查询成功")
     private boolean success;
     @Schema(title = "订单状态")

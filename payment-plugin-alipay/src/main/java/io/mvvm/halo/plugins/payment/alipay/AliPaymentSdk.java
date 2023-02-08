@@ -139,7 +139,7 @@ public class AliPaymentSdk extends AbstractPaymentOperator {
                     model.setSubject(request.getTitle());
                     model.setProductCode("FAST_INSTANT_TRADE_PAY");
                     model.setBody(request.getDescription());
-                    model.setPassbackParams(request.getBackParams());
+                    model.setPassbackParams(request.getBiz().getBackParams());
                     payRequest.setBizModel(model);
                     try {
                         AlipayTradePagePayResponse response = alipayClientAtomicReference.get()

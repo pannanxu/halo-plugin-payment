@@ -38,16 +38,16 @@ public class ParameterVerificationRule extends BasePaymentRule {
         if (!StringUtils.hasLength(request.getTitle())) {
             return Mono.error(new CreateException(ExceptionCode.parameter_error, "标题不能为空"));
         }
-        if (!StringUtils.hasLength(request.getClientIp())) {
+        if (!StringUtils.hasLength(request.getCreator().getIpAddress())) {
             return Mono.error(new CreateException(ExceptionCode.parameter_error, "客户端IP不能为空"));
         }
-        if (!StringUtils.hasLength(request.getDevice())) {
+        if (!StringUtils.hasLength(request.getCreator().getDevice())) {
             return Mono.error(new CreateException(ExceptionCode.parameter_error, "设备类型不能为空"));
         }
         if (null == request.getMoney() || null == request.getMoney().getTotal()) {
             return Mono.error(new CreateException(ExceptionCode.parameter_error, "金额不能为空"));
         }
-        if (!StringUtils.hasLength(request.getGvk())) {
+        if (!StringUtils.hasLength(request.getBiz().getGvk())) {
             return Mono.error(new CreateException(ExceptionCode.parameter_error, "业务引用标识不能为空"));
         }
         return super.create(request);

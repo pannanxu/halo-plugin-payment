@@ -20,6 +20,6 @@ public class FetchRefundPaymentRequest implements PaymentRequest {
     @Schema(title = "退款单号", requiredMode = Schema.RequiredMode.REQUIRED)
     private String refundNo;
     @Schema(title = "扩展值")
-    private Map<String, Object> expand;
+    private Map<String, String> expand;
 
 }

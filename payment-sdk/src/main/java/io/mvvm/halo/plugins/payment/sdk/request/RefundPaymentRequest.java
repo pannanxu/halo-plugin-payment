@@ -28,7 +28,7 @@ public class RefundPaymentRequest implements PaymentRequest {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private String gvk;
     @Schema(title = "扩展值")
-    private Map<String, Object> expand;
+    private Map<String, String> expand;
 
     @Schema(title = "退款回调通知地址", hidden = true, description = "开发者无需设置, 内部会自动处理")
     private String refundNotifyUrl;

@@ -30,7 +30,7 @@ public interface PaymentResponse {
     /**
      * @return 扩展值
      */
-    default Map<String, Object> getExpand() {
+    default Map<String, String> getExpand() {
         return new HashMap<>();
     }
 

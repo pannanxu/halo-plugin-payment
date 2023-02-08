@@ -301,9 +301,9 @@ public class WechatPayment extends AbstractPaymentOperator {
         request.setDescription(paymentRequest.getTitle());
         request.setNotifyUrl(paymentRequest.getNotifyUrl());
         request.setOutTradeNo(paymentRequest.getOutTradeNo());
-        request.setAttach(paymentRequest.getBackParams());
+        request.setAttach(paymentRequest.getBiz().getBackParams());
         SceneInfo sceneInfo = new SceneInfo();
-        sceneInfo.setPayerClientIp(paymentRequest.getClientIp());
+        sceneInfo.setPayerClientIp(paymentRequest.getCreator().getIpAddress());
         H5Info h5Info = new H5Info();
         h5Info.setType("Wap");
         sceneInfo.setH5Info(h5Info);

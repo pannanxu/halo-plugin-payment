@@ -28,7 +28,7 @@ public class CreatePaymentResponse extends ErrorResponse implements PaymentRespo
     @Schema(title = "金额", requiredMode = Schema.RequiredMode.REQUIRED)
     private Amount money;
     @Schema(title = "扩展值")
-    private Map<String, Object> expand;
+    private Map<String, String> expand;
     @Schema(title = "订单是否创建成功")
     private boolean success;
     @Schema(title = "订单状态")

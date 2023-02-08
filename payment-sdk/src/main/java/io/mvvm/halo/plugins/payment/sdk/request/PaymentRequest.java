@@ -20,7 +20,7 @@ public interface PaymentRequest {
     /**
      * @return 扩展值
      */
-    default Map<String, Object> getExpand() {
+    default Map<String, String> getExpand() {
         return new HashMap<>();
     }
 
@@ -29,11 +29,11 @@ public interface PaymentRequest {
     class SimplePaymentRequest implements PaymentRequest {
         
         private String outTradeNo;
-        private Map<String, Object> expand;
+        private Map<String, String> expand;
     }
     
     default String getExpandAsString(String key) {
-        Map<String, Object> expand = getExpand();
+        Map<String, String> expand = getExpand();
         if (null != expand) {
             Object val = expand.get(key);
             if (null != val) {

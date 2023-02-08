@@ -24,7 +24,7 @@ public class CancelPaymentResponse implements PaymentResponse {
     @Schema(title = "应付总金额")
     private Amount money;
     @Schema(title = "扩展值")
-    private Map<String, Object> expand;
+    private Map<String, String> expand;
     @Schema(title = "订单是否取消成功")
     private boolean success;
     @Schema(title = "订单状态")
