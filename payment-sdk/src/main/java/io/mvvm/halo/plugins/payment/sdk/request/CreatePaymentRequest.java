@@ -83,9 +83,7 @@ public class CreatePaymentRequest implements PaymentRequest {
         /**
          * 设备类型: {@link io.mvvm.halo.plugins.payment.sdk.enums.DeviceType}
          */
-        @Schema(title = "设备类型",
-                description = "pc：电脑端网页、mobile：手机端网页、mini：小程序、app：手机app",
-                requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(title = "设备类型", requiredMode = Schema.RequiredMode.REQUIRED)
         private String device = "pc";
 
         @Schema(title = "下单用户")
