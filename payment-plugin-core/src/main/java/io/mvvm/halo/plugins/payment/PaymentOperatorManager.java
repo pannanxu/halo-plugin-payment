@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: pan
  **/
-public interface PaymentProvider {
+public interface PaymentOperatorManager {
 
     IPayment register(IPaymentOperator operator);
 

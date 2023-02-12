@@ -1,6 +1,6 @@
 package io.mvvm.halo.plugins.payment.endpoint;
 
-import io.mvvm.halo.plugins.payment.PaymentProvider;
+import io.mvvm.halo.plugins.payment.PaymentOperatorManager;
 import io.mvvm.halo.plugins.payment.endpoint.vo.PaymentExtensionVo;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
@@ -37,7 +37,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
 
     private final ReactiveExtensionClient client;
     private PaymentDispatcher dispatcher;
-    private PaymentProvider provider;
+    private PaymentOperatorManager provider;
 
     public CorePaymentEndpoint(ReactiveExtensionClient client) {
         this.client = client;

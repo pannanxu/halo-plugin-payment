@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
+import io.mvvm.halo.plugins.payment.callback.NotifyCallbackManager;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.NotifyCallback;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +17,11 @@ import java.util.stream.Stream;
 @Slf4j
 public class PluginStartedListener {
 
-    private final PaymentProvider provider;
-    private final NotifyCallbackProvider notifyCallbackProvider;
+    private final PaymentOperatorManager provider;
+    private final NotifyCallbackManager notifyCallbackProvider;
 
-    public PluginStartedListener(PaymentProvider provider,
-                                 NotifyCallbackProvider notifyCallbackProvider) {
+    public PluginStartedListener(PaymentOperatorManager provider,
+                                 NotifyCallbackManager notifyCallbackProvider) {
         this.provider = provider;
         this.notifyCallbackProvider = notifyCallbackProvider;
     }

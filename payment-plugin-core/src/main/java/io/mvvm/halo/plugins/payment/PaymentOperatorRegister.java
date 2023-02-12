@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
+import io.mvvm.halo.plugins.payment.callback.NotifyCallbackManager;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginWrapper;
@@ -11,14 +12,10 @@ import org.pf4j.PluginWrapper;
  **/
 @Slf4j
 public class PaymentOperatorRegister implements PaymentRegister {
-    private final PaymentProvider provider;
-    private final NotifyCallbackProvider notifyCallbackProvider;
     private final PluginStartedListener listener;
 
-    public PaymentOperatorRegister(PaymentProvider provider,
-                                   NotifyCallbackProvider notifyCallbackProvider) {
-        this.provider = provider;
-        this.notifyCallbackProvider = notifyCallbackProvider;
+    public PaymentOperatorRegister(PaymentOperatorManager provider,
+                                   NotifyCallbackManager notifyCallbackProvider) {
         this.listener = new PluginStartedListener(provider, notifyCallbackProvider);
     }
 

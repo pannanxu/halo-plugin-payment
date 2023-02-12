@@ -16,9 +16,9 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class SimplePaymentDispatcher implements PaymentDispatcher {
 
-    private final PaymentProvider provider;
+    private final PaymentOperatorManager provider;
 
-    public SimplePaymentDispatcher(PaymentProvider provider) {
+    public SimplePaymentDispatcher(PaymentOperatorManager provider) {
         this.provider = provider;
     }
 

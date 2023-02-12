@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
+import io.mvvm.halo.plugins.payment.callback.SimpleNotifyCallbackManager;
 import io.mvvm.halo.plugins.payment.endpoint.PaymentEndpoint;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import io.mvvm.halo.plugins.payment.sdk.PaymentRegister;
@@ -21,12 +22,12 @@ import java.util.List;
 @Configuration
 public class PaymentConfiguration {
 
-    private final PaymentProvider provider;
-    private final SimpleNotifyCallbackProvider notifyProvider;
+    private final PaymentOperatorManager provider;
+    private final SimpleNotifyCallbackManager notifyProvider;
 
     public PaymentConfiguration(PaymentFactory factory) {
-        this.provider = new SimplePaymentProvider(factory);
-        this.notifyProvider = new SimpleNotifyCallbackProvider();
+        this.provider = new SimplePaymentOperatorManager(factory);
+        this.notifyProvider = new SimpleNotifyCallbackManager();
     }
 
     @Bean

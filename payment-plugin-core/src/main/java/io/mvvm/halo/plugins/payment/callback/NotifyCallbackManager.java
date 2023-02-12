@@ -1,4 +1,4 @@
-package io.mvvm.halo.plugins.payment;
+package io.mvvm.halo.plugins.payment.callback;
 
 import io.mvvm.halo.plugins.payment.sdk.NotifyCallback;
 
@@ -7,7 +7,7 @@ import io.mvvm.halo.plugins.payment.sdk.NotifyCallback;
  *
  * @author: pan
  **/
-public interface NotifyCallbackProvider {
+public interface NotifyCallbackManager {
 
     void register(NotifyCallback point);
 

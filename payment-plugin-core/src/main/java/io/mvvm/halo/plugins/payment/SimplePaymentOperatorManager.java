@@ -19,13 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author: pan
  **/
 @Slf4j
-public class SimplePaymentProvider implements PaymentProvider {
+public class SimplePaymentOperatorManager implements PaymentOperatorManager {
 
     private final Map<String, Wrapper> PAYMENT_CONTAINER = new ConcurrentHashMap<>();
 
     private final PaymentFactory factory;
 
-    public SimplePaymentProvider(PaymentFactory factory) {
+    public SimplePaymentOperatorManager(PaymentFactory factory) {
         this.factory = factory;
     }
 

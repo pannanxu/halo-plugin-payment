@@ -1,5 +1,6 @@
 package io.mvvm.halo.plugins.payment;
 
+import io.mvvm.halo.plugins.payment.callback.NotifyCallbackManager;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -15,9 +16,9 @@ import java.util.function.Supplier;
 @Slf4j
 public class AsyncPayment implements IAsyncPayment {
     private final PaymentDispatcher dispatcher;
-    private final NotifyCallbackProvider provider;
+    private final NotifyCallbackManager provider;
 
-    public AsyncPayment(PaymentDispatcher dispatcher, NotifyCallbackProvider provider) {
+    public AsyncPayment(PaymentDispatcher dispatcher, NotifyCallbackManager provider) {
         this.dispatcher = dispatcher;
         this.provider = provider;
     }

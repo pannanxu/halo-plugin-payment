@@ -1,4 +1,4 @@
-package io.mvvm.halo.plugins.payment;
+package io.mvvm.halo.plugins.payment.callback;
 
 import io.mvvm.halo.plugins.payment.sdk.NotifyCallback;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author: pan
  **/
 @Slf4j
-public class SimpleNotifyCallbackProvider implements NotifyCallbackProvider {
+public class SimpleNotifyCallbackManager implements NotifyCallbackManager {
 
     private final Map<String, NotifyCallback> CALLBACK_MAP = new ConcurrentHashMap<>();
 
