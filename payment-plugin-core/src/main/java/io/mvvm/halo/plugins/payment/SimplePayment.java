@@ -3,10 +3,11 @@ package io.mvvm.halo.plugins.payment;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
 import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PayEnvironmentFetcher;
-import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptorGetter;
+import io.mvvm.halo.plugins.payment.sdk.PaymentExtension;
 import io.mvvm.halo.plugins.payment.sdk.PaymentResponseWrapper;
 import io.mvvm.halo.plugins.payment.sdk.PaymentSetting;
+import io.mvvm.halo.plugins.payment.sdk.cache.CacheManager;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentMode;
 import io.mvvm.halo.plugins.payment.sdk.enums.PaymentStatus;
 import io.mvvm.halo.plugins.payment.sdk.exception.BaseException;
@@ -22,6 +23,7 @@ import io.mvvm.halo.plugins.payment.sdk.response.RefundPaymentResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
+import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.infra.ExternalUrlSupplier;
 
 /**
@@ -32,20 +34,23 @@ import run.halo.app.infra.ExternalUrlSupplier;
 @Slf4j
 public class SimplePayment implements IPayment {
 
-    private final PaymentDescriptor descriptor;
     private final PaymentDescriptorGetter descriptorGetter;
     private final ExternalUrlSupplier externalUrlSupplier;
     private final IPaymentOperator operator;
     private final PayEnvironmentFetcher fetcher;
+    private final CacheManager cacheManager;
+    private final ReactiveExtensionClient client;
 
     public SimplePayment(IPaymentOperator operator,
-                         PaymentDescriptor descriptor,
-                         ExternalUrlSupplier externalUrlSupplier, PayEnvironmentFetcher fetcher) {
+                         ExternalUrlSupplier externalUrlSupplier,
+                         PayEnvironmentFetcher fetcher,
+                         CacheManager cacheManager, ReactiveExtensionClient client) {
         this.operator = operator;
-        this.descriptor = descriptor;
         this.externalUrlSupplier = externalUrlSupplier;
         this.fetcher = fetcher;
         descriptorGetter = PaymentDescriptorGetter.of(operator, operator::status);
+        this.cacheManager = cacheManager;
+        this.client = client;
     }
 
     @Override
@@ -55,7 +60,11 @@ public class SimplePayment implements IPayment {
 
     @Override
     public Mono<Boolean> status() {
-        return Mono.just(operator.status());
+        return Mono.just(operator.status())
+                .filter(e -> e)
+                .switchIfEmpty(Mono.defer(() -> client.fetch(PaymentExtension.class, getDescriptor().getName())
+                        .map(e -> e.getSpec().getEnabled())))
+                .switchIfEmpty(Mono.just(Boolean.FALSE));
     }
 
     @Override
@@ -73,61 +82,109 @@ public class SimplePayment implements IPayment {
                     .setExpand(request.getExpand()));
             return Mono.just(wrapper);
         }
-
-        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
-                .flatMap(setting -> {
-                    String token = setting.getToken();
-                    request.setNotifyUrl(externalUrlSupplier.get().toString(), token, getDescriptor().getName());
-                    return operator.create(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
-                });
+        try {
+            return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                    .flatMap(setting -> {
+                        String token = setting.getToken();
+                        request.setNotifyUrl(externalUrlSupplier.get().toString(), token, getDescriptor().getName());
+                        return operator.create(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+                    })
+                    .onErrorResume(BaseException.class, ex -> Mono.just(new PaymentResponseWrapper<>(CreatePaymentResponse.onError(ex), getDescriptor())))
+                    .onErrorResume(ex -> Mono.just(new PaymentResponseWrapper<>(CreatePaymentResponse.onError(ex), getDescriptor())));
+        } catch (Exception ex) {
+            log.error("PaymentRuleDecorator|create|{}", ex.getMessage(), ex);
+            return Mono.just(new PaymentResponseWrapper<>(CreatePaymentResponse.onError(ex), getDescriptor()));
+        }
     }
 
     @Override
     public Mono<PaymentResponseWrapper<PaymentInfo>> fetch(PaymentRequest request) {
-        return operator.fetch(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+        try {
+            return operator.fetch(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()))
+                    .onErrorResume(BaseException.class, ex -> Mono.just(new PaymentResponseWrapper<>(PaymentInfo.onError(ex), getDescriptor())))
+                    .onErrorResume(ex -> Mono.just(new PaymentResponseWrapper<>(PaymentInfo.onError(ex), getDescriptor())));
+        } catch (Exception ex) {
+            log.error("PaymentRuleDecorator|fetch|{}", ex.getMessage(), ex);
+            return Mono.just(new PaymentResponseWrapper<>(PaymentInfo.onError(ex), getDescriptor()));
+        }
     }
 
     @Override
     public Mono<PaymentResponseWrapper<PaymentResponse>> cancel(PaymentRequest request) {
-        return operator.cancel(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+        try {
+            return operator.cancel(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()))
+                    .onErrorResume(BaseException.class, ex -> Mono.just(new PaymentResponseWrapper<>(PaymentInfo.onError(ex), getDescriptor())))
+                    .onErrorResume(ex -> Mono.just(new PaymentResponseWrapper<>(PaymentInfo.onError(ex), getDescriptor())));
+        } catch (Exception ex) {
+            log.error("PaymentRuleDecorator|cancel|{}", ex.getMessage(), ex);
+            return Mono.just(new PaymentResponseWrapper<>(PaymentInfo.onError(ex), getDescriptor()));
+        }
     }
 
     @Override
     public Mono<PaymentResponseWrapper<RefundPaymentResponse>> refund(RefundPaymentRequest request) {
-        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
-                .flatMap(setting -> {
-                    request.setRefundNotifyUrl(externalUrlSupplier.get().toString(), setting.getToken(), getDescriptor().getName());
-                    return operator.refund(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
-                });
+        try {
+            return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                    .flatMap(setting -> {
+                        request.setRefundNotifyUrl(externalUrlSupplier.get().toString(), setting.getToken(), getDescriptor().getName());
+                        return operator.refund(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+                    })
+                    .onErrorResume(BaseException.class, ex -> Mono.just(new PaymentResponseWrapper<>(RefundPaymentResponse.onError(ex), getDescriptor())))
+                    .onErrorResume(ex -> Mono.just(new PaymentResponseWrapper<>(RefundPaymentResponse.onError(ex), getDescriptor())));
+        } catch (Exception ex) {
+            log.error("PaymentRuleDecorator|refund|{}", ex.getMessage(), ex);
+            return Mono.just(new PaymentResponseWrapper<>(RefundPaymentResponse.onError(ex), getDescriptor()));
+        }
     }
 
     @Override
     public Mono<PaymentResponseWrapper<RefundPaymentResponse>> fetchRefund(FetchRefundPaymentRequest request) {
-        return operator.fetchRefund(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()));
+        try {
+            return operator.fetchRefund(request).map(response -> new PaymentResponseWrapper<>(response, getDescriptor()))
+                    .onErrorResume(BaseException.class, ex -> Mono.just(new PaymentResponseWrapper<>(RefundPaymentResponse.onError(ex), getDescriptor())))
+                    .onErrorResume(ex -> Mono.just(new PaymentResponseWrapper<>(RefundPaymentResponse.onError(ex), getDescriptor())));
+        } catch (Exception ex) {
+            log.error("PaymentRuleDecorator|fetchRefund|{}", ex.getMessage(), ex);
+            return Mono.just(new PaymentResponseWrapper<>(RefundPaymentResponse.onError(ex), getDescriptor()));
+        }
     }
 
     @Override
     public Mono<AsyncNotifyResponse> paymentAsyncNotify(ServerRequest request) {
-        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
-                .flatMap(setting -> {
-                    String token = request.pathVariable("token");
-                    if (setting.getToken().equals(token)) {
-                        return operator.paymentAsyncNotify(request);
-                    }
-                    return Mono.error(new BaseException("token 不匹配"));
-                });
+        try {
+            return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                    .flatMap(setting -> {
+                        String token = request.pathVariable("token");
+                        if (setting.getToken().equals(token)) {
+                            return operator.paymentAsyncNotify(request);
+                        }
+                        return Mono.error(new BaseException("token 不匹配"));
+                    })
+                    .onErrorResume(BaseException.class, ex -> Mono.just(AsyncNotifyResponse.onError(ex)))
+                    .onErrorResume(ex -> Mono.just(AsyncNotifyResponse.onError(ex)));
+        } catch (Exception ex) {
+            log.error("PaymentRuleDecorator|paymentAsyncNotify|{}", ex.getMessage(), ex);
+            return Mono.just(AsyncNotifyResponse.onError(ex));
+        }
     }
 
     @Override
     public Mono<AsyncNotifyResponse> refundAsyncNotify(ServerRequest request) {
-        return fetcher.fetchPaymentConfig(PaymentSetting.basic)
-                .flatMap(setting -> {
-                    String token = request.pathVariable("token");
-                    if (setting.getToken().equals(token)) {
-                        return operator.refundAsyncNotify(request);
-                    }
-                    return Mono.error(new BaseException("token 不匹配"));
-                });
+        try {
+            return fetcher.fetchPaymentConfig(PaymentSetting.basic)
+                    .flatMap(setting -> {
+                        String token = request.pathVariable("token");
+                        if (setting.getToken().equals(token)) {
+                            return operator.refundAsyncNotify(request);
+                        }
+                        return Mono.error(new BaseException("token 不匹配"));
+                    })
+                    .onErrorResume(BaseException.class, ex -> Mono.just(AsyncNotifyResponse.onError(ex)))
+                    .onErrorResume(ex -> Mono.just(AsyncNotifyResponse.onError(ex)));
+        } catch (Exception ex) {
+            log.error("PaymentRuleDecorator|refundAsyncNotify|{}", ex.getMessage(), ex);
+            return Mono.just(AsyncNotifyResponse.onError(ex));
+        }
     }
 
     @Override

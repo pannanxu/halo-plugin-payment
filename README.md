@@ -6,9 +6,6 @@ Payment plugin for Halo2.0
 
 - [x] SDK
 - [x] Core Plugin
-  - [x] IP黑名单
-  - [x] 限流规则
-  - [x] 动态管理支付模式
 - [x] 微信支付 Plugin
   - [x] PC
   - [ ] 移动端网页

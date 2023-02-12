@@ -31,16 +31,6 @@ public interface PaymentDescriptorGetter {
             }
 
             @Override
-            public String getIcon() {
-                return descriptor.getIcon();
-            }
-
-            @Override
-            public String getLogo() {
-                return descriptor.getLogo();
-            }
-
-            @Override
             public Unstructured getSchema() {
                 return descriptor.getUserInputFormSchema();
             }
@@ -65,10 +55,6 @@ public interface PaymentDescriptorGetter {
     String getName();
 
     String getTitle();
-
-    String getIcon();
-
-    String getLogo();
 
     Unstructured getSchema();
 

@@ -3,7 +3,6 @@ package io.mvvm.halo.plugins.payment.endpoint;
 import io.mvvm.halo.plugins.payment.PaymentOperatorManager;
 import io.mvvm.halo.plugins.payment.endpoint.vo.PaymentExtensionVo;
 import io.mvvm.halo.plugins.payment.sdk.IPayment;
-import io.mvvm.halo.plugins.payment.sdk.IPaymentOperator;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptor;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDescriptorGetter;
 import io.mvvm.halo.plugins.payment.sdk.PaymentDispatcher;
@@ -61,7 +60,7 @@ public class CorePaymentEndpoint implements PaymentEndpoint {
     Mono<ServerResponse> init(ServerRequest request) {
         try {
             Mono<ApiResponse> resp = provider.getOperator(request.pathVariable("name"))
-                    .flatMap(IPaymentOperator::initConfig)
+                    .flatMap(e -> e.initConfig(request))
                     .map(res -> new ApiResponse(res, null, res))
                     .onErrorResume(ex -> Mono.just(new ApiResponse(false, ex.getMessage(), false)));
             return ServerResponse.ok().body(resp, Boolean.class);

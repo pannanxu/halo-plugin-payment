@@ -37,7 +37,7 @@ public interface IPaymentOperator extends ExtensionPoint {
     /**
      * 支付初始化配置
      */
-    default Mono<Boolean> initConfig() {
+    default Mono<Boolean> initConfig(ServerRequest request) {
         return Mono.empty();
     }
 

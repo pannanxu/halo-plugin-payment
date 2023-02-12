@@ -25,12 +25,6 @@ public class PaymentDescriptor {
     @Schema(title = "展示名称", description = "例如：微信支付、支付宝")
     private String title;
 
-    @Schema(title = "展示图标", description = "base64格式")
-    private String icon;
-
-    @Schema(title = "展示Logo", description = "base64格式")
-    private String logo;
-
     @Schema(title = "应用端点, 为空则表示不限制", description = "例如，在PC端网页那就是pc、在移动App那就是app，可以同时支持多个端点")
     private Set<String> endpoint;
 

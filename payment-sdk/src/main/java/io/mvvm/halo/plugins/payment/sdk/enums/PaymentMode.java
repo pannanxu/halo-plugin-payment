@@ -23,5 +23,9 @@ public enum PaymentMode {
     /**
      * h5 页面跳转支付
      */
-    h5_url
+    h5_url,
+    /**
+     * Html 表单
+     */
+    html_form
 }
