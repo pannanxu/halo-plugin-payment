@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import run.halo.app.plugin.ApiVersion;
 import run.halo.app.theme.TemplateNameResolver;
 
 /**
@@ -26,7 +25,7 @@ import run.halo.app.theme.TemplateNameResolver;
  *
  * @author: pan
  **/
-@ApiVersion("fake.halo.run/v1alpha1")
+// @ApiVersion("fake.halo.run/v1alpha1")
 @RequestMapping("/payment")
 @RestController
 @RequiredArgsConstructor
