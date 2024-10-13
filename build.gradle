@@ -34,6 +34,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 node {
+    download = true
     nodeProjectDir = file("${project.projectDir}/ui")
 }
 
@@ -55,4 +56,12 @@ build {
 
 halo {
     version = '2.17'
+    superAdminUsername = 'admin'
+    superAdminPassword = '123123'
+    externalUrl = 'http://localhost:8090'
+
+    port = 8090
+    debug = true
+    debugPort = 5005
+
 }

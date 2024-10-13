@@ -11,8 +11,6 @@ import net.nanxu.payment.core.PaymentProfile;
 import net.nanxu.payment.core.model.CallbackRequest;
 import net.nanxu.payment.core.model.CallbackResult;
 import org.springdoc.core.fn.builders.operation.Builder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -26,12 +24,12 @@ import run.halo.app.theme.TemplateNameResolver;
  * @author: P
  **/
 @RequiredArgsConstructor
-@Component
+// @Component
 public class PaymentEndpoint {
     private final TemplateNameResolver templateNameResolver;
     private final Payment payment;
 
-    @Bean
+    // @Bean
     public RouterFunction<ServerResponse> paymentRouter() {
         return route()
             // // 获取订单所有可以使用的支付渠道

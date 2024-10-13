@@ -3,6 +3,7 @@ package net.nanxu.order;
 import java.math.BigDecimal;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 import run.halo.app.extension.AbstractExtension;
 import run.halo.app.extension.GVK;
 
@@ -12,6 +13,7 @@ import run.halo.app.extension.GVK;
  * @author: P
  **/
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @GVK(kind = "Order", group = "order.payment.plugin.nanxu.net", version = "v1alpha1", singular = "order", plural = "orders")
 public class Order extends AbstractExtension {

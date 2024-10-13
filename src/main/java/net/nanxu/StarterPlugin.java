@@ -3,6 +3,8 @@ package net.nanxu;
 import net.nanxu.order.Order;
 import net.nanxu.payment.DispatcherPayment;
 import net.nanxu.payment.Payment;
+import net.nanxu.payment.impl.AliPayment;
+import net.nanxu.payment.impl.WeChatPayment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.SchemeManager;
@@ -38,6 +40,9 @@ public class StarterPlugin extends BasePlugin {
     public void start() {
         System.out.println("插件启动成功！");
         schemeManager.register(Order.class);
+        
+        dispatcher.register(new WeChatPayment());
+        dispatcher.register(new AliPayment());
     }
 
     @Override

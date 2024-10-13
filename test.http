@@ -1,0 +1,2 @@
+GET http://localhost:8090/apis/fake.halo.run/v1alpha1/payment/profiles?orderId=123
+Content-Type: application/json
