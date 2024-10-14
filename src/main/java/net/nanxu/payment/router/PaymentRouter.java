@@ -1,7 +1,7 @@
 package net.nanxu.payment.router;
 
-import net.nanxu.payment.PaymentOrder;
-import net.nanxu.payment.core.IPayment;
+import net.nanxu.payment.infra.model.PaymentSupport;
+import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.registry.PaymentRegistry;
 import reactor.core.publisher.Flux;
 
@@ -17,7 +17,7 @@ public class PaymentRouter {
         this.registry = registry;
     }
 
-    public Flux<IPayment> selectPayments(PaymentOrder order) {
+    public Flux<IPayment> selectPayments(PaymentSupport order) {
         return Flux.fromIterable(registry.getPayments())
                 .filterWhen(e -> e.getSupport().pay(order));
     }

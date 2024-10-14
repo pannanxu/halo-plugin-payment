@@ -1,4 +1,4 @@
-package net.nanxu.payment.core;
+package net.nanxu.payment.infra;
 
 import lombok.Getter;
 

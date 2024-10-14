@@ -2,14 +2,14 @@ package net.nanxu.payment.endpoint;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.nanxu.order.Order;
-import net.nanxu.payment.Payment;
-import net.nanxu.payment.PaymentOrder;
-import net.nanxu.payment.core.IPayment;
-import net.nanxu.payment.core.PaymentProfile;
-import net.nanxu.payment.core.model.CallbackRequest;
-import net.nanxu.payment.core.model.CallbackResult;
-import net.nanxu.payment.impl.WeChatPayment;
+import net.nanxu.payment.infra.model.Order;
+import net.nanxu.payment.PaymentFactory;
+import net.nanxu.payment.infra.model.PaymentSupport;
+import net.nanxu.payment.infra.IPayment;
+import net.nanxu.payment.infra.PaymentProfile;
+import net.nanxu.payment.infra.model.CallbackRequest;
+import net.nanxu.payment.infra.model.CallbackResult;
+import net.nanxu.testplugin.WeChatPayment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import run.halo.app.extension.Ref;
 import run.halo.app.theme.TemplateNameResolver;
 
 /**
@@ -32,7 +33,7 @@ import run.halo.app.theme.TemplateNameResolver;
 @Slf4j
 public class PaymentController {
     private final TemplateNameResolver templateNameResolver;
-    private final Payment payment;
+    private final PaymentFactory payment;
 
     @GetMapping("/test")
     public Mono<String> test() {
@@ -42,10 +43,10 @@ public class PaymentController {
     // /apis/fake.halo.run/v1alpha1/payment/profiles?orderId=123
     @GetMapping("/profiles")
     public Flux<PaymentProfile> renderPaymentPage() {
-        Flux<PaymentProfile> profiles = payment.getPaymentProfiles(PaymentOrder.builder()
+        Flux<PaymentProfile> profiles = payment.getPaymentProfiles(PaymentSupport.builder()
             .userAgent("")
             .request(null)
-            .order(new Order().setPayType(WeChatPayment.NAME))
+            .order(new Order().setPayment(Ref.of(WeChatPayment.NAME)))
             .build());
 
         return profiles;
@@ -64,7 +65,7 @@ public class PaymentController {
         ServerRequest request) {
         return payment.getPayment(paymentType)
             .map(IPayment::getCallback)
-            .flatMap(callback -> callback.call(CallbackRequest.builder()
+            .flatMap(callback -> callback.payCallback(CallbackRequest.builder()
                 .order(null)
                 .request(request)
                 .build()))

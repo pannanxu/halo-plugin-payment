@@ -1,10 +1,8 @@
-package net.nanxu;
+package net.nanxu.payment;
 
-import net.nanxu.order.Order;
-import net.nanxu.payment.DispatcherPayment;
-import net.nanxu.payment.Payment;
-import net.nanxu.payment.impl.AliPayment;
-import net.nanxu.payment.impl.WeChatPayment;
+import net.nanxu.payment.infra.model.Order;
+import net.nanxu.testplugin.AliPayment;
+import net.nanxu.testplugin.WeChatPayment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.SchemeManager;
@@ -32,8 +30,8 @@ public class StarterPlugin extends BasePlugin {
     }
 
     @Bean
-    public Payment payment() {
-        return new Payment(dispatcher);
+    public PaymentFactory payment() {
+        return new PaymentFactory(dispatcher);
     }
 
     @Override

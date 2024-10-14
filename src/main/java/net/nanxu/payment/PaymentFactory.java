@@ -1,7 +1,8 @@
 package net.nanxu.payment;
 
-import net.nanxu.payment.core.IPayment;
-import net.nanxu.payment.core.PaymentProfile;
+import net.nanxu.payment.infra.IPayment;
+import net.nanxu.payment.infra.PaymentProfile;
+import net.nanxu.payment.infra.model.PaymentSupport;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -10,18 +11,18 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public class Payment {
+public class PaymentFactory {
 
     private final DispatcherPayment dispatcher;
 
-    public Payment(DispatcherPayment dispatcher) {
+    public PaymentFactory(DispatcherPayment dispatcher) {
         this.dispatcher = dispatcher;
     }
 
     /**
      * 根据请求获取可以在当前场景下使用的支付方式
      */
-    public Flux<PaymentProfile> getPaymentProfiles(PaymentOrder order) {
+    public Flux<PaymentProfile> getPaymentProfiles(PaymentSupport order) {
         return dispatcher.getPaymentProfiles(order);
     }
 

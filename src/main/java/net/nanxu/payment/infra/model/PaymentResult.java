@@ -1,7 +1,6 @@
-package net.nanxu.payment.core.model;
+package net.nanxu.payment.infra.model;
 
 import lombok.Data;
-import net.nanxu.order.Order;
 
 /**
  * PaymentResult.

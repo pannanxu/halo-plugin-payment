@@ -1,9 +1,9 @@
 package net.nanxu.payment;
 
-import net.nanxu.payment.core.model.PaymentRequest;
-import net.nanxu.payment.core.model.PaymentResult;
-import net.nanxu.payment.impl.AliPayment;
-import net.nanxu.payment.impl.WeChatPayment;
+import net.nanxu.payment.infra.model.PaymentRequest;
+import net.nanxu.payment.infra.model.PaymentResult;
+import net.nanxu.testplugin.AliPayment;
+import net.nanxu.testplugin.WeChatPayment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

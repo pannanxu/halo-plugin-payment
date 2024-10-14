@@ -1,18 +1,18 @@
-package net.nanxu.payment.impl;
+package net.nanxu.testplugin;
 
-import net.nanxu.payment.PaymentOrder;
-import net.nanxu.payment.core.AbstractPayment;
-import net.nanxu.payment.core.IPaymentCallback;
-import net.nanxu.payment.core.IPaymentSupport;
-import net.nanxu.payment.core.PaymentProfile;
-import net.nanxu.payment.core.model.CallbackRequest;
-import net.nanxu.payment.core.model.CallbackResult;
-import net.nanxu.payment.core.model.PaymentRequest;
-import net.nanxu.payment.core.model.PaymentResult;
-import net.nanxu.payment.core.model.QueryRequest;
-import net.nanxu.payment.core.model.QueryResult;
-import net.nanxu.payment.core.model.RefundRequest;
-import net.nanxu.payment.core.model.RefundResult;
+import net.nanxu.payment.infra.model.PaymentSupport;
+import net.nanxu.payment.infra.AbstractPayment;
+import net.nanxu.payment.infra.IPaymentCallback;
+import net.nanxu.payment.infra.IPaymentSupport;
+import net.nanxu.payment.infra.PaymentProfile;
+import net.nanxu.payment.infra.model.CallbackRequest;
+import net.nanxu.payment.infra.model.CallbackResult;
+import net.nanxu.payment.infra.model.PaymentRequest;
+import net.nanxu.payment.infra.model.PaymentResult;
+import net.nanxu.payment.infra.model.QueryRequest;
+import net.nanxu.payment.infra.model.QueryResult;
+import net.nanxu.payment.infra.model.RefundRequest;
+import net.nanxu.payment.infra.model.RefundResult;
 import reactor.core.publisher.Mono;
 
 /**
@@ -58,7 +58,7 @@ public class AliPayment extends AbstractPayment {
 
     public static class AliPaymentSupport implements IPaymentSupport {
         @Override
-        public Mono<Boolean> pay(PaymentOrder request) {
+        public Mono<Boolean> pay(PaymentSupport request) {
             return Mono.just(request.getOrder().getPayType().equals(NAME));
         }
 
@@ -81,7 +81,7 @@ public class AliPayment extends AbstractPayment {
 
     public static class AliPaymentCallback implements IPaymentCallback {
         @Override
-        public Mono<CallbackResult> call(CallbackRequest request) {
+        public Mono<CallbackResult> payCallback(CallbackRequest request) {
             return null;
         }
     }

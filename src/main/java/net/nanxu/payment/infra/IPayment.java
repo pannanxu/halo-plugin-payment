@@ -1,11 +1,11 @@
-package net.nanxu.payment.core;
+package net.nanxu.payment.infra;
 
-import net.nanxu.payment.core.model.PaymentRequest;
-import net.nanxu.payment.core.model.PaymentResult;
-import net.nanxu.payment.core.model.QueryRequest;
-import net.nanxu.payment.core.model.QueryResult;
-import net.nanxu.payment.core.model.RefundRequest;
-import net.nanxu.payment.core.model.RefundResult;
+import net.nanxu.payment.infra.model.PaymentRequest;
+import net.nanxu.payment.infra.model.PaymentResult;
+import net.nanxu.payment.infra.model.QueryRequest;
+import net.nanxu.payment.infra.model.QueryResult;
+import net.nanxu.payment.infra.model.RefundRequest;
+import net.nanxu.payment.infra.model.RefundResult;
 import reactor.core.publisher.Mono;
 
 /**
@@ -43,8 +43,6 @@ public interface IPayment {
 
     /**
      * 去除一些不需要让第三方插件需要的功能
-     * @param payment
-     * @return
      */
     static IPayment wrap(IPayment payment) {
         return new IPayment() {

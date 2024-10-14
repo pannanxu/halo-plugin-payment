@@ -1,24 +1,26 @@
 package net.nanxu.payment;
 
 import lombok.Getter;
-import net.nanxu.payment.core.IPayment;
-import net.nanxu.payment.core.IPaymentCallback;
-import net.nanxu.payment.core.IPaymentSupport;
-import net.nanxu.payment.core.PaymentProfile;
-import net.nanxu.payment.core.model.PaymentRequest;
-import net.nanxu.payment.core.model.PaymentResult;
-import net.nanxu.payment.core.model.QueryRequest;
-import net.nanxu.payment.core.model.QueryResult;
-import net.nanxu.payment.core.model.RefundRequest;
-import net.nanxu.payment.core.model.RefundResult;
-import net.nanxu.payment.impl.AliPayment;
-import net.nanxu.payment.impl.WeChatPayment;
+import net.nanxu.payment.infra.IPayment;
+import net.nanxu.payment.infra.IPaymentCallback;
+import net.nanxu.payment.infra.IPaymentSupport;
+import net.nanxu.payment.infra.PaymentProfile;
+import net.nanxu.payment.infra.model.PaymentRequest;
+import net.nanxu.payment.infra.model.PaymentResult;
+import net.nanxu.payment.infra.model.PaymentSupport;
+import net.nanxu.payment.infra.model.QueryRequest;
+import net.nanxu.payment.infra.model.QueryResult;
+import net.nanxu.payment.infra.model.RefundRequest;
+import net.nanxu.payment.infra.model.RefundResult;
+import net.nanxu.payment.registry.BusinessRegistry;
 import net.nanxu.payment.registry.PaymentRegistry;
 import net.nanxu.payment.router.PaymentRouter;
-import net.nanxu.payment.security.SecurityModule;
 import net.nanxu.payment.security.PaymentBeforeSecurityModule;
+import net.nanxu.payment.security.SecurityModule;
 import net.nanxu.payment.security.SecurityModuleContext;
 import net.nanxu.payment.security.SecurityRegistry;
+import net.nanxu.testplugin.AliPayment;
+import net.nanxu.testplugin.WeChatPayment;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,11 +34,12 @@ public class DispatcherPayment {
     private final PaymentRegistry registry = new PaymentRegistry();
     private final PaymentRouter router = new PaymentRouter(registry);
     private final SecurityRegistry security = new SecurityRegistry();
+    private final BusinessRegistry businessRegistry = new BusinessRegistry();
 
     /**
      * 根据请求获取可以在当前场景下使用的支付方式
      */
-    public Flux<PaymentProfile> getPaymentProfiles(PaymentOrder order) {
+    public Flux<PaymentProfile> getPaymentProfiles(PaymentSupport order) {
         return getRouter().selectPayments(order).map(IPayment::getProfile);
     }
 
@@ -44,7 +47,8 @@ public class DispatcherPayment {
      * 根据名称获取支付方式
      */
     public Mono<IPayment> getPayment(String name) {
-        return Mono.justOrEmpty(getRegistry().get(name)).map(e -> new PaymentProxy(e, security));
+        return Mono.justOrEmpty(getRegistry().get(name))
+            .map(e -> new PaymentProxy(e, security));
     }
 
     public void register(IPayment payment) {

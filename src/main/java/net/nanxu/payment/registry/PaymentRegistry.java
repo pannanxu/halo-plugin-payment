@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.extern.slf4j.Slf4j;
-import net.nanxu.payment.core.IPayment;
+import net.nanxu.payment.infra.IPayment;
 
 /**
  * PaymentRegistry.

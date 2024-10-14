@@ -1,20 +1,21 @@
-package net.nanxu.payment.core.model;
+package net.nanxu.payment.infra.model;
 
 import lombok.Builder;
 import lombok.Data;
-import net.nanxu.order.Order;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
- * CallbackRequest.
+ * PaymentOrder.
  *
  * @author: P
  **/
 @Data
 @Builder
-public class CallbackRequest {
+public class PaymentSupport {
     
     private Order order;
     
     private ServerRequest request;
+
+    private String userAgent;
 }

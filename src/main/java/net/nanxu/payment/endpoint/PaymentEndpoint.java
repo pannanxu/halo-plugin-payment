@@ -4,12 +4,12 @@ import static org.springdoc.webflux.core.fn.SpringdocRouteBuilder.route;
 
 import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
-import net.nanxu.payment.Payment;
-import net.nanxu.payment.PaymentOrder;
-import net.nanxu.payment.core.IPayment;
-import net.nanxu.payment.core.PaymentProfile;
-import net.nanxu.payment.core.model.CallbackRequest;
-import net.nanxu.payment.core.model.CallbackResult;
+import net.nanxu.payment.PaymentFactory;
+import net.nanxu.payment.infra.model.PaymentSupport;
+import net.nanxu.payment.infra.IPayment;
+import net.nanxu.payment.infra.PaymentProfile;
+import net.nanxu.payment.infra.model.CallbackRequest;
+import net.nanxu.payment.infra.model.CallbackResult;
 import org.springdoc.core.fn.builders.operation.Builder;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -27,7 +27,7 @@ import run.halo.app.theme.TemplateNameResolver;
 // @Component
 public class PaymentEndpoint {
     private final TemplateNameResolver templateNameResolver;
-    private final Payment payment;
+    private final PaymentFactory payment;
 
     // @Bean
     public RouterFunction<ServerResponse> paymentRouter() {
@@ -52,7 +52,7 @@ public class PaymentEndpoint {
 
     Mono<ServerResponse> renderPaymentPage(ServerRequest request) {
         String orderId = request.pathVariable("orderId");
-        Flux<PaymentProfile> profiles = payment.getPaymentProfiles(PaymentOrder.builder()
+        Flux<PaymentProfile> profiles = payment.getPaymentProfiles(PaymentSupport.builder()
             .userAgent(request.headers().firstHeader("User-Agent"))
             .request(request)
             .build());
@@ -70,7 +70,7 @@ public class PaymentEndpoint {
     Mono<ServerResponse> callback(ServerRequest request) {
         return payment.getPayment(request.pathVariable("paymentType"))
             .map(IPayment::getCallback)
-            .flatMap(callback -> callback.call(CallbackRequest.builder()
+            .flatMap(callback -> callback.payCallback(CallbackRequest.builder()
                 .order(null)
                 .request(request)
                 .build()))

@@ -1,4 +1,4 @@
-package net.nanxu.payment.core.model;
+package net.nanxu.payment.infra.model;
 
 import lombok.Data;
 
@@ -13,4 +13,8 @@ public class CallbackResult {
      * 返回给支付商的内容
      */
     public Object render;
+    /**
+     * 是否支付成功
+     */
+    private Boolean success;
 }
