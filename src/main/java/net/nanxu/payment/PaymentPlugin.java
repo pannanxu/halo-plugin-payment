@@ -21,7 +21,7 @@ import run.halo.app.plugin.PluginContext;
 public class PaymentPlugin extends BasePlugin {
 
     private final SchemeManager schemeManager;
-    
+
     private final IPayment wechat = new WeChatPayment();
     private final IPayment ali = new AliPayment();
 

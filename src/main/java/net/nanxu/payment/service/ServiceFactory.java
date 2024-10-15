@@ -1,9 +1,11 @@
 package net.nanxu.payment.service;
 
 import lombok.Getter;
-import net.nanxu.payment.DispatcherPayment;
-import net.nanxu.payment.service.impl.OrderServiceImpl;
+import net.nanxu.payment.registry.BusinessRegistry;
+import net.nanxu.payment.registry.PaymentRegistry;
+import net.nanxu.payment.security.SecurityRegistry;
 import net.nanxu.payment.service.impl.CallbackServiceImpl;
+import net.nanxu.payment.service.impl.OrderServiceImpl;
 import net.nanxu.payment.service.impl.PaymentServiceImpl;
 
 /**
@@ -24,13 +26,14 @@ public class ServiceFactory {
         this.callback = callback;
     }
 
-    public static ServiceFactory create(DispatcherPayment dispatcher) {
+    public static ServiceFactory create(PaymentRegistry registry,
+        BusinessRegistry businessRegistry,
+        SecurityRegistry security) {
         OrderService orderService = new OrderServiceImpl();
-        PaymentService paymentService = new PaymentServiceImpl(dispatcher.getSecurity(),
-            dispatcher.getBusinessRegistry(), orderService);
+        PaymentService paymentService =
+            new PaymentServiceImpl(security, businessRegistry, orderService);
         CallbackService callbackService =
-            new CallbackServiceImpl(dispatcher.getBusinessRegistry(),
-                dispatcher.getRegistry(), orderService);
+            new CallbackServiceImpl(businessRegistry, registry, orderService);
         return new ServiceFactory(paymentService, orderService, callbackService);
     }
 

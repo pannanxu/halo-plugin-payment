@@ -16,19 +16,19 @@ import reactor.test.StepVerifier;
  **/
 public class DispatcherPaymentTest {
 
-    private DispatcherPayment dispatcher;
+    private PaymentFactory factory;
 
     @BeforeEach
     public void setUp() {
-        dispatcher = new DispatcherPayment();
-        
-        dispatcher.register(new WeChatPayment());
-        dispatcher.register(new AliPayment());
+        factory = new PaymentFactory();
+
+        factory.register(new WeChatPayment());
+        factory.register(new AliPayment());
     }
 
     @Test
     void getPayment_ExistingName_ShouldReturnPayment() throws InterruptedException {
-        Mono<PaymentResult> resultMono = dispatcher.getPayment(WeChatPayment.NAME)
+        Mono<PaymentResult> resultMono = factory.getPayment(WeChatPayment.NAME)
             .flatMap(payment -> payment.pay(new PaymentRequest()));
 
         StepVerifier.create(resultMono).expectNextCount(1).verifyComplete();

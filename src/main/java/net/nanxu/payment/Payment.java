@@ -13,6 +13,7 @@ import net.nanxu.payment.service.ServiceFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
+@Component
 public final class Payment implements ApplicationContextAware {
 
     private static PaymentFactory factory;
