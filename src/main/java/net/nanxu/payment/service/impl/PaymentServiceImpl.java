@@ -1,4 +1,4 @@
-package net.nanxu.payment.service;
+package net.nanxu.payment.service.impl;
 
 import net.nanxu.payment.infra.model.PaymentRequest;
 import net.nanxu.payment.infra.model.PaymentResult;
@@ -11,6 +11,8 @@ import net.nanxu.payment.security.PaymentBeforeSecurityModule;
 import net.nanxu.payment.security.SecurityModule;
 import net.nanxu.payment.security.SecurityModuleContext;
 import net.nanxu.payment.security.SecurityRegistry;
+import net.nanxu.payment.service.OrderService;
+import net.nanxu.payment.service.PaymentService;
 import reactor.core.publisher.Mono;
 
 /**
@@ -21,13 +23,14 @@ import reactor.core.publisher.Mono;
 public class PaymentServiceImpl implements PaymentService {
 
     private final SecurityRegistry security;
-    private final PaymentCallbackService callback;
+    private final CallbackServiceImpl callback;
     private final OrderService orderService;
 
-    public PaymentServiceImpl( SecurityRegistry security, BusinessRegistry businessRegistry, OrderService orderService) {
+    public PaymentServiceImpl(SecurityRegistry security, BusinessRegistry businessRegistry,
+        OrderService orderService) {
         this.security = security;
         this.orderService = orderService;
-        this.callback = new PaymentCallbackService(businessRegistry, null, orderService);
+        this.callback = new CallbackServiceImpl(businessRegistry, null, orderService);
     }
 
     @Override

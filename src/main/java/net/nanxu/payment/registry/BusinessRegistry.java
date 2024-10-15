@@ -17,8 +17,8 @@ public class BusinessRegistry {
         notification.put(business.getName(), business);
     }
 
-    public void unregister(String name) {
-        notification.remove(name);
+    public void unregister(INotificationBusiness business) {
+        notification.remove(business.getName());
     }
 
     public INotificationBusiness getNotification(String name) {

@@ -1,9 +1,9 @@
 package net.nanxu.payment;
 
+import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.model.Order;
 import net.nanxu.testplugin.AliPayment;
 import net.nanxu.testplugin.WeChatPayment;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;
@@ -18,35 +18,35 @@ import run.halo.app.plugin.PluginContext;
  * @since 1.0.0
  */
 @Component
-public class StarterPlugin extends BasePlugin {
+public class PaymentPlugin extends BasePlugin {
 
-    private final DispatcherPayment dispatcher;
     private final SchemeManager schemeManager;
+    
+    private final IPayment wechat = new WeChatPayment();
+    private final IPayment ali = new AliPayment();
 
-    public StarterPlugin(PluginContext pluginContext, SchemeManager schemeManager) {
+    public PaymentPlugin(PluginContext pluginContext, SchemeManager schemeManager) {
         super(pluginContext);
-        this.dispatcher = new DispatcherPayment();
         this.schemeManager = schemeManager;
-    }
-
-    @Bean
-    public PaymentFactory payment() {
-        return new PaymentFactory(dispatcher);
     }
 
     @Override
     public void start() {
-        System.out.println("插件启动成功！");
         schemeManager.register(Order.class);
-        
-        dispatcher.register(new WeChatPayment());
-        dispatcher.register(new AliPayment());
+
+        Payment.register(wechat);
+        Payment.register(ali);
+
+        System.out.println("插件启动成功！");
     }
 
     @Override
     public void stop() {
-        System.out.println("插件停止！");
         schemeManager.unregister(schemeManager.get(Order.class));
-        dispatcher.unregisterAll();
+
+        Payment.unregister(wechat);
+        Payment.unregister(ali);
+
+        System.out.println("插件停止！");
     }
 }

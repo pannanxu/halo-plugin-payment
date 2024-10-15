@@ -16,7 +16,7 @@ public class CallbackRequest {
     private Order order;
 
     private String orderNo;
-    private String payment;
+    private String channel;
     private String business;
     
     private ServerRequest request;

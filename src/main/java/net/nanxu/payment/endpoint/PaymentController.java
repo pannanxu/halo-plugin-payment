@@ -2,13 +2,12 @@ package net.nanxu.payment.endpoint;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.nanxu.payment.infra.model.Order;
 import net.nanxu.payment.PaymentFactory;
-import net.nanxu.payment.infra.model.PaymentSupport;
-import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.PaymentProfile;
-import net.nanxu.payment.infra.model.CallbackRequest;
-import net.nanxu.payment.infra.model.CallbackResult;
+import net.nanxu.payment.infra.model.Order;
+import net.nanxu.payment.infra.model.PaymentRequest;
+import net.nanxu.payment.infra.model.PaymentResult;
+import net.nanxu.payment.infra.model.PaymentSupport;
 import net.nanxu.testplugin.WeChatPayment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,16 +59,27 @@ public class PaymentController {
         //         }));
     }
 
-    @PostMapping("/{orderId}/callback/{paymentType}")
-    public Mono<Object> callback(@PathVariable String paymentType, @PathVariable String orderId,
+    @PostMapping("/{orderNo}/pay/{channel}")
+    public Mono<PaymentResult> pay(@PathVariable String orderNo, @PathVariable String channel) {
+        return payment.getServiceFactory().getPayment().pay(new PaymentRequest());
+    }
+
+    @GetMapping("/{orderNo}/pay/status")
+    public Mono<Order.PayStatus> payStatus(@PathVariable String orderNo) {
+        return payment.getServiceFactory().getOrder().getOrder(orderNo)
+            .map(Order::getPayStatus);
+    }
+
+    @PostMapping("/{internal}/{orderNo}/callback/{channel}")
+    public Mono<Object> callback(
+        @PathVariable String internal,
+        @PathVariable String channel,
+        @PathVariable String orderNo,
         ServerRequest request) {
-        return payment.getPayment(paymentType)
-            .map(IPayment::getCallback)
-            .flatMap(callback -> callback.payCallback(CallbackRequest.builder()
-                .order(null)
-                .request(request)
-                .build()))
-            .map(CallbackResult::getRender);
+
+        // TODO 校验系统配置的内部路径是否正确
+
+        return payment.getServiceFactory().getCallback().callback(channel, orderNo, request);
     }
 
 }

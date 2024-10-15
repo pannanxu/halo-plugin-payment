@@ -1,6 +1,7 @@
 package net.nanxu.payment;
 
 import lombok.Getter;
+import net.nanxu.payment.infra.INotificationBusiness;
 import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.IPaymentCallback;
 import net.nanxu.payment.infra.IPaymentSupport;
@@ -47,19 +48,23 @@ public class DispatcherPayment {
      * 根据名称获取支付方式
      */
     public Mono<IPayment> getPayment(String name) {
-        return Mono.justOrEmpty(getRegistry().get(name))
-            .map(e -> new PaymentProxy(e, security));
+        return Mono.justOrEmpty(getRegistry().get(name));
     }
 
     public void register(IPayment payment) {
         registry.register(payment);
     }
 
-    /**
-     * 取消注册所有的支付方式
-     */
-    public void unregisterAll() {
-        registry.unregisterAll();
+    public void unregister(IPayment payment) {
+        registry.unregister(payment);
+    }
+
+    public void register(INotificationBusiness notification) {
+        businessRegistry.register(notification);
+    }
+
+    public void unregister(INotificationBusiness notification) {
+        businessRegistry.unregister(notification);
     }
 
     public static class PaymentProxy implements IPayment {
