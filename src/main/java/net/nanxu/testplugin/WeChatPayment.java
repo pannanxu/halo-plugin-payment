@@ -59,7 +59,7 @@ public class WeChatPayment extends AbstractPayment {
     public static class WeChatPaymentSupport implements IPaymentSupport {
         @Override
         public Mono<Boolean> pay(PaymentSupport request) {
-            return Mono.just(request.getOrder().getPayType().equals(NAME));
+            return Mono.just(request.getOrder().getPayment().getName().equals(NAME));
         }
 
         @Override
