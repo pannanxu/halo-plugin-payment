@@ -1,7 +1,7 @@
 package net.nanxu.payment;
 
 import lombok.NonNull;
-import net.nanxu.payment.infra.INotificationBusiness;
+import net.nanxu.payment.infra.INotification;
 import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.PaymentProfile;
 import net.nanxu.payment.infra.model.Order;
@@ -43,11 +43,11 @@ public final class Payment implements ApplicationContextAware {
         factory.unregister(payment);
     }
 
-    public static void register(INotificationBusiness notification) {
+    public static void register(INotification notification) {
         factory.register(notification);
     }
 
-    public static void unregister(INotificationBusiness notification) {
+    public static void unregister(INotification notification) {
         factory.unregister(notification);
     }
 

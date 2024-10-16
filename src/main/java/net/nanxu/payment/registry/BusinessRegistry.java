@@ -2,7 +2,7 @@ package net.nanxu.payment.registry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.nanxu.payment.infra.INotificationBusiness;
+import net.nanxu.payment.infra.INotification;
 
 /**
  * BusinessRegistry.
@@ -11,17 +11,17 @@ import net.nanxu.payment.infra.INotificationBusiness;
  **/
 public class BusinessRegistry {
 
-    private final Map<String, INotificationBusiness> notification = new ConcurrentHashMap<>();
+    private final Map<String, INotification> notification = new ConcurrentHashMap<>();
 
-    public void register(INotificationBusiness business) {
+    public void register(INotification business) {
         notification.put(business.getName(), business);
     }
 
-    public void unregister(INotificationBusiness business) {
+    public void unregister(INotification business) {
         notification.remove(business.getName());
     }
 
-    public INotificationBusiness getNotification(String name) {
+    public INotification getNotification(String name) {
         return notification.get(name);
     }
 }

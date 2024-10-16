@@ -1,6 +1,6 @@
 package net.nanxu.testplugin;
 
-import net.nanxu.payment.infra.INotificationBusiness;
+import net.nanxu.payment.infra.INotification;
 import net.nanxu.payment.infra.model.Order;
 import reactor.core.publisher.Mono;
 
@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public class TestNotificationBusiness implements INotificationBusiness {
+public class TestNotification implements INotification {
     @Override
     public String getName() {
         return "test-notification-plugin";

@@ -24,7 +24,7 @@ public class StarterPlugin extends BasePlugin {
         // 1. 注册支付通道
         Payment.register(IPayment payment);
         // 2. 注册业务回调通知
-        Payment.register(INotificationBusiness notification);
+        Payment.register(INotification notification);
 
         System.out.println("插件启动成功！");
     }
@@ -34,7 +34,7 @@ public class StarterPlugin extends BasePlugin {
         // 1. 卸载支付通道
         Payment.unregister(IPayment payment);
         // 2. 卸载业务回调通知
-        Payment.unregister(INotificationBusiness notification);
+        Payment.unregister(INotification notification);
 
         System.out.println("插件停止！");
     }

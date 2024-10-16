@@ -1,7 +1,7 @@
 package net.nanxu.payment;
 
 import lombok.Getter;
-import net.nanxu.payment.infra.INotificationBusiness;
+import net.nanxu.payment.infra.INotification;
 import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.PaymentProfile;
 import net.nanxu.payment.infra.model.PaymentSupport;
@@ -62,11 +62,11 @@ public class PaymentFactory {
         paymentRegistry.unregister(payment);
     }
 
-    public void register(INotificationBusiness notification) {
+    public void register(INotification notification) {
         businessRegistry.register(notification);
     }
 
-    public void unregister(INotificationBusiness notification) {
+    public void unregister(INotification notification) {
         businessRegistry.unregister(notification);
     }
 

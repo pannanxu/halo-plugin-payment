@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public interface INotificationBusiness {
+public interface INotification {
 
     String getName();
 
