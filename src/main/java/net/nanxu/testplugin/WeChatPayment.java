@@ -81,7 +81,7 @@ public class WeChatPayment extends AbstractPayment {
 
     public static class WeChatPaymentCallback implements IPaymentCallback {
         @Override
-        public Mono<CallbackResult> payCallback(CallbackRequest request) {
+        public Mono<CallbackResult> callback(CallbackRequest request) {
             return null;
         }
     }

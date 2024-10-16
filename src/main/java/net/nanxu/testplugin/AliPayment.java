@@ -81,7 +81,7 @@ public class AliPayment extends AbstractPayment {
 
     public static class AliPaymentCallback implements IPaymentCallback {
         @Override
-        public Mono<CallbackResult> payCallback(CallbackRequest request) {
+        public Mono<CallbackResult> callback(CallbackRequest request) {
             return null;
         }
     }

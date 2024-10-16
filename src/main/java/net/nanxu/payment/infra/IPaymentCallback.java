@@ -13,6 +13,6 @@ public interface IPaymentCallback {
     /**
      * 支付回调
      */
-    Mono<CallbackResult> payCallback(CallbackRequest request);
+    Mono<CallbackResult> callback(CallbackRequest request);
 
 }

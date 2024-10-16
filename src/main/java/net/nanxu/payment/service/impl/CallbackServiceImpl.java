@@ -42,7 +42,7 @@ public class CallbackServiceImpl implements CallbackService {
             // 支付插件处理
             .flatMap(order -> paymentRegistry.get(channel)
                 .getCallback()
-                .payCallback(CallbackRequest.builder()
+                .callback(CallbackRequest.builder()
                     .request(request)
                     .channel(channel)
                     .orderNo(orderNo)

@@ -12,6 +12,10 @@ import reactor.core.publisher.Mono;
  **/
 public interface IPaymentSupport {
 
+    default Mono<Boolean> isSupported(PaymentSupport request) {
+        return Mono.just(Boolean.FALSE);
+    }
+
     Mono<Boolean> pay(PaymentSupport request);
 
     Mono<Boolean> query(QueryRequest request);
