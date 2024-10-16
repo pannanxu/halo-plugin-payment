@@ -118,6 +118,13 @@ public class Order extends AbstractExtension {
         public static final String MASTER = "_master";
         private String name;
 
+        public AccountRef() {
+        }
+
+        public AccountRef(String name) {
+            this.name = name;
+        }
+
         public String getNameOrDefault(String channel) {
             return StringUtils.isNotBlank(name) ? name : (channel + MASTER);
         }

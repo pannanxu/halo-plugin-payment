@@ -1,8 +1,10 @@
 package net.nanxu.testplugin;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.nanxu.payment.account.IAccount;
-import net.nanxu.payment.infra.model.PaymentSupport;
+import net.nanxu.payment.account.PaymentAccount;
 import net.nanxu.payment.infra.AbstractPayment;
 import net.nanxu.payment.infra.IPaymentCallback;
 import net.nanxu.payment.infra.IPaymentSupport;
@@ -11,6 +13,7 @@ import net.nanxu.payment.infra.model.CallbackRequest;
 import net.nanxu.payment.infra.model.CallbackResult;
 import net.nanxu.payment.infra.model.PaymentRequest;
 import net.nanxu.payment.infra.model.PaymentResult;
+import net.nanxu.payment.infra.model.PaymentSupport;
 import net.nanxu.payment.infra.model.QueryRequest;
 import net.nanxu.payment.infra.model.QueryResult;
 import net.nanxu.payment.infra.model.RefundRequest;
@@ -30,17 +33,17 @@ public class WeChatPayment extends AbstractPayment {
 
     public WeChatPayment() {
         super(NAME,
-                PaymentProfile.builder()
-                        .name(NAME)
-                        .displayName("微信支付")
-                        .icon("wechat.png")
-                        .build(),
-                new WeChatPaymentSupport(), new WeChatPaymentCallback());
+            PaymentProfile.builder()
+                .name(NAME)
+                .displayName("微信支付")
+                .icon("wechat.png")
+                .build(),
+            new WeChatPaymentSupport(), new WeChatPaymentCallback());
     }
 
     @Override
     public Mono<IAccount> createAccount(IAccount account) {
-        return null;
+        return Mono.just(new WeChatAccount(account));
     }
 
     @Override
@@ -93,4 +96,21 @@ public class WeChatPayment extends AbstractPayment {
             return null;
         }
     }
+
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class WeChatAccount extends PaymentAccount {
+
+        private final String secret;
+        private final String appId;
+        // ...
+
+        public WeChatAccount(IAccount account) {
+            super(account);
+            this.secret = account.getConfig().get("secret").asText();
+            this.appId = account.getConfig().get("appId").asText();
+        }
+
+    }
+
 }

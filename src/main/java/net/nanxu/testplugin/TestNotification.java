@@ -2,6 +2,7 @@ package net.nanxu.testplugin;
 
 import net.nanxu.payment.infra.INotification;
 import net.nanxu.payment.infra.model.Order;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
@@ -9,6 +10,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
+@Component
 public class TestNotification implements INotification {
     @Override
     public String getName() {
