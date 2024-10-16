@@ -1,7 +1,6 @@
 package net.nanxu.payment;
 
 import lombok.Getter;
-import net.nanxu.payment.infra.INotification;
 import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.PaymentProfile;
 import net.nanxu.payment.infra.model.PaymentSupport;
@@ -32,12 +31,14 @@ public final class PaymentFactory {
     @Getter
     private final ServiceFactory serviceFactory;
 
-    public PaymentFactory(ReactiveExtensionClient client) {
+    public PaymentFactory(ReactiveExtensionClient client,
+        PaymentExtensionGetter paymentExtensionGetter,
+        NotificationExtensionGetter notificationExtensionGetter) {
         this.client = client;
-        this.paymentRegistry = new PaymentRegistry();
+        this.paymentRegistry = new PaymentRegistry(paymentExtensionGetter);
         this.router = new PaymentRouter(paymentRegistry);
         this.security = new SecurityRegistry();
-        this.notificationRegistry = new NotificationRegistry();
+        this.notificationRegistry = new NotificationRegistry(notificationExtensionGetter);
         this.serviceFactory =
             ServiceFactory.create(paymentRegistry, notificationRegistry, security, client);
     }
@@ -54,25 +55,6 @@ public final class PaymentFactory {
      */
     public Mono<IPayment> getPayment(String name) {
         return Mono.justOrEmpty(paymentRegistry.get(name));
-    }
-
-    /**
-     * 注册支付方式
-     */
-    public void register(IPayment payment) {
-        paymentRegistry.register(payment);
-    }
-
-    public void unregister(IPayment payment) {
-        paymentRegistry.unregister(payment);
-    }
-
-    public void register(INotification notification) {
-        notificationRegistry.register(notification);
-    }
-
-    public void unregister(INotification notification) {
-        notificationRegistry.unregister(notification);
     }
 
 }

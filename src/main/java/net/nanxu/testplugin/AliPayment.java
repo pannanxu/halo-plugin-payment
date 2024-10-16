@@ -17,6 +17,7 @@ import net.nanxu.payment.infra.model.QueryRequest;
 import net.nanxu.payment.infra.model.QueryResult;
 import net.nanxu.payment.infra.model.RefundRequest;
 import net.nanxu.payment.infra.model.RefundResult;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
@@ -24,6 +25,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
+@Component
 public class AliPayment extends AbstractPayment {
 
     public static final String NAME = "Ali";

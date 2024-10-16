@@ -1,7 +1,7 @@
 package net.nanxu.payment.registry;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import net.nanxu.payment.NotificationExtensionGetter;
+import net.nanxu.payment.exception.NotificationException;
 import net.nanxu.payment.infra.INotification;
 
 /**
@@ -11,17 +11,16 @@ import net.nanxu.payment.infra.INotification;
  **/
 public class NotificationRegistry {
 
-    private final Map<String, INotification> notification = new ConcurrentHashMap<>();
+    private final NotificationExtensionGetter notificationExtensionGetter;
 
-    public void register(INotification business) {
-        notification.put(business.getName(), business);
-    }
-
-    public void unregister(INotification business) {
-        notification.remove(business.getName());
+    public NotificationRegistry(NotificationExtensionGetter notificationExtensionGetter) {
+        this.notificationExtensionGetter = notificationExtensionGetter;
     }
 
     public INotification getNotification(String name) {
-        return notification.get(name);
+        return notificationExtensionGetter.getNotificationExtensions().stream()
+            .filter(e -> e.getName().equals(name))
+            .findFirst()
+            .orElseThrow(() -> new NotificationException("不支持此通知类型"));
     }
 }

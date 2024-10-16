@@ -1,6 +1,7 @@
 package net.nanxu.testplugin;
 
 import lombok.extern.slf4j.Slf4j;
+import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.infra.model.PaymentSupport;
 import net.nanxu.payment.infra.AbstractPayment;
 import net.nanxu.payment.infra.IPaymentCallback;
@@ -14,6 +15,7 @@ import net.nanxu.payment.infra.model.QueryRequest;
 import net.nanxu.payment.infra.model.QueryResult;
 import net.nanxu.payment.infra.model.RefundRequest;
 import net.nanxu.payment.infra.model.RefundResult;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
@@ -22,6 +24,7 @@ import reactor.core.publisher.Mono;
  * @author: P
  **/
 @Slf4j
+@Component
 public class WeChatPayment extends AbstractPayment {
     public static final String NAME = "WeChat";
 
@@ -33,6 +36,11 @@ public class WeChatPayment extends AbstractPayment {
                         .icon("wechat.png")
                         .build(),
                 new WeChatPaymentSupport(), new WeChatPaymentCallback());
+    }
+
+    @Override
+    public Mono<IAccount> createAccount(IAccount account) {
+        return null;
     }
 
     @Override

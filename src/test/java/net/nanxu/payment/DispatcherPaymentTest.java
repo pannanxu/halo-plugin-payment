@@ -2,7 +2,6 @@ package net.nanxu.payment;
 
 import net.nanxu.payment.infra.model.PaymentRequest;
 import net.nanxu.payment.infra.model.PaymentResult;
-import net.nanxu.testplugin.AliPayment;
 import net.nanxu.testplugin.WeChatPayment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,10 +19,7 @@ public class DispatcherPaymentTest {
 
     @BeforeEach
     public void setUp() {
-        factory = new PaymentFactory(null);
-
-        factory.register(new WeChatPayment());
-        factory.register(new AliPayment());
+        factory = new PaymentFactory(null, null, null);
     }
 
     @Test

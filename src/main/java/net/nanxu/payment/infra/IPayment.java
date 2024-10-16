@@ -7,6 +7,7 @@ import net.nanxu.payment.infra.model.QueryRequest;
 import net.nanxu.payment.infra.model.QueryResult;
 import net.nanxu.payment.infra.model.RefundRequest;
 import net.nanxu.payment.infra.model.RefundResult;
+import org.pf4j.ExtensionPoint;
 import reactor.core.publisher.Mono;
 
 /**
@@ -14,7 +15,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public interface IPayment {
+public interface IPayment extends ExtensionPoint {
 
     String getName();
 

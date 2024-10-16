@@ -1,6 +1,7 @@
 package net.nanxu.payment.infra;
 
 import net.nanxu.payment.infra.model.Order;
+import org.pf4j.ExtensionPoint;
 import reactor.core.publisher.Mono;
 
 /**
@@ -8,7 +9,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public interface INotification {
+public interface INotification extends ExtensionPoint {
 
     String getName();
 

@@ -21,25 +21,15 @@ public class StarterPlugin extends BasePlugin {
     
     @Override
     public void start() {
-        // 1. 注册支付通道
-        Payment.register(IPayment payment);
-        // 2. 注册业务回调通知
-        Payment.register(INotification notification);
-
+        // 用户选择在页面点击立即购买后，通过业务插件接口创建订单，然后跳转到收银台页面（/payment/{orderNo}）
+        Payment.createOrder(Order order);
         System.out.println("插件启动成功！");
     }
 
     @Override
     public void stop() {
-        // 1. 卸载支付通道
-        Payment.unregister(IPayment payment);
-        // 2. 卸载业务回调通知
-        Payment.unregister(INotification notification);
-
         System.out.println("插件停止！");
     }
 }
 
-// 3. 用户选择在页面点击立即购买后，通过业务插件接口创建订单，然后跳转到收银台页面（/payment/{orderNo}）
-Payment.createOrder(Order order);
 ```

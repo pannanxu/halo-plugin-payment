@@ -2,7 +2,6 @@ package net.nanxu.payment;
 
 import lombok.NonNull;
 import net.nanxu.payment.account.IAccount;
-import net.nanxu.payment.infra.INotification;
 import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.PaymentProfile;
 import net.nanxu.payment.infra.model.Order;
@@ -43,22 +42,6 @@ public final class Payment implements ApplicationContextAware {
      */
     public static Mono<IPayment> getPayment(String name) {
         return factory.getPayment(name);
-    }
-
-    public static void register(IPayment payment) {
-        factory.register(payment);
-    }
-
-    public static void unregister(IPayment payment) {
-        factory.unregister(payment);
-    }
-
-    public static void register(INotification notification) {
-        factory.register(notification);
-    }
-
-    public static void unregister(INotification notification) {
-        factory.unregister(notification);
     }
 
     public static ServiceFactory getServiceFactory() {
