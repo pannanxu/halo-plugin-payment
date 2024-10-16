@@ -6,8 +6,8 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 import run.halo.app.extension.AbstractExtension;
-import run.halo.app.extension.GVK;
 import run.halo.app.extension.Ref;
 
 /**
@@ -18,8 +18,8 @@ import run.halo.app.extension.Ref;
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
-@GVK(kind = "Order", group = "order.payment.plugin.nanxu.net", version = "v1alpha1", singular = 
-        "order", plural = "orders")
+// @GVK(kind = "Order", group = "order.payment.plugin.nanxu.net", version = "v1alpha1", singular = 
+//         "order", plural = "orders")
 public class Order extends AbstractExtension {
     /**
      * 订单单号
@@ -49,6 +49,10 @@ public class Order extends AbstractExtension {
      * 支付插件
      */
     private Ref payment;
+    /**
+     * 账户信息
+     */
+    private AccountRef account;
     /**
      * 支付用户
      */
@@ -107,6 +111,16 @@ public class Order extends AbstractExtension {
          * 商品图片链接
          */
         private String imageUrl;
+    }
+
+    @Data
+    public static class AccountRef {
+        public static final String MASTER = "_master";
+        private String name;
+
+        public String getNameOrDefault(String channel) {
+            return StringUtils.isNotBlank(name) ? name : (channel + MASTER);
+        }
     }
 
     public enum PayStatus {

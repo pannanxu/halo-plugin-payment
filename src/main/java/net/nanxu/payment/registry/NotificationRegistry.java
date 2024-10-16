@@ -5,11 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.nanxu.payment.infra.INotification;
 
 /**
- * BusinessRegistry.
+ * NotificationRegistry.
  *
  * @author: P
  **/
-public class BusinessRegistry {
+public class NotificationRegistry {
 
     private final Map<String, INotification> notification = new ConcurrentHashMap<>();
 

@@ -1,5 +1,6 @@
 package net.nanxu.payment.infra;
 
+import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.infra.model.PaymentRequest;
 import net.nanxu.payment.infra.model.PaymentResult;
 import net.nanxu.payment.infra.model.QueryRequest;
@@ -16,6 +17,14 @@ import reactor.core.publisher.Mono;
 public interface IPayment {
 
     String getName();
+
+    /**
+     * 创建通道的账户。
+     *
+     * @param account 账户的配置信息
+     * @return 通道所需要的账户信息，可以是证书、密钥等，在后续的方法request参数中会将此账户信息传入。
+     */
+    Mono<IAccount> createAccount(IAccount account);
 
     PaymentProfile getProfile();
 
@@ -34,12 +43,14 @@ public interface IPayment {
     /**
      * 注册时调用
      */
-    default void register() {}
+    default void register() {
+    }
 
     /**
      * 注销时调用
      */
-    default void unregister() {};
+    default void unregister() {
+    }
 
     /**
      * 去除一些不需要让第三方插件需要的功能
@@ -49,6 +60,11 @@ public interface IPayment {
             @Override
             public String getName() {
                 return payment.getName();
+            }
+
+            @Override
+            public Mono<IAccount> createAccount(IAccount account) {
+                return payment.createAccount(account);
             }
 
             @Override

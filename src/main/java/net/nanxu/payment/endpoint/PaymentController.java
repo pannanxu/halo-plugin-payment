@@ -77,8 +77,6 @@ public class PaymentController {
         @PathVariable String orderNo,
         ServerRequest request) {
 
-        // TODO 校验系统配置的内部路径是否正确
-
         return payment.getServiceFactory().getCallback().callback(channel, orderNo, request);
     }
 

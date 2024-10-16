@@ -1,6 +1,7 @@
 package net.nanxu.payment.infra.model;
 
 import lombok.Data;
+import net.nanxu.payment.account.IAccount;
 
 /**
  * modelPaymentRequest.
@@ -10,4 +11,5 @@ import lombok.Data;
 @Data
 public class PaymentRequest {
     private Order order;
+    private IAccount account;
 }

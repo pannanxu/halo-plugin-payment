@@ -5,7 +5,7 @@ import net.nanxu.payment.infra.INotification;
 import net.nanxu.payment.infra.IPayment;
 import net.nanxu.payment.infra.PaymentProfile;
 import net.nanxu.payment.infra.model.PaymentSupport;
-import net.nanxu.payment.registry.BusinessRegistry;
+import net.nanxu.payment.registry.NotificationRegistry;
 import net.nanxu.payment.registry.PaymentRegistry;
 import net.nanxu.payment.router.PaymentRouter;
 import net.nanxu.payment.security.SecurityRegistry;
@@ -13,6 +13,7 @@ import net.nanxu.payment.service.ServiceFactory;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import run.halo.app.extension.ReactiveExtensionClient;
 
 /**
  * 提供给第三方使用的入口.
@@ -20,21 +21,25 @@ import reactor.core.publisher.Mono;
  * @author: P
  **/
 @Component
-public class PaymentFactory {
+public final class PaymentFactory {
+
+    private final ReactiveExtensionClient client;
 
     private final PaymentRegistry paymentRegistry;
     private final PaymentRouter router;
     private final SecurityRegistry security;
-    private final BusinessRegistry businessRegistry;
+    private final NotificationRegistry notificationRegistry;
     @Getter
     private final ServiceFactory serviceFactory;
 
-    public PaymentFactory() {
+    public PaymentFactory(ReactiveExtensionClient client) {
+        this.client = client;
         this.paymentRegistry = new PaymentRegistry();
         this.router = new PaymentRouter(paymentRegistry);
         this.security = new SecurityRegistry();
-        this.businessRegistry = new BusinessRegistry();
-        this.serviceFactory = ServiceFactory.create(paymentRegistry, businessRegistry, security);
+        this.notificationRegistry = new NotificationRegistry();
+        this.serviceFactory =
+            ServiceFactory.create(paymentRegistry, notificationRegistry, security, client);
     }
 
     /**
@@ -48,7 +53,7 @@ public class PaymentFactory {
      * 根据名称获取支付方式
      */
     public Mono<IPayment> getPayment(String name) {
-        return Mono.justOrEmpty(paymentRegistry.get(name)).map(IPayment::wrap);
+        return Mono.justOrEmpty(paymentRegistry.get(name));
     }
 
     /**
@@ -63,11 +68,11 @@ public class PaymentFactory {
     }
 
     public void register(INotification notification) {
-        businessRegistry.register(notification);
+        notificationRegistry.register(notification);
     }
 
     public void unregister(INotification notification) {
-        businessRegistry.unregister(notification);
+        notificationRegistry.unregister(notification);
     }
 
 }

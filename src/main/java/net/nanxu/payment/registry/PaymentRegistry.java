@@ -3,8 +3,6 @@ package net.nanxu.payment.registry;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import lombok.extern.slf4j.Slf4j;
 import net.nanxu.payment.infra.IPayment;
 
@@ -18,24 +16,14 @@ public class PaymentRegistry {
 
     private final Map<String, IPayment> payments = new ConcurrentHashMap<>();
 
-    private final Lock lock = new ReentrantLock();
-
     public PaymentRegistry() {
     }
 
     public void register(IPayment payment) {
-        try {
-            if (lock.tryLock()) {
-                IPayment pay = payments.get(payment.getName());
-                unregister(pay);
-                payment.register();
-                payments.put(payment.getName(), payment);
-            }
-        } catch (Exception ex) {
-            log.error("PaymentRegistry register error", ex);
-        } finally {
-            lock.unlock();
-        }
+        IPayment pay = payments.get(payment.getName());
+        unregister(pay);
+        payment.register();
+        payments.put(payment.getName(), payment);
     }
 
     public void unregister(IPayment payment) {

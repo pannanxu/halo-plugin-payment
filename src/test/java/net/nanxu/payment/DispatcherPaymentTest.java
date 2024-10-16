@@ -20,7 +20,7 @@ public class DispatcherPaymentTest {
 
     @BeforeEach
     public void setUp() {
-        factory = new PaymentFactory();
+        factory = new PaymentFactory(null);
 
         factory.register(new WeChatPayment());
         factory.register(new AliPayment());

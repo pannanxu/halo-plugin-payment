@@ -1,6 +1,9 @@
 package net.nanxu.testplugin;
 
-import net.nanxu.payment.infra.model.PaymentSupport;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import net.nanxu.payment.account.IAccount;
+import net.nanxu.payment.account.PaymentAccount;
 import net.nanxu.payment.infra.AbstractPayment;
 import net.nanxu.payment.infra.IPaymentCallback;
 import net.nanxu.payment.infra.IPaymentSupport;
@@ -9,6 +12,7 @@ import net.nanxu.payment.infra.model.CallbackRequest;
 import net.nanxu.payment.infra.model.CallbackResult;
 import net.nanxu.payment.infra.model.PaymentRequest;
 import net.nanxu.payment.infra.model.PaymentResult;
+import net.nanxu.payment.infra.model.PaymentSupport;
 import net.nanxu.payment.infra.model.QueryRequest;
 import net.nanxu.payment.infra.model.QueryResult;
 import net.nanxu.payment.infra.model.RefundRequest;
@@ -26,17 +30,24 @@ public class AliPayment extends AbstractPayment {
 
     public AliPayment() {
         super(NAME,
-                PaymentProfile.builder()
-                        .name(NAME)
-                        .displayName("支付宝")
-                        .icon("ali.png")
-                        .build(),
-                new AliPaymentSupport(),
-                new AliPaymentCallback());
+            PaymentProfile.builder()
+                .name(NAME)
+                .displayName("支付宝")
+                .icon("ali.png")
+                .build(),
+            new AliPaymentSupport(),
+            new AliPaymentCallback());
+    }
+
+    @Override
+    public Mono<IAccount> createAccount(IAccount account) {
+        return Mono.just(new AliAccount(account));
     }
 
     @Override
     public Mono<PaymentResult> pay(PaymentRequest request) {
+        AliAccount account = request.getAccount().as(AliAccount.class);
+        System.out.println(account);
         return Mono.just(new PaymentResult());
     }
 
@@ -85,4 +96,23 @@ public class AliPayment extends AbstractPayment {
             return null;
         }
     }
+
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class AliAccount extends PaymentAccount {
+
+        private final String key;
+        private final String secret;
+        private final String appId;
+        // ...
+
+        public AliAccount(IAccount account) {
+            super(account);
+            this.key = account.getConfig().get("key").asText();
+            this.secret = account.getConfig().get("secret").asText();
+            this.appId = account.getConfig().get("appId").asText();
+        }
+
+    }
+
 }

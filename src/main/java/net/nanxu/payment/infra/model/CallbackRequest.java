@@ -2,6 +2,7 @@ package net.nanxu.payment.infra.model;
 
 import lombok.Builder;
 import lombok.Data;
+import net.nanxu.payment.account.IAccount;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
@@ -19,5 +20,7 @@ public class CallbackRequest {
     private String channel;
     private String business;
     
+    private IAccount account;
+
     private ServerRequest request;
 }
