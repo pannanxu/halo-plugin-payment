@@ -20,7 +20,11 @@ import net.nanxu.payment.channel.model.QueryRequest;
 import net.nanxu.payment.channel.model.QueryResult;
 import net.nanxu.payment.channel.model.RefundRequest;
 import net.nanxu.payment.channel.model.RefundResult;
+import net.nanxu.payment.reconciliation.IReconciliation;
+import net.nanxu.payment.reconciliation.ReconciliationOrder;
+import net.nanxu.payment.reconciliation.ReconciliationRequest;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -65,6 +69,14 @@ public class WeChatPayment extends AbstractPayment {
     @Override
     public Mono<RefundResult> cancel(RefundRequest request) {
         return null;
+    }
+
+    @Component
+    public static class WeChatReconciliation implements IReconciliation {
+        @Override
+        public Flux<ReconciliationOrder> reconciliation(ReconciliationRequest request) {
+            return Flux.empty();
+        }
     }
 
     public static class WeChatPaymentSupport implements IPaymentSupport {
