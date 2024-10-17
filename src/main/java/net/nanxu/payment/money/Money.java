@@ -3,6 +3,8 @@ package net.nanxu.payment.money;
 import java.math.BigDecimal;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import javax.money.CurrencyUnit;
+import javax.money.Monetary;
 
 /**
  * Money.
@@ -31,6 +33,13 @@ public class Money {
 
     public static Money ofCNY(BigDecimal amount) {
         return of(amount, Currency.CNY);
+    }
+
+    public static void main(String[] args) {
+        CurrencyUnit unit = Monetary.getCurrency("CNY");
+
+
+        System.out.println(unit);
     }
 
 }

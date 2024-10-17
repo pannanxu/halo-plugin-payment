@@ -21,7 +21,7 @@ public class SimpleExchangeRateConverter implements ExchangeRateConverter {
     public Mono<Money> convert(Money money, Currency target) {
         return resolve(money.getCurrency())
             .map(e -> {
-                BigDecimal rate = e.getRates().get(target.getCode());
+                BigDecimal rate = e.getRates().get(target.getAlphaCode());
                 money.setRate(new ExchangeRate(money.getCurrency(), target, rate));
                 return money;
             });

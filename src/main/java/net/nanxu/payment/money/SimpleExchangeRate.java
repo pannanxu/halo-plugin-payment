@@ -21,7 +21,7 @@ public class SimpleExchangeRate implements IExchangeRate {
         ExchangeRateResult result = new ExchangeRateResult();
         Map<String, BigDecimal> rates = new HashMap<>();
         for (Currency value : Currency.values()) {
-            rates.put(value.getCode(), BigDecimal.ONE);
+            rates.put(value.getAlphaCode(), BigDecimal.ONE);
         }
         result.setRates(rates);
         return Mono.justOrEmpty(result);
