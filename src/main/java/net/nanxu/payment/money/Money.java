@@ -36,9 +36,7 @@ public class Money {
     }
 
     public static void main(String[] args) {
-        CurrencyUnit unit = Monetary.getCurrency("CNY");
-
-
+        CurrencyUnit unit = Monetary.getCurrency("USD");
         System.out.println(unit);
     }
 
