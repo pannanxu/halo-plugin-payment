@@ -3,6 +3,7 @@ package net.nanxu.payment.setting;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.nanxu.payment.account.Account;
+import net.nanxu.payment.money.Currency;
 import run.halo.app.extension.AbstractExtension;
 
 /**
@@ -19,6 +20,26 @@ public class PaymentSetting {
          * 内部的地址，可以是一个uuid或自定义字符串，避免回调接口被恶意调用
          */
         private String internal;
+
+        /**
+         * 基础汇率转换货币
+         */
+        private Currency currency;
+
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class Money extends AbstractExtension {
+
+        /**
+         * 基础汇率转换货币
+         */
+        private Currency currency;
+        /**
+         * 使用的汇率转换器
+         */
+        private String useExchangeRateConvert;
 
     }
 

@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.nanxu.payment.acl.ExternalLinkCreator;
 import net.nanxu.payment.generator.OrderNoProvider;
-import net.nanxu.payment.model.Money;
+import net.nanxu.payment.money.Money;
 import net.nanxu.payment.order.Order;
 import net.nanxu.payment.order.OrderService;
 import net.nanxu.payment.setting.PaymentSettingManager;

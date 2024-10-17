@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import net.nanxu.payment.channel.PaymentMethod;
-import net.nanxu.payment.model.Money;
+import net.nanxu.payment.money.Money;
 import org.apache.commons.lang3.StringUtils;
 import run.halo.app.extension.AbstractExtension;
 import run.halo.app.extension.Ref;
