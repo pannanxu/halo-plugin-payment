@@ -1,8 +1,8 @@
 package net.nanxu.payment.router;
 
-import net.nanxu.payment.infra.model.PaymentSupport;
-import net.nanxu.payment.infra.IPayment;
-import net.nanxu.payment.registry.PaymentRegistry;
+import net.nanxu.payment.channel.model.PaymentSupport;
+import net.nanxu.payment.channel.IPayment;
+import net.nanxu.payment.channel.PaymentRegistry;
 import reactor.core.publisher.Flux;
 
 /**

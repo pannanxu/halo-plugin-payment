@@ -1,23 +1,25 @@
 package net.nanxu.testplugin;
 
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.account.PaymentAccount;
-import net.nanxu.payment.infra.AbstractPayment;
-import net.nanxu.payment.infra.IPaymentCallback;
-import net.nanxu.payment.infra.IPaymentSupport;
-import net.nanxu.payment.infra.PaymentProfile;
-import net.nanxu.payment.infra.model.CallbackRequest;
-import net.nanxu.payment.infra.model.CallbackResult;
-import net.nanxu.payment.infra.model.PaymentRequest;
-import net.nanxu.payment.infra.model.PaymentResult;
-import net.nanxu.payment.infra.model.PaymentSupport;
-import net.nanxu.payment.infra.model.QueryRequest;
-import net.nanxu.payment.infra.model.QueryResult;
-import net.nanxu.payment.infra.model.RefundRequest;
-import net.nanxu.payment.infra.model.RefundResult;
+import net.nanxu.payment.channel.AbstractPayment;
+import net.nanxu.payment.channel.IPaymentCallback;
+import net.nanxu.payment.channel.IPaymentSupport;
+import net.nanxu.payment.channel.PaymentProfile;
+import net.nanxu.payment.channel.SettingField;
+import net.nanxu.payment.channel.model.CallbackRequest;
+import net.nanxu.payment.channel.model.CallbackResult;
+import net.nanxu.payment.channel.model.PaymentRequest;
+import net.nanxu.payment.channel.model.PaymentResult;
+import net.nanxu.payment.channel.model.PaymentSupport;
+import net.nanxu.payment.channel.model.QueryRequest;
+import net.nanxu.payment.channel.model.QueryResult;
+import net.nanxu.payment.channel.model.RefundRequest;
+import net.nanxu.payment.channel.model.RefundResult;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -32,12 +34,10 @@ public class WeChatPayment extends AbstractPayment {
     public static final String NAME = "WeChat";
 
     public WeChatPayment() {
-        super(NAME,
-            PaymentProfile.builder()
-                .name(NAME)
-                .displayName("微信支付")
-                .icon("wechat.png")
-                .build(),
+        super(PaymentProfile.create(NAME, "微信支付", "/wechat.png"),
+            List.of(SettingField.text("appid", "APPID").required(),
+                SettingField.text("secret", "SECRET").required(),
+                SettingField.text("mchid", "MCHID").required()),
             new WeChatPaymentSupport(), new WeChatPaymentCallback());
     }
 
@@ -70,7 +70,7 @@ public class WeChatPayment extends AbstractPayment {
     public static class WeChatPaymentSupport implements IPaymentSupport {
         @Override
         public Mono<Boolean> pay(PaymentSupport request) {
-            return Mono.just(request.getOrder().getPayment().getName().equals(NAME));
+            return Mono.just(request.getOrder().getChannel().getName().equals(NAME));
         }
 
         @Override

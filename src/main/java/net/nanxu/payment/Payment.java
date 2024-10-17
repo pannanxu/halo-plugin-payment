@@ -2,20 +2,19 @@ package net.nanxu.payment;
 
 import lombok.NonNull;
 import net.nanxu.payment.account.IAccount;
-import net.nanxu.payment.infra.IPayment;
-import net.nanxu.payment.infra.PaymentProfile;
-import net.nanxu.payment.infra.model.Order;
-import net.nanxu.payment.infra.model.PaymentRequest;
-import net.nanxu.payment.infra.model.PaymentResult;
-import net.nanxu.payment.infra.model.PaymentSupport;
-import net.nanxu.payment.infra.model.QueryRequest;
-import net.nanxu.payment.infra.model.QueryResult;
-import net.nanxu.payment.infra.model.RefundRequest;
-import net.nanxu.payment.infra.model.RefundResult;
-import net.nanxu.payment.service.CallbackService;
-import net.nanxu.payment.service.OrderService;
-import net.nanxu.payment.service.PaymentService;
-import net.nanxu.payment.service.ServiceFactory;
+import net.nanxu.payment.channel.IPayment;
+import net.nanxu.payment.channel.PaymentProfile;
+import net.nanxu.payment.order.Order;
+import net.nanxu.payment.channel.model.PaymentRequest;
+import net.nanxu.payment.channel.model.PaymentResult;
+import net.nanxu.payment.channel.model.PaymentSupport;
+import net.nanxu.payment.channel.model.QueryRequest;
+import net.nanxu.payment.channel.model.QueryResult;
+import net.nanxu.payment.channel.model.RefundRequest;
+import net.nanxu.payment.channel.model.RefundResult;
+import net.nanxu.payment.channel.CallbackService;
+import net.nanxu.payment.order.OrderService;
+import net.nanxu.payment.channel.PaymentService;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -44,24 +43,20 @@ public final class Payment implements ApplicationContextAware {
         return factory.getPayment(name);
     }
 
-    public static ServiceFactory getServiceFactory() {
-        return factory.getServiceFactory();
-    }
-
     public static PaymentService getPaymentService() {
-        return getServiceFactory().getPayment();
+        return factory.getServiceFactory().getPayment();
     }
 
     public static OrderService getOrderService() {
-        return getServiceFactory().getOrder();
+        return factory.getServiceFactory().getOrder();
     }
 
     public static CallbackService getCallbackService() {
-        return getServiceFactory().getCallback();
+        return factory.getServiceFactory().getCallback();
     }
 
     public static Mono<IAccount> getAccount(String name) {
-        return getServiceFactory().getAccount().getAccount(name);
+        return factory.getServiceFactory().getAccount().getAccount(name);
     }
 
     public static Mono<Order> createOrder(Order order) {

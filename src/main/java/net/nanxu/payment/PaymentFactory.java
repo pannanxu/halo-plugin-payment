@@ -1,18 +1,20 @@
 package net.nanxu.payment;
 
 import lombok.Getter;
-import net.nanxu.payment.infra.IPayment;
-import net.nanxu.payment.infra.PaymentProfile;
-import net.nanxu.payment.infra.model.PaymentSupport;
-import net.nanxu.payment.registry.NotificationRegistry;
-import net.nanxu.payment.registry.PaymentRegistry;
+import lombok.RequiredArgsConstructor;
+import net.nanxu.payment.account.AccountService;
+import net.nanxu.payment.channel.CallbackService;
+import net.nanxu.payment.channel.IPayment;
+import net.nanxu.payment.channel.PaymentProfile;
+import net.nanxu.payment.channel.PaymentRegistry;
+import net.nanxu.payment.channel.PaymentService;
+import net.nanxu.payment.channel.model.PaymentSupport;
+import net.nanxu.payment.order.OrderService;
 import net.nanxu.payment.router.PaymentRouter;
 import net.nanxu.payment.security.SecurityRegistry;
-import net.nanxu.payment.service.ServiceFactory;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import run.halo.app.extension.ReactiveExtensionClient;
 
 /**
  * 提供给第三方使用的入口.
@@ -22,25 +24,17 @@ import run.halo.app.extension.ReactiveExtensionClient;
 @Component
 public final class PaymentFactory {
 
-    private final ReactiveExtensionClient client;
-
     private final PaymentRegistry paymentRegistry;
     private final PaymentRouter router;
-    private final SecurityRegistry security;
-    private final NotificationRegistry notificationRegistry;
+    private final SecurityRegistry securityRegistry;
     @Getter
     private final ServiceFactory serviceFactory;
 
-    public PaymentFactory(ReactiveExtensionClient client,
-        PaymentExtensionGetter paymentExtensionGetter,
-        NotificationExtensionGetter notificationExtensionGetter) {
-        this.client = client;
-        this.paymentRegistry = new PaymentRegistry(paymentExtensionGetter);
+    public PaymentFactory(PaymentRegistry paymentRegistry, ServiceFactory serviceFactory) {
+        this.paymentRegistry = paymentRegistry;
         this.router = new PaymentRouter(paymentRegistry);
-        this.security = new SecurityRegistry();
-        this.notificationRegistry = new NotificationRegistry(notificationExtensionGetter);
-        this.serviceFactory =
-            ServiceFactory.create(paymentRegistry, notificationRegistry, security, client);
+        this.serviceFactory = serviceFactory;
+        this.securityRegistry = new SecurityRegistry();
     }
 
     /**
@@ -55,6 +49,16 @@ public final class PaymentFactory {
      */
     public Mono<IPayment> getPayment(String name) {
         return Mono.justOrEmpty(paymentRegistry.get(name));
+    }
+
+    @Getter
+    @Component
+    @RequiredArgsConstructor
+    public static final class ServiceFactory {
+        private final PaymentService payment;
+        private final OrderService order;
+        private final CallbackService callback;
+        private final AccountService account;
     }
 
 }

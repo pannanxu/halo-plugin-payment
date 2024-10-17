@@ -1,6 +1,6 @@
 package net.nanxu.payment;
 
-import net.nanxu.payment.infra.model.Order;
+import net.nanxu.payment.order.Order;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;

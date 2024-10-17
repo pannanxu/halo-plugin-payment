@@ -1,7 +1,7 @@
 package net.nanxu.testplugin;
 
-import net.nanxu.payment.infra.INotification;
-import net.nanxu.payment.infra.model.Order;
+import net.nanxu.payment.notification.INotification;
+import net.nanxu.payment.order.Order;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 

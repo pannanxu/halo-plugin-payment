@@ -5,6 +5,7 @@ import java.util.List;
 import net.nanxu.payment.security.impl.Decryptor;
 import net.nanxu.payment.security.impl.Encryptor;
 import net.nanxu.payment.security.impl.FrequencyLimiter;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 /**
@@ -12,6 +13,7 @@ import reactor.core.publisher.Flux;
  *
  * @author: P
  **/
+@Component
 public class SecurityRegistry {
 
     private final List<SecurityModule> modules = new ArrayList<>();

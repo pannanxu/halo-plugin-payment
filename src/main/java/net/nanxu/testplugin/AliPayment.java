@@ -1,22 +1,24 @@
 package net.nanxu.testplugin;
 
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.account.PaymentAccount;
-import net.nanxu.payment.infra.AbstractPayment;
-import net.nanxu.payment.infra.IPaymentCallback;
-import net.nanxu.payment.infra.IPaymentSupport;
-import net.nanxu.payment.infra.PaymentProfile;
-import net.nanxu.payment.infra.model.CallbackRequest;
-import net.nanxu.payment.infra.model.CallbackResult;
-import net.nanxu.payment.infra.model.PaymentRequest;
-import net.nanxu.payment.infra.model.PaymentResult;
-import net.nanxu.payment.infra.model.PaymentSupport;
-import net.nanxu.payment.infra.model.QueryRequest;
-import net.nanxu.payment.infra.model.QueryResult;
-import net.nanxu.payment.infra.model.RefundRequest;
-import net.nanxu.payment.infra.model.RefundResult;
+import net.nanxu.payment.channel.AbstractPayment;
+import net.nanxu.payment.channel.IPaymentCallback;
+import net.nanxu.payment.channel.IPaymentSupport;
+import net.nanxu.payment.channel.PaymentProfile;
+import net.nanxu.payment.channel.SettingField;
+import net.nanxu.payment.channel.model.CallbackRequest;
+import net.nanxu.payment.channel.model.CallbackResult;
+import net.nanxu.payment.channel.model.PaymentRequest;
+import net.nanxu.payment.channel.model.PaymentResult;
+import net.nanxu.payment.channel.model.PaymentSupport;
+import net.nanxu.payment.channel.model.QueryRequest;
+import net.nanxu.payment.channel.model.QueryResult;
+import net.nanxu.payment.channel.model.RefundRequest;
+import net.nanxu.payment.channel.model.RefundResult;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -31,12 +33,10 @@ public class AliPayment extends AbstractPayment {
     public static final String NAME = "Ali";
 
     public AliPayment() {
-        super(NAME,
-            PaymentProfile.builder()
-                .name(NAME)
-                .displayName("支付宝")
-                .icon("ali.png")
-                .build(),
+        super(PaymentProfile.create(NAME, "支付宝", "/ali.png"),
+            List.of(SettingField.text("appid", "APPID").required(),
+                SettingField.text("secret", "SECRET").required(),
+                SettingField.text("mchid", "MCHID").required()),
             new AliPaymentSupport(),
             new AliPaymentCallback());
     }
@@ -72,7 +72,7 @@ public class AliPayment extends AbstractPayment {
     public static class AliPaymentSupport implements IPaymentSupport {
         @Override
         public Mono<Boolean> pay(PaymentSupport request) {
-            return Mono.just(request.getOrder().getPayment().getName().equals(NAME));
+            return Mono.just(request.getOrder().getChannel().getName().equals(NAME));
         }
 
         @Override

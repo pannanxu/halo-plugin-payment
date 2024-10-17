@@ -3,11 +3,11 @@ package net.nanxu.payment.endpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nanxu.payment.PaymentFactory;
-import net.nanxu.payment.infra.PaymentProfile;
-import net.nanxu.payment.infra.model.Order;
-import net.nanxu.payment.infra.model.PaymentRequest;
-import net.nanxu.payment.infra.model.PaymentResult;
-import net.nanxu.payment.infra.model.PaymentSupport;
+import net.nanxu.payment.channel.PaymentProfile;
+import net.nanxu.payment.order.Order;
+import net.nanxu.payment.channel.model.PaymentRequest;
+import net.nanxu.payment.channel.model.PaymentResult;
+import net.nanxu.payment.channel.model.PaymentSupport;
 import net.nanxu.testplugin.WeChatPayment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import run.halo.app.extension.Ref;
 import run.halo.app.theme.TemplateNameResolver;
 
 /**
@@ -45,7 +44,7 @@ public class PaymentController {
         Flux<PaymentProfile> profiles = payment.getPaymentProfiles(PaymentSupport.builder()
             .userAgent("")
             .request(null)
-            .order(new Order().setPayment(Ref.of(WeChatPayment.NAME)))
+            .order(new Order().setChannel(Order.ChannelRef.of(WeChatPayment.NAME)))
             .build());
 
         return profiles;
