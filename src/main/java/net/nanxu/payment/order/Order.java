@@ -7,7 +7,7 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import net.nanxu.payment.channel.PaymentMethod;
+import net.nanxu.payment.channel.model.PaymentMethod;
 import net.nanxu.payment.money.Money;
 import org.apache.commons.lang3.StringUtils;
 import run.halo.app.extension.AbstractExtension;
@@ -29,6 +29,10 @@ public class Order extends AbstractExtension {
      */
     private String orderNo;
     /**
+     * 外部订单号
+     */
+    private String outTradeNo;
+    /**
      * 订单标题
      */
     private String subject;
@@ -47,7 +51,7 @@ public class Order extends AbstractExtension {
     /**
      * 业务插件
      */
-    private Ref business;
+    private BusinessRef business;
     /**
      * 支付通道
      */
@@ -59,7 +63,7 @@ public class Order extends AbstractExtension {
     /**
      * 支付用户
      */
-    private Ref user;
+    private UserRef user;
     /**
      * 支付状态
      */
@@ -70,17 +74,6 @@ public class Order extends AbstractExtension {
     private RefundStatus refundStatus;
     
     private Instant createdAt;
-
-    private Map<String, Object> extra;
-
-    public Order addExtra(String key, Object value) {
-        if (extra == null) {
-            extra = new HashMap<>();
-        } else {
-            extra.put(key, value);
-        }
-        return this;
-    }
 
     @Data
     public static class Product {
@@ -134,6 +127,52 @@ public class Order extends AbstractExtension {
             return StringUtils.isNotBlank(name) ? name : (channel + MASTER);
         }
     }
+
+    @Data
+    @Accessors(chain = true)
+    public static class BusinessRef {
+
+        /**
+         * 业务名称
+         */
+        private String name;
+        /**
+         * 在收银台中需要返回的地址
+         */
+        private String returnUrl;
+        /**
+         * 扩展数据
+         */
+        private Map<String, Object> extra;
+
+        public BusinessRef addExtra(String key, Object value) {
+            if (extra == null) {
+                extra = new HashMap<>();
+            } else {
+                extra.put(key, value);
+            }
+            return this;
+        }
+
+    }
+    
+    @Data
+    @Accessors(chain = true)
+    public static class UserRef {
+
+        /**
+         * 内部用户名称
+         */
+        private String name;
+        /**
+         * 用户邮箱
+         */
+        private String email;
+        /**
+         * 外部用户ID(一般是第三方支付通道提供的用户ID，如：微信的openId)
+         */
+        private String outerId;
+    }
     
     @Data
     @Accessors(chain = true)
@@ -151,7 +190,20 @@ public class Order extends AbstractExtension {
          * 通知地址
          */
         private String notifyUrl;
-        
+        /**
+         * 扩展数据
+         */
+        private Map<String, Object> extra;
+
+        public ChannelRef addExtra(String key, Object value) {
+            if (extra == null) {
+                extra = new HashMap<>();
+            } else {
+                extra.put(key, value);
+            }
+            return this;
+        }
+
         public static ChannelRef of(String name) {
             return new ChannelRef().setName(name);
         }

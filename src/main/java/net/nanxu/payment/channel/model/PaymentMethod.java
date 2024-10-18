@@ -1,4 +1,4 @@
-package net.nanxu.payment.channel;
+package net.nanxu.payment.channel.model;
 
 /**
  * 支付方式.
@@ -10,6 +10,5 @@ public enum PaymentMethod {
     WAP,
     APP,
     MINI
-    ;
 
 }

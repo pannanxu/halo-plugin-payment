@@ -1,14 +1,15 @@
 package net.nanxu.payment.money;
 
+import java.math.BigDecimal;
 import reactor.core.publisher.Mono;
 
 /**
- * ExchangeRateConverter.
+ * 汇率转换器.
  *
  * @author: P
  **/
 public interface ExchangeRateConverter {
 
-    Mono<Money> convert(Money money, Currency target);
+    Mono<BigDecimal> convert(Money money);
 
 }

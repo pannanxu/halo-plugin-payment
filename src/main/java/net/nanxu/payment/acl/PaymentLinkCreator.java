@@ -1,5 +1,6 @@
 package net.nanxu.payment.acl;
 
+import net.nanxu.payment.generator.PaymentLinkGenerator;
 import org.springframework.stereotype.Component;
 import run.halo.app.infra.ExternalLinkProcessor;
 
@@ -9,17 +10,19 @@ import run.halo.app.infra.ExternalLinkProcessor;
  * @author: P
  **/
 @Component
-public class ExternalLinkCreator {
+public class PaymentLinkCreator implements PaymentLinkGenerator {
     private final ExternalLinkProcessor externalLinkProcessor;
 
-    public ExternalLinkCreator(ExternalLinkProcessor externalLinkProcessor) {
+    public PaymentLinkCreator(ExternalLinkProcessor externalLinkProcessor) {
         this.externalLinkProcessor = externalLinkProcessor;
     }
 
-    public String paymentUrl(String orderNo, String channel) {
+    @Override
+    public String checkoutUrl(String orderNo, String channel) {
         return externalLinkProcessor.processLink("/payment/" + orderNo + "/pay/" + channel);
     }
 
+    @Override
     public String callbackUrl(String internal, String orderNo, String channel) {
         return externalLinkProcessor.processLink("/payment/" + internal + "/" + orderNo + "/callback/" + channel);
     }

@@ -1,6 +1,6 @@
 package net.nanxu.testplugin;
 
-import net.nanxu.payment.notification.INotification;
+import net.nanxu.payment.business.IBusiness;
 import net.nanxu.payment.order.Order;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
  * @author: P
  **/
 @Component
-public class TestNotification implements INotification {
+public class TestBusiness implements IBusiness {
     @Override
     public String getName() {
         return "test-notification-plugin";

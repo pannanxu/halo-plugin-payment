@@ -4,21 +4,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Currency.
+ * 国际货币单位.
  *
  * @author: P
  **/
 @Getter
 @RequiredArgsConstructor
-public enum Currency {
-    CNY("CNY", 156,"人民币", "¥", 2),
-    HKD("HKD", 344,"港币", "$", 2),
-    USD("USD", 840,"美元", "$", 2),
-    EUR("EUR", 978,"欧元", "€", 2),
-    GBP("GBP", 826,"英镑", "£", 2),
-    JPY("JPY",392, "日元", "¥", 0),
-    BTC("BTC",-1, "比特币", "฿", 0),
-    ;
+public class ISOCurrencyUnit implements CurrencyUnit {
 
     /**
      * ISO 货币唯一的三位字母代码。
@@ -27,7 +19,7 @@ public enum Currency {
     /**
      * ISO 货币唯一的三位数字代码。
      */
-    private final Integer numericCode;
+    private final int numericCode;
     /**
      * 货币名称。
      */

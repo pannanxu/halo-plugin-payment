@@ -1,6 +1,7 @@
 package net.nanxu.payment.channel;
 
 import net.nanxu.payment.account.IAccount;
+import net.nanxu.payment.channel.model.PaymentProfile;
 import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
 import net.nanxu.payment.channel.model.QueryRequest;
@@ -53,55 +54,4 @@ public interface IPayment extends ExtensionPoint {
     default void unregister() {
     }
 
-    /**
-     * 去除一些不需要让第三方插件需要的功能
-     */
-    static IPayment wrap(IPayment payment) {
-        return new IPayment() {
-            @Override
-            public String getName() {
-                return payment.getName();
-            }
-
-            @Override
-            public Mono<IAccount> createAccount(IAccount account) {
-                return payment.createAccount(account);
-            }
-
-            @Override
-            public PaymentProfile getProfile() {
-                return payment.getProfile();
-            }
-
-            @Override
-            public IPaymentSupport getSupport() {
-                return payment.getSupport();
-            }
-
-            @Override
-            public IPaymentCallback getCallback() {
-                throw new UnsupportedOperationException("Not support callback");
-            }
-
-            @Override
-            public Mono<PaymentResult> pay(PaymentRequest request) {
-                return payment.pay(request);
-            }
-
-            @Override
-            public Mono<QueryResult> query(QueryRequest request) {
-                return payment.query(request);
-            }
-
-            @Override
-            public Mono<RefundResult> refund(RefundRequest request) {
-                return payment.refund(request);
-            }
-
-            @Override
-            public Mono<RefundResult> cancel(RefundRequest request) {
-                return payment.cancel(request);
-            }
-        };
-    }
 }

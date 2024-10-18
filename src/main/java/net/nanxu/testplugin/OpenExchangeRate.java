@@ -1,6 +1,6 @@
 package net.nanxu.testplugin;
 
-import net.nanxu.payment.money.Currency;
+import net.nanxu.payment.money.CurrencyUnit;
 import net.nanxu.payment.money.ExchangeRateResult;
 import net.nanxu.payment.money.IExchangeRate;
 import reactor.core.publisher.Mono;
@@ -18,7 +18,7 @@ public class OpenExchangeRate implements IExchangeRate {
     }
 
     @Override
-    public Mono<ExchangeRateResult> convert(Currency base) {
+    public Mono<ExchangeRateResult> convert(CurrencyUnit base) {
         return null;
     }
 }

@@ -25,4 +25,11 @@ public class Account extends AbstractExtension implements IAccount  {
 
     // 账户配置信息
     private ObjectNode config;
+
+    public void copyFrom(IAccount account) {
+        this.setName(account.getName());
+        this.setChannel(account.getChannel());
+        this.setMaster(account.getMaster());
+        this.setConfig(account.getConfig());
+    }
 }

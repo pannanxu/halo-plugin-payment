@@ -3,16 +3,15 @@ package net.nanxu.payment.order.impl;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.nanxu.payment.acl.ExternalLinkCreator;
 import net.nanxu.payment.generator.OrderNoProvider;
+import net.nanxu.payment.generator.PaymentLinkGenerator;
 import net.nanxu.payment.money.Money;
 import net.nanxu.payment.order.Order;
 import net.nanxu.payment.order.OrderService;
-import net.nanxu.payment.setting.PaymentSettingManager;
+import net.nanxu.payment.setting.PaymentSettingService;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ReactiveExtensionClient;
-import run.halo.app.extension.Ref;
 
 /**
  * OrderService.
@@ -24,8 +23,8 @@ import run.halo.app.extension.Ref;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderNoProvider orderNoProvider;
-    private final ExternalLinkCreator externalLinkCreator;
-    private final PaymentSettingManager settingManager;
+    private final PaymentLinkGenerator paymentLinkGenerator;
+    private final PaymentSettingService settingService;
     private final ReactiveExtensionClient client;
 
     @Override
@@ -38,40 +37,30 @@ public class OrderServiceImpl implements OrderService {
             .setProducts(List.of())
             .setMoney(Money.ofCNY(new BigDecimal("100.00")))
             // .setPayment(Ref.of("WeChat")) // 在收银台由用户自行选择后再写入
-            .setUser(Ref.of("user-1"))
-            .addExtra("simple", "第三方插件创建订单自行写入的扩展数据")
+            // .setUser(Ref.of("user-1"))
             ;
     }
 
     @Override
     public Mono<Order> getOrder(String orderNo) {
-        return Mono.just(createSimpleOrder());
+        return client.get(Order.class, orderNo);
     }
 
     @Override
     public Mono<Order> createOrder(Order request) {
         return orderNoProvider.generate()
-            .map(orderNo -> {
-                Order order = Order.createOrder();
-                return order
-                    .setOrderNo(orderNo)
-                    .setSubject(request.getSubject())
-                    .setDescription(request.getDescription())
-                    .setProducts(request.getProducts())
-                    .setMoney(request.getMoney())
-                    .setBusiness(request.getBusiness())
-                    .setChannel(request.getChannel())
-                    .setAccount(request.getAccount())
-                    .setUser(request.getUser())
-                    .setExtra(request.getExtra());
+            .map(e -> {
+                request.setOrderNo(e);
+                return request;
             })
-            .flatMap(order -> settingManager.getBasicSetting().map(basic -> {
+            .flatMap(order -> settingService.getBasicSetting().map(basic -> {
                 if (null == order.getChannel()) {
                     order.setChannel(new Order.ChannelRef());
                 }
-                order.setChannel(order.getChannel().setNotifyUrl(
-                    externalLinkCreator.callbackUrl(basic.getInternal(), order.getOrderNo(),
-                        order.getChannel().getName())));
+                String callbackUrl = paymentLinkGenerator.callbackUrl(basic.getInternal(),
+                    order.getOrderNo(),
+                    order.getChannel().getName());
+                order.setChannel(order.getChannel().setNotifyUrl(callbackUrl));
                 return order;
             }))
             .flatMap(client::create);

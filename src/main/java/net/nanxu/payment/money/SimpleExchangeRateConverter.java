@@ -1,10 +1,10 @@
 package net.nanxu.payment.money;
 
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import run.halo.app.plugin.extensionpoint.ExtensionGetter;
-import java.math.BigDecimal;
 
 /**
  * SimpleExchangeRateConverter.
@@ -18,16 +18,15 @@ public class SimpleExchangeRateConverter implements ExchangeRateConverter {
     private final ExtensionGetter extensionGetter;
 
     @Override
-    public Mono<Money> convert(Money money, Currency target) {
+    public Mono<BigDecimal> convert(Money money) {
         return resolve(money.getCurrency())
             .map(e -> {
-                BigDecimal rate = e.getRates().get(target.getAlphaCode());
-                money.setRate(new ExchangeRate(money.getCurrency(), target, rate));
-                return money;
+                BigDecimal rate = e.getRates().get(money.getRate().getTarget().getAlphaCode());
+                return money.getAmount().multiply(rate);
             });
     }
 
-    public Mono<ExchangeRateResult> resolve(Currency base) {
+    public Mono<ExchangeRateResult> resolve(CurrencyUnit base) {
         return new SimpleExchangeRate().convert(base);
     }
 }

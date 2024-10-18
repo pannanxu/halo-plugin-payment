@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public interface PaymentSettingManager {
+public interface PaymentSettingService {
     
     Mono<PaymentSetting.Basic> getBasicSetting();
     

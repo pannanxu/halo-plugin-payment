@@ -1,4 +1,4 @@
-package net.nanxu.payment.channel;
+package net.nanxu.payment.channel.model;
 
 import java.util.ArrayList;
 import java.util.List;

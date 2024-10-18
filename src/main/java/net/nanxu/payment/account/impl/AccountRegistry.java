@@ -1,7 +1,8 @@
-package net.nanxu.payment.account;
+package net.nanxu.payment.account.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.nanxu.payment.account.IAccount;
 
 /**
  * AccountRegistry.
@@ -24,7 +25,7 @@ public class AccountRegistry {
         return accountMap.get(name);
     }
 
-    public IAccount getAccountByChannel(String channel) {
+    public IAccount getMasterAccount(String channel) {
         return accountMap.values().stream()
             .filter(e -> e.getChannel().equals(channel))
             .filter(IAccount::getMaster)

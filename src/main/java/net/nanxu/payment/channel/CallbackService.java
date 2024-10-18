@@ -1,6 +1,6 @@
 package net.nanxu.payment.channel;
 
-import org.springframework.web.reactive.function.server.ServerRequest;
+import net.nanxu.payment.channel.model.CallbackRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -9,5 +9,8 @@ import reactor.core.publisher.Mono;
  * @author: P
  **/
 public interface CallbackService {
-    Mono<Object> callback(String channel, String orderNo, ServerRequest request);
+    
+    Mono<Boolean> validateInternal(String internal);
+    
+    Mono<Object> callback(CallbackRequest request);
 }

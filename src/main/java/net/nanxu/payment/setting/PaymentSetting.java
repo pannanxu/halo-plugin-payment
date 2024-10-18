@@ -3,7 +3,7 @@ package net.nanxu.payment.setting;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.nanxu.payment.account.Account;
-import net.nanxu.payment.money.Currency;
+import net.nanxu.payment.money.CurrencyUnit;
 import run.halo.app.extension.AbstractExtension;
 
 /**
@@ -24,7 +24,7 @@ public class PaymentSetting {
         /**
          * 基础汇率转换货币
          */
-        private Currency currency;
+        private CurrencyUnit currency;
 
     }
 
@@ -35,7 +35,7 @@ public class PaymentSetting {
         /**
          * 基础汇率转换货币
          */
-        private Currency currency;
+        private CurrencyUnit currency;
         /**
          * 使用的汇率转换器
          */

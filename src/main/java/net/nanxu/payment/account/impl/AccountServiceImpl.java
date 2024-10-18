@@ -6,10 +6,9 @@ import lombok.RequiredArgsConstructor;
 import net.nanxu.payment.account.AccountService;
 import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.channel.IPayment;
-import net.nanxu.payment.exception.AccountException;
-import net.nanxu.payment.account.AccountRegistry;
 import net.nanxu.payment.channel.PaymentRegistry;
-import net.nanxu.payment.setting.PaymentSettingManager;
+import net.nanxu.payment.exception.AccountException;
+import net.nanxu.payment.setting.PaymentSettingService;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -22,15 +21,16 @@ import reactor.core.publisher.Mono;
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    private final AccountRegistry registry;
-    private final PaymentRegistry paymentRegistry;
-    private final PaymentSettingManager settingManager;
-
+    private final AccountRegistry registry = new AccountRegistry();
     private final AtomicBoolean creating = new AtomicBoolean(false);
+
+    private final PaymentRegistry paymentRegistry;
+    private final PaymentSettingService settingService;
+
 
     @Override
     public Mono<IAccount> getAccount(String name) {
-        return settingManager.getAccountSetting(name)
+        return settingService.getAccountSetting(name)
             .flatMap(accountSetting -> {
                 if (!accountSetting.getEnabled() || null == accountSetting.getAccount()) {
                     return Mono.error(new AccountException("Account " + name + " is disabled"));

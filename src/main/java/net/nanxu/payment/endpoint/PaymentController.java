@@ -3,18 +3,20 @@ package net.nanxu.payment.endpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nanxu.payment.PaymentFactory;
-import net.nanxu.payment.channel.PaymentProfile;
-import net.nanxu.payment.order.Order;
+import net.nanxu.payment.channel.CallbackService;
+import net.nanxu.payment.channel.model.CallbackRequest;
+import net.nanxu.payment.channel.model.PaymentProfile;
 import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
 import net.nanxu.payment.channel.model.PaymentSupport;
+import net.nanxu.payment.order.Order;
 import net.nanxu.testplugin.WeChatPayment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.theme.TemplateNameResolver;
@@ -74,9 +76,17 @@ public class PaymentController {
         @PathVariable String internal,
         @PathVariable String channel,
         @PathVariable String orderNo,
-        ServerRequest request) {
-
-        return payment.getServiceFactory().getCallback().callback(channel, orderNo, request);
+        @RequestBody String body) {
+        CallbackService callback = payment.getServiceFactory().getCallback();
+        return callback.validateInternal(internal)
+            .flatMap(e -> {
+                if (!e) {
+                    // 随便返回一个
+                    return Mono.just("success");
+                }
+                return callback.callback(
+                    CallbackRequest.builder().channel(channel).orderNo(orderNo).requestBody(body).build());
+            });
     }
 
 }

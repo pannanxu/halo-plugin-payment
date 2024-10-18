@@ -5,7 +5,12 @@ package net.nanxu.payment.cache;
  *
  * @author: P
  **/
-public class CacheManager {
+public interface CacheManager {
     
+    void put(String key, Object value);
     
+    <T> T get(String key, Class<T> clazz);
+    
+    void remove(String key);
+
 }

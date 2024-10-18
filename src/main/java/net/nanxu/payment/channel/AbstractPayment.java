@@ -2,6 +2,8 @@ package net.nanxu.payment.channel;
 
 import java.util.List;
 import lombok.Getter;
+import net.nanxu.payment.channel.model.PaymentProfile;
+import net.nanxu.payment.channel.model.SettingField;
 
 /**
  * AbstractPayment.

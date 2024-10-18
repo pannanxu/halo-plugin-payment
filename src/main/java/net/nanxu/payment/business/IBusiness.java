@@ -1,4 +1,4 @@
-package net.nanxu.payment.notification;
+package net.nanxu.payment.business;
 
 import net.nanxu.payment.order.Order;
 import org.pf4j.ExtensionPoint;
@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public interface INotification extends ExtensionPoint {
+public interface IBusiness extends ExtensionPoint {
 
     String getName();
 

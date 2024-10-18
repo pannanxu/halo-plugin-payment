@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.order.Order;
-import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
  * CallbackRequest.
@@ -23,5 +22,5 @@ public class CallbackRequest {
     
     private IAccount account;
 
-    private ServerRequest request;
+    private String requestBody;
 }

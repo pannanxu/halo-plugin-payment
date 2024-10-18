@@ -1,4 +1,4 @@
-package net.nanxu.payment.channel;
+package net.nanxu.payment.channel.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

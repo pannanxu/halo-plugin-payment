@@ -2,9 +2,9 @@ package net.nanxu.payment.acl;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import net.nanxu.payment.business.BusinessRegistry;
+import net.nanxu.payment.business.IBusiness;
 import net.nanxu.payment.exception.NotificationException;
-import net.nanxu.payment.notification.INotification;
-import net.nanxu.payment.notification.NotificationRegistry;
 import org.springframework.stereotype.Component;
 import run.halo.app.plugin.extensionpoint.ExtensionGetter;
 
@@ -15,15 +15,15 @@ import run.halo.app.plugin.extensionpoint.ExtensionGetter;
  **/
 @RequiredArgsConstructor
 @Component
-public class NotificationExtensionGetter implements NotificationRegistry {
+public class BusinessExtensionGetter implements BusinessRegistry {
     private final ExtensionGetter extensionGetter;
 
-    public List<INotification> getNotificationExtensions() {
-        return extensionGetter.getExtensionList(INotification.class);
+    public List<IBusiness> getNotificationExtensions() {
+        return extensionGetter.getExtensionList(IBusiness.class);
     }
 
     @Override
-    public INotification getNotification(String name) {
+    public IBusiness getBusiness(String name) {
         return getNotificationExtensions().stream()
                 .filter(e -> e.getName().equals(name))
                 .findFirst()

@@ -1,13 +1,13 @@
 package net.nanxu.payment.money;
 
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import java.math.BigDecimal;
 
 /**
- * ExchangeRate.
+ * 汇率.
  *
  * @author: P
  **/
@@ -19,11 +19,11 @@ public class ExchangeRate {
     /**
      * 基础货币
      */
-    private Currency base;
+    private CurrencyUnit base;
     /**
      * 目标货币
      */
-    private Currency target;
+    private CurrencyUnit target;
     /**
      * 汇率
      */
