@@ -36,6 +36,10 @@ public class SettingField {
         private String value;
     }
 
+    public static SettingField text(String nameAndLabel) {
+        return create(nameAndLabel, nameAndLabel, "text");
+    }
+    
     public static SettingField text(String name, String label) {
         return create(name, label, "text");
     }

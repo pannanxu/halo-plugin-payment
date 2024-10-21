@@ -35,6 +35,8 @@ import net.nanxu.payment.channel.model.RefundRequest;
 import net.nanxu.payment.channel.model.RefundResult;
 import net.nanxu.payment.channel.model.SettingField;
 import net.nanxu.payment.exception.PaymentException;
+import net.nanxu.payment.money.Money;
+import net.nanxu.payment.order.Order;
 import net.nanxu.payment.utils.JsonNodeUtils;
 import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
@@ -51,9 +53,15 @@ public class AliF2FPayment extends AbstractPayment {
 
     public AliF2FPayment() {
         super(PaymentProfile.create(NAME, "支付宝当面付", "/ali.png"),
-            List.of(SettingField.text("appid", "APPID").required(),
-                SettingField.text("secret", "SECRET").required(),
-                SettingField.text("mchid", "MCHID").required()),
+            List.of(SettingField.text("appid").required(),
+                SettingField.text("publicKey").required().security(),
+                SettingField.text("privateKey").required().security(),
+                SettingField.text("charset").defaultValue("UTF-8"),
+                SettingField.text("signType").defaultValue("RSA2"),
+                SettingField.text("format").defaultValue("JSON"),
+                SettingField.text("appAuthToken").security(),
+                SettingField.text("serverUrl").defaultValue("https://openapi.alipay.com/gateway.do")
+            ),
             new AliF2FPaymentSupport(),
             new AliF2FPaymentCallback());
     }
@@ -104,9 +112,9 @@ public class AliF2FPayment extends AbstractPayment {
 
         AlipayTradeQueryModel model = new AlipayTradeQueryModel();
         // 设置订单支付时传入的商户订单号
-        model.setOutTradeNo(request.getOrder().getOrderNo());
+        model.setOutTradeNo(request.getOrderNo());
         // 设置支付宝交易号
-        model.setTradeNo(request.getOrder().getOutTradeNo());
+        model.setTradeNo(request.getOutTradeNo());
 
         // 设置查询选项
         List<String> queryOptions = new ArrayList<>();
@@ -126,17 +134,28 @@ public class AliF2FPayment extends AbstractPayment {
             log.error("Payment|支付宝当面付|查询异常:{}", e.getMessage(), e);
             return Mono.error(new PaymentException("查询当面付订单异常", e));
         }
-        System.out.println(response.getBody());
+
+        // 交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）
+        // TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
+        // TRADE_SUCCESS（交易支付成功）
+        // TRADE_FINISHED（交易结束，不可退款）
+        Map<String, Order.OrderStatus> statusMap = Map.of(
+            "WAIT_BUYER_PAY", Order.OrderStatus.WAITING,
+            "TRADE_CLOSED", Order.OrderStatus.CLOSED,
+            "TRADE_SUCCESS", Order.OrderStatus.SUCCESS,
+            "TRADE_FINISHED", Order.OrderStatus.FINISHED
+        );
 
         if (response.isSuccess()) {
-            System.out.println("调用成功");
+            return Mono.just(QueryResult.builder()
+                .orderNo(response.getOutTradeNo())
+                .outTradeNo(response.getTradeNo())
+                .payStatus(statusMap.get(response.getTradeStatus()))
+                .money(Money.ofCNY(response.getTotalAmount()))
+                .build());
         } else {
-            System.out.println("调用失败");
-            // sdk版本是"4.38.0.ALL"及以上,可以参考下面的示例获取诊断链接
-            // String diagnosisUrl = DiagnosisUtils.getDiagnosisUrl(response);
-            // System.out.println(diagnosisUrl);
+            return Mono.error(new PaymentException("查询当面付订单失败"));
         }
-        return null;
     }
 
     @Override
@@ -219,6 +238,9 @@ public class AliF2FPayment extends AbstractPayment {
         private final String charset;
         private final String signType;
         private final String format;
+        /**
+         * 第三方代调用模式下请设置app_auth_token
+         */
         private final String appAuthToken;
 
         private final AlipayClient client;
@@ -231,7 +253,7 @@ public class AliF2FPayment extends AbstractPayment {
             this.charset = JsonNodeUtils.getString(config, "charset", "UTF-8");
             this.signType = JsonNodeUtils.getString(config, "signType", "RSA2");
             this.format = JsonNodeUtils.getString(config, "format", "json");
-            this.appAuthToken = JsonNodeUtils.getString(config, "app_auth_token");
+            this.appAuthToken = JsonNodeUtils.getString(config, "appAuthToken");
 
             AlipayConfig alipayConfig = new AlipayConfig();
             //设置网关地址

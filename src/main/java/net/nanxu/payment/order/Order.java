@@ -199,6 +199,40 @@ public class Order extends AbstractExtension {
         private String outerId;
     }
 
+    public enum OrderStatus {
+        /**
+         * 等待交易
+         */
+        WAITING,
+        /**
+         * 交易成功
+         */
+        SUCCESS,
+        /**
+         * 交易关闭
+         */
+        CLOSED,
+        /**
+         * 交易完成
+         */
+        FINISHED
+    }
+
+    public enum PayStatus {
+        /**
+         * 未支付
+         */
+        UNPAID,
+        /**
+         * 支付中
+         */
+        PAYING,
+        /**
+         * 支付成功
+         */
+        PAID
+    }
+
     @Data
     @Accessors(chain = true)
     public static class ChannelRef {
@@ -221,6 +255,13 @@ public class Order extends AbstractExtension {
          */
         private Map<String, Object> extra;
 
+        public ChannelRef() {
+        }
+
+        public ChannelRef(String name) {
+            this.name = name;
+        }
+
         public ChannelRef addExtra(String key, Object value) {
             if (extra == null) {
                 extra = new HashMap<>();
@@ -238,25 +279,6 @@ public class Order extends AbstractExtension {
             return new ChannelRef().setName(name).setMethod(method);
         }
 
-    }
-
-    public enum PayStatus {
-        /**
-         * 未支付
-         */
-        UNPAID,
-        /**
-         * 支付中
-         */
-        PAYING,
-        /**
-         * 支付成功
-         */
-        PAID,
-        /**
-         * 支付失败
-         */
-        FAILED
     }
 
     public enum RefundStatus {

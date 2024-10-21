@@ -53,7 +53,7 @@ public class WeChatPayment extends AbstractPayment {
     @Override
     public Mono<PaymentResult> pay(PaymentRequest request) {
         log.info("WeChatPayment pay");
-        return Mono.just(new PaymentResult());
+        return Mono.just(PaymentResult.builder().build());
     }
 
     @Override

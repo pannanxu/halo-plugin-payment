@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author: P
  **/
 @Slf4j
-public class QrUtil {
+public class QrCodeUtil {
     public static final String IMAGE_TYPE_PNG = "png";
     public static final String BASE64_PREFIX = "data:image/";
     public static final String QR_CODE_PREFIX = BASE64_PREFIX + "png;base64,";

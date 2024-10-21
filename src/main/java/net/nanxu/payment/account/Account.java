@@ -3,6 +3,7 @@ package net.nanxu.payment.account;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 import run.halo.app.extension.AbstractExtension;
 
 /**
@@ -11,6 +12,7 @@ import run.halo.app.extension.AbstractExtension;
  * @author: P
  **/
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 public class Account extends AbstractExtension implements IAccount {
 

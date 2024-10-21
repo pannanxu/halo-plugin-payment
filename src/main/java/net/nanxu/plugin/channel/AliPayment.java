@@ -50,7 +50,7 @@ public class AliPayment extends AbstractPayment {
     public Mono<PaymentResult> pay(PaymentRequest request) {
         AliAccount account = request.getAccount().as(AliAccount.class);
         System.out.println(account);
-        return Mono.just(new PaymentResult());
+        return Mono.just(PaymentResult.builder().build());
     }
 
     @Override

@@ -33,4 +33,14 @@ public class Money {
         return of(amount, null);
     }
 
+    public static Money ofCNY(String amount) {
+        BigDecimal value = new BigDecimal(amount);
+        return of(value, null);
+    }
+
+    public static Money ofCNY(Long amount) {
+        BigDecimal value = new BigDecimal(amount);
+        return of(value.multiply(new BigDecimal("0.01")), null);
+    }
+
 }

@@ -39,7 +39,8 @@ public class AccountServiceImpl implements AccountService {
                 if (null != account) {
                     return Mono.just(account);
                 }
-                return createAccount(paymentRegistry.get(accountSetting.getAccount().getChannel()), accountSetting.getAccount());
+                IPayment payment = paymentRegistry.get(accountSetting.getAccount().getChannel());
+                return createAccount(payment, accountSetting.getAccount());
             });
     }
 
