@@ -12,13 +12,18 @@ import run.halo.app.extension.AbstractExtension;
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Account extends AbstractExtension implements IAccount  {
+public class Account extends AbstractExtension implements IAccount {
 
     // 账户名称
     private String name;
 
     // 支付通道
     private String channel;
+
+    /**
+     * 账户类型
+     */
+    private String type;
 
     // 是否为默认
     private Boolean master;

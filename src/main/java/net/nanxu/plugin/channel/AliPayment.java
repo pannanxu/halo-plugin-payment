@@ -1,4 +1,4 @@
-package net.nanxu.testplugin;
+package net.nanxu.plugin.channel;
 
 import java.util.List;
 import lombok.EqualsAndHashCode;

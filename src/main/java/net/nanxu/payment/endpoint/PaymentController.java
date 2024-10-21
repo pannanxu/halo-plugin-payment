@@ -10,7 +10,7 @@ import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
 import net.nanxu.payment.channel.model.PaymentSupport;
 import net.nanxu.payment.order.Order;
-import net.nanxu.testplugin.WeChatPayment;
+import net.nanxu.plugin.channel.WeChatPayment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

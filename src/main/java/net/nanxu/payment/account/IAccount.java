@@ -13,6 +13,8 @@ public interface IAccount {
     String getName();
 
     String getChannel();
+    
+    String getType();
 
     Boolean getMaster();
 

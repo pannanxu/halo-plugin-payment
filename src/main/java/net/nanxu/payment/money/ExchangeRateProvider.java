@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public interface IExchangeRate extends ExtensionPoint {
+public interface ExchangeRateProvider extends ExtensionPoint {
 
     String getName();
 

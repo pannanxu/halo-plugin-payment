@@ -1,5 +1,7 @@
 package net.nanxu.payment.order;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +13,6 @@ import net.nanxu.payment.channel.model.PaymentMethod;
 import net.nanxu.payment.money.Money;
 import org.apache.commons.lang3.StringUtils;
 import run.halo.app.extension.AbstractExtension;
-import run.halo.app.extension.Ref;
 
 /**
  * Order.
@@ -21,12 +22,16 @@ import run.halo.app.extension.Ref;
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
-// @GVK(kind = "Order", group = "order.payment.plugin.nanxu.net", version = "v1alpha1", singular = 
-//         "order", plural = "orders")
+// @GVK(kind = "Order",
+//     group = "order.payment.plugin.nanxu.net",
+//     version = "v1alpha1",
+//     singular = "order",
+//     plural = "orders")
 public class Order extends AbstractExtension {
     /**
      * 订单单号
      */
+    @NotBlank
     private String orderNo;
     /**
      * 外部订单号
@@ -35,6 +40,7 @@ public class Order extends AbstractExtension {
     /**
      * 订单标题
      */
+    @NotBlank
     private String subject;
     /**
      * 订单说明
@@ -47,32 +53,42 @@ public class Order extends AbstractExtension {
     /**
      * 订单总金额
      */
+    @NotNull
     private Money money;
     /**
      * 业务插件
      */
+    @NotNull
     private BusinessRef business;
     /**
      * 支付通道
      */
+    @NotNull
     private ChannelRef channel;
     /**
      * 账户信息
      */
+    @NotNull
     private AccountRef account;
     /**
      * 支付用户
      */
+    @NotNull
     private UserRef user;
     /**
      * 支付状态
      */
+    @NotNull
     private PayStatus payStatus;
     /**
      * 退款状态
      */
+    @NotNull
     private RefundStatus refundStatus;
-    
+    /**
+     * 创建时间
+     */
+    @NotNull
     private Instant createdAt;
 
     @Data
@@ -80,10 +96,12 @@ public class Order extends AbstractExtension {
         /**
          * 商品编号
          */
+        @NotBlank
         private String productNo;
         /**
          * 商品标题
          */
+        @NotBlank
         private String title;
         /**
          * 商品描述
@@ -92,14 +110,17 @@ public class Order extends AbstractExtension {
         /**
          * 商品价格
          */
+        @NotBlank
         private Money money;
         /**
          * 商品数量
          */
+        @NotBlank
         private Long quantity;
         /**
          * 商品类型
          */
+        @NotBlank
         private String itemType;
         /**
          * 商品链接
@@ -114,6 +135,7 @@ public class Order extends AbstractExtension {
     @Data
     public static class AccountRef {
         public static final String MASTER = "_master";
+        @NotBlank
         private String name;
 
         public AccountRef() {
@@ -135,10 +157,12 @@ public class Order extends AbstractExtension {
         /**
          * 业务名称
          */
+        @NotBlank
         private String name;
         /**
          * 在收银台中需要返回的地址
          */
+        @NotBlank
         private String returnUrl;
         /**
          * 扩展数据
@@ -155,7 +179,7 @@ public class Order extends AbstractExtension {
         }
 
     }
-    
+
     @Data
     @Accessors(chain = true)
     public static class UserRef {
@@ -163,6 +187,7 @@ public class Order extends AbstractExtension {
         /**
          * 内部用户名称
          */
+        @NotBlank
         private String name;
         /**
          * 用户邮箱
@@ -173,7 +198,7 @@ public class Order extends AbstractExtension {
          */
         private String outerId;
     }
-    
+
     @Data
     @Accessors(chain = true)
     public static class ChannelRef {
@@ -189,6 +214,7 @@ public class Order extends AbstractExtension {
         /**
          * 通知地址
          */
+        @NotBlank
         private String notifyUrl;
         /**
          * 扩展数据
@@ -207,7 +233,7 @@ public class Order extends AbstractExtension {
         public static ChannelRef of(String name) {
             return new ChannelRef().setName(name);
         }
-        
+
         public static ChannelRef of(String name, PaymentMethod method) {
             return new ChannelRef().setName(name).setMethod(method);
         }
@@ -250,14 +276,6 @@ public class Order extends AbstractExtension {
          * 退款失败
          */
         REFUND_FAILED
-    }
-
-    public static class PluginRef {
-
-        private Ref plugin;
-
-        private String notifyUrl;
-
     }
 
     public static Order createOrder() {

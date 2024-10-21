@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
  *
  * @author: P
  **/
-public class SimpleExchangeRate implements IExchangeRate {
+public class SimpleExchangeRateProvider implements ExchangeRateProvider {
     @Override
     public String getName() {
         return "Simple";

@@ -27,6 +27,6 @@ public class SimpleExchangeRateConverter implements ExchangeRateConverter {
     }
 
     public Mono<ExchangeRateResult> resolve(CurrencyUnit base) {
-        return new SimpleExchangeRate().convert(base);
+        return new SimpleExchangeRateProvider().convert(base);
     }
 }

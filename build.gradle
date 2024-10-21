@@ -19,6 +19,11 @@ dependencies {
     implementation platform('run.halo.tools.platform:plugin:2.20.0-SNAPSHOT')
     compileOnly 'run.halo.app:api'
 
+    implementation 'com.google.zxing:core:3.3.3'
+    implementation 'com.google.zxing:javase:3.3.3'
+
+    implementation 'com.alipay.sdk:alipay-sdk-java:4.34.0.ALL'
+    
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

@@ -1,4 +1,4 @@
-package net.nanxu.testplugin;
+package net.nanxu.plugin.business;
 
 import net.nanxu.payment.business.IBusiness;
 import net.nanxu.payment.order.Order;

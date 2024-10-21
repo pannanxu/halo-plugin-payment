@@ -1,8 +1,8 @@
-package net.nanxu.testplugin;
+package net.nanxu.plugin.money;
 
 import net.nanxu.payment.money.CurrencyUnit;
+import net.nanxu.payment.money.ExchangeRateProvider;
 import net.nanxu.payment.money.ExchangeRateResult;
-import net.nanxu.payment.money.IExchangeRate;
 import reactor.core.publisher.Mono;
 
 /**
@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
  * 
  * @author: P
  **/
-public class OpenExchangeRate implements IExchangeRate {
+public class OpenExchangeRateProvider implements ExchangeRateProvider {
 
     @Override
     public String getName() {

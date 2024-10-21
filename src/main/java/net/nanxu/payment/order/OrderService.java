@@ -9,8 +9,6 @@ import reactor.core.publisher.Mono;
  **/
 public interface OrderService {
     
-    Order createSimpleOrder();
-    
     Mono<Order> getOrder(String orderNo);
     
     Mono<Order> createOrder(Order order);

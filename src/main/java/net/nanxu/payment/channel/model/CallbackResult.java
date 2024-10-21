@@ -1,5 +1,6 @@
 package net.nanxu.payment.channel.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  * @author: P
  **/
 @Data
+@Builder
 public class CallbackResult {
     /**
      * 返回给支付商的内容
