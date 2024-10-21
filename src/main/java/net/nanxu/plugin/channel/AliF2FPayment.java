@@ -4,11 +4,15 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConfig;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeQueryModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePrecreateRequest;
+import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradePrecreateResponse;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.EqualsAndHashCode;
@@ -32,6 +36,7 @@ import net.nanxu.payment.channel.model.RefundResult;
 import net.nanxu.payment.channel.model.SettingField;
 import net.nanxu.payment.exception.PaymentException;
 import net.nanxu.payment.utils.JsonNodeUtils;
+import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 import run.halo.app.infra.utils.JsonUtils;
 
@@ -93,6 +98,44 @@ public class AliF2FPayment extends AbstractPayment {
 
     @Override
     public Mono<QueryResult> query(QueryRequest request) {
+        AliF2FAccount account = request.getAccount().as(AliF2FAccount.class);
+        // 构造请求参数以调用接口
+        AlipayTradeQueryRequest queryRequest = new AlipayTradeQueryRequest();
+
+        AlipayTradeQueryModel model = new AlipayTradeQueryModel();
+        // 设置订单支付时传入的商户订单号
+        model.setOutTradeNo(request.getOrder().getOrderNo());
+        // 设置支付宝交易号
+        model.setTradeNo(request.getOrder().getOutTradeNo());
+
+        // 设置查询选项
+        List<String> queryOptions = new ArrayList<>();
+        queryOptions.add("trade_settle_info");
+        model.setQueryOptions(queryOptions);
+
+        queryRequest.setBizModel(model);
+        // 第三方代调用模式下请设置app_auth_token
+        if (StringUtils.isNotBlank(account.getAppAuthToken())) {
+            queryRequest.putOtherTextParam("app_auth_token", account.getAppAuthToken());
+        }
+
+        AlipayTradeQueryResponse response = null;
+        try {
+            response = account.getClient().execute(queryRequest);
+        } catch (AlipayApiException e) {
+            log.error("Payment|支付宝当面付|查询异常:{}", e.getMessage(), e);
+            return Mono.error(new PaymentException("查询当面付订单异常", e));
+        }
+        System.out.println(response.getBody());
+
+        if (response.isSuccess()) {
+            System.out.println("调用成功");
+        } else {
+            System.out.println("调用失败");
+            // sdk版本是"4.38.0.ALL"及以上,可以参考下面的示例获取诊断链接
+            // String diagnosisUrl = DiagnosisUtils.getDiagnosisUrl(response);
+            // System.out.println(diagnosisUrl);
+        }
         return null;
     }
 
@@ -176,6 +219,7 @@ public class AliF2FPayment extends AbstractPayment {
         private final String charset;
         private final String signType;
         private final String format;
+        private final String appAuthToken;
 
         private final AlipayClient client;
 
@@ -187,6 +231,7 @@ public class AliF2FPayment extends AbstractPayment {
             this.charset = JsonNodeUtils.getString(config, "charset", "UTF-8");
             this.signType = JsonNodeUtils.getString(config, "signType", "RSA2");
             this.format = JsonNodeUtils.getString(config, "format", "json");
+            this.appAuthToken = JsonNodeUtils.getString(config, "app_auth_token");
 
             AlipayConfig alipayConfig = new AlipayConfig();
             //设置网关地址
