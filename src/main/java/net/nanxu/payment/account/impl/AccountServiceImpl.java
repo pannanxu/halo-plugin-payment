@@ -3,6 +3,7 @@ package net.nanxu.payment.account.impl;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
+import net.nanxu.payment.account.Account;
 import net.nanxu.payment.account.AccountService;
 import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.channel.IPayment;
@@ -31,28 +32,27 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<IAccount> getAccount(String name) {
         return settingService.getAccountSetting(name)
-            .flatMap(accountSetting -> {
-                if (!accountSetting.getEnabled() || null == accountSetting.getAccount()) {
-                    return Mono.error(new AccountException("Account " + name + " is disabled"));
-                }
-                IAccount account = registry.getAccount(name);
-                if (null != account) {
-                    return Mono.just(account);
-                }
-                IPayment payment = paymentRegistry.get(accountSetting.getAccount().getChannel());
-                return createAccount(payment, accountSetting.getAccount());
-            });
+            .filter(accountSetting -> accountSetting.getEnabled()
+                && null != accountSetting.getAccount())
+            .switchIfEmpty(Mono.error(new AccountException("Account " + name + " is disabled")))
+            .flatMap(accountSetting -> Mono.justOrEmpty(registry.getAccount(name))
+                .switchIfEmpty(Mono.defer(() -> {
+                    Account account = accountSetting.getAccount();
+                    IPayment payment = paymentRegistry.get(account.getChannel());
+                    return createAccount(payment, account);
+                })));
     }
 
     @Override
     public Mono<IAccount> createAccount(IPayment payment, IAccount account) {
-        if (null == payment) {
-            return Mono.error(new AccountException("Payment " + account.getChannel() + " is not registered"));
-        }
-        if (null == account) {
-            return Mono.error(new AccountException("Account is null"));
-        }
         return Mono.defer(() -> {
+            if (null == payment) {
+                return Mono.error(
+                    new AccountException("Payment " + account.getChannel() + " is not registered"));
+            }
+            if (null == account) {
+                return Mono.error(new AccountException("Account is null"));
+            }
             if (creating.compareAndSet(false, true)) {
                 return payment.createAccount(account)
                     .doOnNext(registry::register)

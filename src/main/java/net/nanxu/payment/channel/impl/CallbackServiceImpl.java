@@ -51,25 +51,20 @@ public class CallbackServiceImpl implements CallbackService {
 
     private Mono<Tuple2<Order, CallbackResult>> handleBusinessLogic(CallbackRequest request) {
         return Mono.defer(() -> orderService.getOrder(request.getOrderNo())
-                .flatMap(order -> {
-                    if (Order.PayStatus.PAYING.equals(order.getPayStatus())) {
-                        request.setOrder(order);
-                        return Mono.just(order);
-                    }
-                    return Mono.error(new PaymentException("订单状态异常"));
-                })
+                .switchIfEmpty(Mono.error(new PaymentException("订单不存在")))
+                .filter(order -> Order.PayStatus.PAYING.equals(order.getPayStatus()))
+                .switchIfEmpty(Mono.error(new PaymentException("订单状态异常")))
+                .doOnNext(request::setOrder)
                 // 支付插件处理
                 .flatMap(order -> handlePayment(order, request))
-                // 更新订单处理
-                .flatMap(e -> {
-                    CallbackResult result = e.getT2();
-                    Order order = e.getT1();
-                    if (result.getSuccess()) { // 第三方支付插件反馈支付成功
+                .doOnNext(e -> {
+                    if (e.getT2().getSuccess()) { // 第三方支付插件反馈支付成功
                         // 更新订单状态为支付成功
-                        order.setPayStatus(Order.PayStatus.PAID);
+                        e.getT1().setPayStatus(Order.PayStatus.PAID);
                     }
-                    return orderService.updateOrder(order).map(e1 -> Tuples.of(order, result));
-                }))
+                })
+                // 更新订单处理
+                .flatMap(e -> orderService.updateOrder(e.getT1()).thenReturn(e)))
             .retryWhen(Retry.backoff(5, Duration.ofMillis(100))
                 .filter(OptimisticLockingFailureException.class::isInstance));
     }
@@ -86,9 +81,8 @@ public class CallbackServiceImpl implements CallbackService {
     }
 
     private Mono<CallbackResult> handleNotify(Order order, CallbackResult result) {
-        return Mono.defer(
-                () -> businessRegistry.getBusiness(order.getBusiness().getName()).notify(order)
-            )
+        return Mono.defer(() -> businessRegistry.getBusiness(order.getBusiness().getName())
+                .notify(order))
             .mapNotNull(e -> e ? result : null)
             .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
                 .filter(RuntimeException.class::isInstance));
