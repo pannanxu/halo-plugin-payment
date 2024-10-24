@@ -25,11 +25,4 @@ public class AccountRegistry {
         return accountMap.get(name);
     }
 
-    public IAccount getMasterAccount(String channel) {
-        return accountMap.values().stream()
-            .filter(e -> e.getChannel().equals(channel))
-            .filter(IAccount::getMaster)
-            .findFirst()
-            .orElse(null);
-    }
 }

@@ -21,7 +21,8 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.3.3'
     implementation 'com.google.zxing:javase:3.3.3'
-
+    
+    // sdks
     implementation 'com.alipay.sdk:alipay-sdk-java:4.34.0.ALL'
     
     testImplementation 'run.halo.app:api'

@@ -1,4 +1,4 @@
-package net.nanxu.plugin.channel;
+package net.nanxu.plugin.channel.alipay;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;

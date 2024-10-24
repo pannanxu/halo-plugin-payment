@@ -28,6 +28,11 @@ public class AccountServiceImpl implements AccountService {
     private final PaymentRegistry paymentRegistry;
     private final PaymentSettingService settingService;
 
+    @Override
+    public Mono<IAccount> getDefaultAccount(String channel) {
+        // TODO 默认账户需要进一步处理，此处暂时这样处理
+        return getAccount(channel + "_default");
+    }
 
     @Override
     public Mono<IAccount> getAccount(String name) {

@@ -30,11 +30,6 @@ public abstract class PaymentAccount implements IAccount {
     }
 
     @Override
-    public Boolean getMaster() {
-        return account.getMaster();
-    }
-
-    @Override
     public String getType() {
         return account.getType();
     }

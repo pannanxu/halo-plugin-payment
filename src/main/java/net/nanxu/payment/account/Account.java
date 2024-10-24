@@ -27,16 +27,12 @@ public class Account extends AbstractExtension implements IAccount {
      */
     private String type;
 
-    // 是否为默认
-    private Boolean master;
-
     // 账户配置信息
     private ObjectNode config;
 
     public void copyFrom(IAccount account) {
         this.setName(account.getName());
         this.setChannel(account.getChannel());
-        this.setMaster(account.getMaster());
         this.setConfig(account.getConfig());
     }
 }

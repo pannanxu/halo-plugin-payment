@@ -9,6 +9,9 @@ import reactor.core.publisher.Mono;
  * @author: P
  **/
 public interface AccountService {
+
+    Mono<IAccount> getDefaultAccount(String channel);
+
     /**
      * 获取或者创建一个账户
      *

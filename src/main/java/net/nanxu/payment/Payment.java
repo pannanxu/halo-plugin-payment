@@ -4,11 +4,10 @@ import lombok.NonNull;
 import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.channel.CallbackService;
 import net.nanxu.payment.channel.IPayment;
+import net.nanxu.payment.channel.IPaymentRouter;
 import net.nanxu.payment.channel.PaymentService;
-import net.nanxu.payment.channel.model.PaymentProfile;
 import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
-import net.nanxu.payment.channel.model.PaymentSupport;
 import net.nanxu.payment.channel.model.QueryRequest;
 import net.nanxu.payment.channel.model.QueryResult;
 import net.nanxu.payment.channel.model.RefundRequest;
@@ -19,7 +18,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -31,10 +29,6 @@ import reactor.core.publisher.Mono;
 public final class Payment implements ApplicationContextAware {
 
     private static PaymentFactory factory;
-
-    public static Flux<PaymentProfile> getPaymentProfiles(PaymentSupport order) {
-        return factory.getPaymentProfiles(order);
-    }
 
     /**
      * 获取原始的支付通道
@@ -53,6 +47,10 @@ public final class Payment implements ApplicationContextAware {
 
     public static CallbackService getCallbackService() {
         return factory.getServiceFactory().getCallback();
+    }
+
+    public static IPaymentRouter getPaymentRouter() {
+        return factory.getPaymentRouter();
     }
 
     public static Mono<IAccount> getAccount(String name) {

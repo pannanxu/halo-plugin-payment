@@ -11,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import net.nanxu.payment.channel.model.PaymentMethod;
 import net.nanxu.payment.money.Money;
-import org.apache.commons.lang3.StringUtils;
 import run.halo.app.extension.AbstractExtension;
 
 /**
@@ -134,7 +133,6 @@ public class Order extends AbstractExtension {
 
     @Data
     public static class AccountRef {
-        public static final String MASTER = "_master";
         @NotBlank
         private String name;
 
@@ -145,9 +143,6 @@ public class Order extends AbstractExtension {
             this.name = name;
         }
 
-        public String getNameOrDefault(String channel) {
-            return StringUtils.isNotBlank(name) ? name : (channel + MASTER);
-        }
     }
 
     @Data

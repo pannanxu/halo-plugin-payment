@@ -1,4 +1,4 @@
-package net.nanxu.plugin.channel;
+package net.nanxu.plugin.channel.alipay;
 
 import java.util.List;
 import lombok.EqualsAndHashCode;

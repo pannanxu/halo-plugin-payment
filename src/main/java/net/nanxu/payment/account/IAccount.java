@@ -16,8 +16,6 @@ public interface IAccount {
     
     String getType();
 
-    Boolean getMaster();
-
     ObjectNode getConfig();
 
     @SuppressWarnings("unchecked")

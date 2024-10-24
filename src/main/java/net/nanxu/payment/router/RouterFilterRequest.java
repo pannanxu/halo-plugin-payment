@@ -1,19 +1,23 @@
-package net.nanxu.payment.channel.model;
+package net.nanxu.payment.router;
 
+import lombok.Builder;
 import lombok.Data;
-import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.infra.ProtocolPacket;
 import net.nanxu.payment.order.Order;
 
 /**
- * modelPaymentRequest.
+ * RouterFilterRequest.
  *
  * @author: P
  **/
 @Data
-public class PaymentRequest {
+@Builder
+public class RouterFilterRequest {
+
+    /**
+     * 订单信息
+     */
     private Order order;
-    private IAccount account;
+
     private ProtocolPacket packet;
-    
 }

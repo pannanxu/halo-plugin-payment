@@ -5,19 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.nanxu.payment.PaymentFactory;
 import net.nanxu.payment.channel.CallbackService;
 import net.nanxu.payment.channel.model.CallbackRequest;
-import net.nanxu.payment.channel.model.PaymentProfile;
 import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
-import net.nanxu.payment.channel.model.PaymentSupport;
 import net.nanxu.payment.order.Order;
-import net.nanxu.plugin.channel.WeChatPayment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.theme.TemplateNameResolver;
 
@@ -38,26 +34,6 @@ public class PaymentController {
     @GetMapping("/test")
     public Mono<String> test() {
         return Mono.just("test");
-    }
-
-    // /apis/fake.halo.run/v1alpha1/payment/profiles?orderId=123
-    @GetMapping("/profiles")
-    public Flux<PaymentProfile> renderPaymentPage() {
-        Flux<PaymentProfile> profiles = payment.getPaymentProfiles(PaymentSupport.builder()
-            .userAgent("")
-            .request(null)
-            .order(new Order().setChannel(Order.ChannelRef.of(WeChatPayment.NAME)))
-            .build());
-
-        return profiles;
-        // return templateNameResolver.resolveTemplateNameOrDefault(request.exchange(), "payment")
-        //     .flatMap(templateName -> profiles.collectList()
-        //         .flatMap(e -> {
-        //             var model = new HashMap<String, Object>();
-        //             model.put("orderId", orderId);
-        //             model.put("profiles", e);
-        //             return ServerResponse.ok().render(templateName, model);
-        //         }));
     }
 
     @PostMapping("/{orderNo}/pay/{channel}")

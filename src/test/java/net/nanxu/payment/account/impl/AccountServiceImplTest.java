@@ -40,7 +40,6 @@ class AccountServiceImplTest {
         Account account = new Account();
         account.setName("test");
         account.setChannel("test");
-        account.setMaster(true);
         accountSetting.setAccount(account);
 
         when(settingService.getAccountSetting(accountName)).thenReturn(Mono.just(accountSetting));
@@ -48,7 +47,6 @@ class AccountServiceImplTest {
         TestChannelAccount channelAccount = new TestChannelAccount();
         channelAccount.setName("test");
         channelAccount.setChannel("test");
-        channelAccount.setMaster(true);
         when(payment.createAccount(any())).thenReturn(Mono.just(channelAccount));
         when(paymentRegistry.get("test")).thenReturn(payment);
 
