@@ -51,6 +51,18 @@ import run.halo.app.infra.utils.JsonUtils;
 public class AliF2FPayment extends AbstractPayment {
     public static final String NAME = "AliF2F";
 
+    // 交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）
+    // TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
+    // TRADE_SUCCESS（交易支付成功）
+    // TRADE_FINISHED（交易结束，不可退款）
+    private static final Map<String, Order.OrderStatus> statusMap = Map.of(
+        "WAIT_BUYER_PAY", Order.OrderStatus.WAITING,
+        "TRADE_CLOSED", Order.OrderStatus.CLOSED,
+        "TRADE_SUCCESS", Order.OrderStatus.SUCCESS,
+        "TRADE_FINISHED", Order.OrderStatus.CLOSED
+    );
+
+
     public AliF2FPayment() {
         super(PaymentProfile.create(NAME, "支付宝当面付", "/ali.png"),
             List.of(SettingField.text("appid").required(),
@@ -134,17 +146,6 @@ public class AliF2FPayment extends AbstractPayment {
             log.error("Payment|支付宝当面付|查询异常:{}", e.getMessage(), e);
             return Mono.error(new PaymentException("查询当面付订单异常", e));
         }
-
-        // 交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）
-        // TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
-        // TRADE_SUCCESS（交易支付成功）
-        // TRADE_FINISHED（交易结束，不可退款）
-        Map<String, Order.OrderStatus> statusMap = Map.of(
-            "WAIT_BUYER_PAY", Order.OrderStatus.WAITING,
-            "TRADE_CLOSED", Order.OrderStatus.CLOSED,
-            "TRADE_SUCCESS", Order.OrderStatus.SUCCESS,
-            "TRADE_FINISHED", Order.OrderStatus.FINISHED
-        );
 
         if (response.isSuccess()) {
             return Mono.just(QueryResult.builder()

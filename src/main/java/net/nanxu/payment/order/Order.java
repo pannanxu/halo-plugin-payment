@@ -206,11 +206,7 @@ public class Order extends AbstractExtension {
         /**
          * 交易关闭
          */
-        CLOSED,
-        /**
-         * 交易完成
-         */
-        FINISHED
+        CLOSED
     }
 
     public enum PayStatus {
