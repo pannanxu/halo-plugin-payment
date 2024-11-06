@@ -12,6 +12,6 @@ public interface ExchangeRateProvider extends ExtensionPoint {
 
     String getName();
 
-    Mono<ExchangeRateResult> convert(CurrencyUnit base);
+    Mono<ExchangeRateResult> convert(String base);
 
 }

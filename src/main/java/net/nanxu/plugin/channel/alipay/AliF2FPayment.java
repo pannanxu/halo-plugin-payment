@@ -28,7 +28,6 @@ import net.nanxu.payment.channel.model.CallbackResult;
 import net.nanxu.payment.channel.model.PaymentProfile;
 import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
-import net.nanxu.payment.channel.model.PaymentSupport;
 import net.nanxu.payment.channel.model.QueryRequest;
 import net.nanxu.payment.channel.model.QueryResult;
 import net.nanxu.payment.channel.model.RefundRequest;
@@ -170,26 +169,6 @@ public class AliF2FPayment extends AbstractPayment {
     }
 
     public static class AliF2FPaymentSupport implements IPaymentSupport {
-        @Override
-        public Mono<Boolean> pay(PaymentSupport request) {
-            return Mono.just(Boolean.TRUE);
-        }
-
-        @Override
-        public Mono<Boolean> query(QueryRequest request) {
-            return Mono.just(Boolean.TRUE);
-        }
-
-        @Override
-        public Mono<Boolean> refund(RefundRequest request) {
-            return Mono.just(Boolean.TRUE);
-
-        }
-
-        @Override
-        public Mono<Boolean> cancel(RefundRequest request) {
-            return Mono.just(Boolean.TRUE);
-        }
     }
 
     @Slf4j

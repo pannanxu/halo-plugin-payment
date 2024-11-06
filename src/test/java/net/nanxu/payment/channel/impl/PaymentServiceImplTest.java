@@ -18,10 +18,10 @@ import net.nanxu.payment.channel.IPaymentSupport;
 import net.nanxu.payment.channel.PaymentRegistry;
 import net.nanxu.payment.channel.model.CallbackRequest;
 import net.nanxu.payment.channel.model.CallbackResult;
+import net.nanxu.payment.channel.model.PayRequest;
 import net.nanxu.payment.channel.model.PaymentProfile;
 import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
-import net.nanxu.payment.channel.model.PaymentSupport;
 import net.nanxu.payment.channel.model.QueryRequest;
 import net.nanxu.payment.channel.model.QueryResult;
 import net.nanxu.payment.channel.model.RefundRequest;
@@ -76,7 +76,7 @@ class PaymentServiceImplTest {
     void pay() {
         PaymentRequest request = new PaymentRequest();
         request.setOrder(createOrder());
-        Mono<PaymentResult> pay = paymentService.pay(request);
+        Mono<PaymentResult> pay = paymentService.pay(new PayRequest());
 
         pay.subscribe(System.out::println);
 
@@ -151,26 +151,6 @@ class PaymentServiceImplTest {
         }
 
         public static class TestPaymentSupport implements IPaymentSupport {
-            @Override
-            public Mono<Boolean> pay(PaymentSupport request) {
-                return Mono.just(request.getOrder().getChannel().getName().equals(NAME));
-            }
-
-            @Override
-            public Mono<Boolean> query(QueryRequest request) {
-                return Mono.just(true);
-            }
-
-            @Override
-            public Mono<Boolean> refund(RefundRequest request) {
-                return Mono.just(true);
-
-            }
-
-            @Override
-            public Mono<Boolean> cancel(RefundRequest request) {
-                return Mono.just(true);
-            }
         }
 
         public static class TestPaymentCallback implements IPaymentCallback {

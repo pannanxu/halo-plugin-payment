@@ -18,6 +18,10 @@ public class ProtocolPacket {
      * Http Header
      */
     private Map<String, String> headers;
+    /**
+     * Http Param
+     */
+    private Map<String, String> params;
 
     public boolean isWap() {
         return userAgent.contains("wap");
@@ -25,6 +29,10 @@ public class ProtocolPacket {
 
     public boolean isPc() {
         return userAgent.contains("pc");
+    }
+
+    public boolean isApp() {
+        return userAgent.contains("app");
     }
 
 }

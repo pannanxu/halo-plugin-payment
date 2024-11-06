@@ -1,8 +1,6 @@
 package net.nanxu.payment.channel;
 
 import net.nanxu.payment.channel.model.PaymentSupport;
-import net.nanxu.payment.channel.model.QueryRequest;
-import net.nanxu.payment.channel.model.RefundRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -11,17 +9,29 @@ import reactor.core.publisher.Mono;
  * @author: P
  **/
 public interface IPaymentSupport {
+    IPaymentSupport WAP = new IPaymentSupport() {
+        @Override
+        public Mono<Boolean> isSupported(PaymentSupport request) {
+            return Mono.just(request.getPacket().isWap());
+        }
+    };
+    
+    IPaymentSupport PC = new IPaymentSupport() {
+        @Override
+        public Mono<Boolean> isSupported(PaymentSupport request) {
+            return Mono.just(request.getPacket().isPc());
+        }
+    };
+    
+    IPaymentSupport App = new IPaymentSupport() {
+        @Override
+        public Mono<Boolean> isSupported(PaymentSupport request) {
+            return Mono.just(request.getPacket().isApp());
+        }
+    };
+    
 
     default Mono<Boolean> isSupported(PaymentSupport request) {
         return Mono.just(Boolean.FALSE);
     }
-
-    Mono<Boolean> pay(PaymentSupport request);
-
-    Mono<Boolean> query(QueryRequest request);
-
-    Mono<Boolean> refund(RefundRequest request);
-
-    Mono<Boolean> cancel(RefundRequest request);
-
 }

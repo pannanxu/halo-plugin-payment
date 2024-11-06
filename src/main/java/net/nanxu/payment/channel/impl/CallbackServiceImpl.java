@@ -52,7 +52,7 @@ public class CallbackServiceImpl implements CallbackService {
     private Mono<Tuple2<Order, CallbackResult>> handleBusinessLogic(CallbackRequest request) {
         return Mono.defer(() -> orderService.getOrder(request.getOrderNo())
                 .switchIfEmpty(Mono.error(new PaymentException("订单不存在")))
-                .filter(order -> Order.PayStatus.PAYING.equals(order.getPayStatus()))
+                .filter(order -> Order.PayStatus.UNPAID.equals(order.getPayStatus()))
                 .switchIfEmpty(Mono.error(new PaymentException("订单状态异常")))
                 .doOnNext(request::setOrder)
                 // 支付插件处理

@@ -21,12 +21,12 @@ public class SimpleExchangeRateConverter implements ExchangeRateConverter {
     public Mono<BigDecimal> convert(Money money) {
         return resolve(money.getCurrency())
             .map(e -> {
-                BigDecimal rate = e.getRates().get(money.getRate().getTarget().getAlphaCode());
+                BigDecimal rate = e.getRates().get(money.getRate().getTarget());
                 return money.getAmount().multiply(rate);
             });
     }
 
-    public Mono<ExchangeRateResult> resolve(CurrencyUnit base) {
+    public Mono<ExchangeRateResult> resolve(String base) {
         return new SimpleExchangeRateProvider().convert(base);
     }
 }

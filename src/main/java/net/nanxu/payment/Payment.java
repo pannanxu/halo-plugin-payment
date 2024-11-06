@@ -6,7 +6,7 @@ import net.nanxu.payment.channel.CallbackService;
 import net.nanxu.payment.channel.IPayment;
 import net.nanxu.payment.channel.IPaymentRouter;
 import net.nanxu.payment.channel.PaymentService;
-import net.nanxu.payment.channel.model.PaymentRequest;
+import net.nanxu.payment.channel.model.PayRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
 import net.nanxu.payment.channel.model.QueryRequest;
 import net.nanxu.payment.channel.model.QueryResult;
@@ -61,7 +61,7 @@ public final class Payment implements ApplicationContextAware {
         return getOrderService().createOrder(order);
     }
 
-    public static Mono<PaymentResult> pay(PaymentRequest request) {
+    public static Mono<PaymentResult> pay(PayRequest request) {
         return getPaymentService().pay(request);
     }
 

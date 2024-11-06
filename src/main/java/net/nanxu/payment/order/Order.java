@@ -204,7 +204,7 @@ public class Order extends AbstractExtension {
          */
         SUCCESS,
         /**
-         * 交易关闭
+         * 交易关闭，例如点击收货、关闭订单、取消订单、订单超时、全部退款
          */
         CLOSED
     }

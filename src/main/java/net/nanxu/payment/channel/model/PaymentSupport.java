@@ -2,8 +2,8 @@ package net.nanxu.payment.channel.model;
 
 import lombok.Builder;
 import lombok.Data;
+import net.nanxu.payment.infra.ProtocolPacket;
 import net.nanxu.payment.order.Order;
-import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
  * PaymentOrder.
@@ -16,7 +16,5 @@ public class PaymentSupport {
     
     private Order order;
     
-    private ServerRequest request;
-
-    private String userAgent;
+    private ProtocolPacket packet;
 }

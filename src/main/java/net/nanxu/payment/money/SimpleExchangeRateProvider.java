@@ -17,7 +17,7 @@ public class SimpleExchangeRateProvider implements ExchangeRateProvider {
     }
 
     @Override
-    public Mono<ExchangeRateResult> convert(CurrencyUnit base) {
+    public Mono<ExchangeRateResult> convert(String base) {
         ExchangeRateResult result = new ExchangeRateResult();
         Map<String, BigDecimal> rates = new HashMap<>();
         // for (Currency value : Currency.values()) {

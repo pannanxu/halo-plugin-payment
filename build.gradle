@@ -55,9 +55,9 @@ tasks.register('installDepsForUI', PnpmTask) {
 
 build {
     // build frontend before build
-    tasks.named('compileJava').configure {
-        dependsOn('buildFrontend')
-    }
+//    tasks.named('compileJava').configure {
+//        dependsOn('buildFrontend')
+//    }
 }
 
 halo {

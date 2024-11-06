@@ -6,6 +6,7 @@ import net.nanxu.payment.account.IAccount;
 import net.nanxu.payment.account.IAccountRouter;
 import net.nanxu.payment.channel.PaymentRegistry;
 import net.nanxu.payment.channel.PaymentService;
+import net.nanxu.payment.channel.model.PayRequest;
 import net.nanxu.payment.channel.model.PaymentRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
 import net.nanxu.payment.channel.model.QueryRequest;
@@ -24,6 +25,7 @@ import net.nanxu.payment.utils.QrCodeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 /**
  * PaymentServiceImpl.
@@ -41,23 +43,29 @@ public class PaymentServiceImpl implements PaymentService {
     private final IAccountRouter accountRouter;
 
     @Override
-    public Mono<PaymentResult> pay(PaymentRequest request) {
+    public Mono<PaymentResult> pay(PayRequest request) {
         return security.getModules(PaymentBeforeSecurityModule.class)
             .flatMap(module -> module.check(new SecurityModuleContext(request)))
             .collectList()
             .flatMap(types -> types.contains(SecurityModule.Type.Reject)
                 ? Mono.error(new RuntimeException("Reject"))
                 : Mono.just("Success"))
-            // 获取账户
-            .flatMap((e) -> getAccount(request.getOrder(), request.getPacket())
-                .doOnNext(account -> {
-                    request.setAccount(account);
-                    request.getOrder().setAccount(new Order.AccountRef(account.getName()));
-                }))
             // 创建订单
-            .flatMap(account -> orderService.createOrder(request.getOrder()))
-            // 调用支付接口
-            .flatMap(order -> paymentRegistry.get(order.getChannel().getName()).pay(request))
+            .flatMap((e) -> orderService.getOrder(request.getOrderNo()))
+            // 获取账户
+            .flatMap((order) -> getAccount(order, request.getPacket()).map(
+                account -> Tuples.of(order, account)))
+            // 调用支付通道创建接口
+            .flatMap(e -> {
+                // TODO 尝试从缓存中拿到支付通道的缓存数据
+                
+                PaymentRequest paymentRequest = new PaymentRequest();
+                paymentRequest.setOrder(e.getT1());
+                paymentRequest.setAccount(e.getT2());
+                paymentRequest.setPacket(request.getPacket());
+                return paymentRegistry.get(e.getT2().getChannel()).pay(paymentRequest);
+            })
+            // TODO 增加订单支付通道参数的缓存处理
             // 后置处理
             .doOnNext(res -> {
                 if (PaymentResult.Status.SUCCESS.equals(res.getStatus())

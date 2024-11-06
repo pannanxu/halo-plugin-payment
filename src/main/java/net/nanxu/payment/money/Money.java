@@ -19,14 +19,14 @@ public class Money {
     /**
      * 货币
      */
-    private CurrencyUnit currency;
+    private String currency;
     /**
      * 汇率
      */
     private ExchangeRate rate;
 
-    public static Money of(BigDecimal amount, CurrencyUnit base) {
-        return new Money().setAmount(amount).setCurrency(base);
+    public static Money of(BigDecimal amount, String currency) {
+        return new Money().setAmount(amount).setCurrency(currency);
     }
 
     public static Money ofCNY(BigDecimal amount) {

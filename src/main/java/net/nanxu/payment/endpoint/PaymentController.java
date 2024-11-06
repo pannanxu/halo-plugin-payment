@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.nanxu.payment.PaymentFactory;
 import net.nanxu.payment.channel.CallbackService;
 import net.nanxu.payment.channel.model.CallbackRequest;
-import net.nanxu.payment.channel.model.PaymentRequest;
+import net.nanxu.payment.channel.model.PayRequest;
 import net.nanxu.payment.channel.model.PaymentResult;
 import net.nanxu.payment.order.Order;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +38,7 @@ public class PaymentController {
 
     @PostMapping("/{orderNo}/pay/{channel}")
     public Mono<PaymentResult> pay(@PathVariable String orderNo, @PathVariable String channel) {
-        return payment.getServiceFactory().getPayment().pay(new PaymentRequest());
+        return payment.getServiceFactory().getPayment().pay(new PayRequest());
     }
 
     @GetMapping("/{orderNo}/pay/status")

@@ -19,11 +19,11 @@ public class ExchangeRate {
     /**
      * 基础货币
      */
-    private CurrencyUnit base;
+    private String base;
     /**
      * 目标货币
      */
-    private CurrencyUnit target;
+    private String target;
     /**
      * 汇率
      */
