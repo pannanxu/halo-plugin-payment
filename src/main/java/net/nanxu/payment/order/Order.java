@@ -75,6 +75,11 @@ public class Order extends AbstractExtension {
     @NotNull
     private UserRef user;
     /**
+     * 订单状态
+     */
+    @NotNull
+    private OrderStatus orderStatus;
+    /**
      * 支付状态
      */
     @NotNull
@@ -214,10 +219,6 @@ public class Order extends AbstractExtension {
          * 未支付
          */
         UNPAID,
-        /**
-         * 支付中
-         */
-        PAYING,
         /**
          * 支付成功
          */

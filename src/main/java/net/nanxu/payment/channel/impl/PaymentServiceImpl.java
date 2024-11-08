@@ -23,6 +23,8 @@ import net.nanxu.payment.security.SecurityModuleContext;
 import net.nanxu.payment.security.SecurityRegistry;
 import net.nanxu.payment.utils.QrCodeUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
@@ -41,6 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderService orderService;
     private final AccountService accountService;
     private final IAccountRouter accountRouter;
+    private final CacheManager cacheManager;
 
     @Override
     public Mono<PaymentResult> pay(PayRequest request) {
@@ -55,17 +58,27 @@ public class PaymentServiceImpl implements PaymentService {
             // 获取账户
             .flatMap((order) -> getAccount(order, request.getPacket()).map(
                 account -> Tuples.of(order, account)))
-            // 调用支付通道创建接口
             .flatMap(e -> {
-                // TODO 尝试从缓存中拿到支付通道的缓存数据
-                
+                Cache cache =
+                    cacheManager.getCache(buildPaymentResultCacheKey(e.getT1().getOrderNo()));
+                if (null != cache) {
+                    PaymentResult cacheResult =
+                        cache.get(buildPaymentResultDataCacheKey(e.getT2()), PaymentResult.class);
+                    if (null != cacheResult) {
+                        return Mono.just(cacheResult);
+                    }
+                }
                 PaymentRequest paymentRequest = new PaymentRequest();
                 paymentRequest.setOrder(e.getT1());
                 paymentRequest.setAccount(e.getT2());
                 paymentRequest.setPacket(request.getPacket());
-                return paymentRegistry.get(e.getT2().getChannel()).pay(paymentRequest);
+                return paymentRegistry.get(e.getT2().getChannel()).pay(paymentRequest)
+                    .doOnNext(x -> {
+                        if (null != cache) {
+                            cache.put(buildPaymentResultDataCacheKey(e.getT2()), x);
+                        }
+                    });
             })
-            // TODO 增加订单支付通道参数的缓存处理
             // 后置处理
             .doOnNext(res -> {
                 if (PaymentResult.Status.SUCCESS.equals(res.getStatus())
@@ -103,4 +116,11 @@ public class PaymentServiceImpl implements PaymentService {
             .build());
     }
 
+    private String buildPaymentResultDataCacheKey(IAccount account) {
+        return String.join("_", account.getChannel(), account.getName());
+    }
+
+    private String buildPaymentResultCacheKey(String orderNo) {
+        return String.join("_", "pay", orderNo);
+    }
 }
