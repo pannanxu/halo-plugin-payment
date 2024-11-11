@@ -24,6 +24,7 @@ dependencies {
     
     // sdks
     implementation 'com.alipay.sdk:alipay-sdk-java:4.34.0.ALL'
+    implementation 'com.github.wechatpay-apiv3:wechatpay-java:0.2.14'
     
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -22,6 +22,8 @@ public class ProtocolPacket {
      * Http Param
      */
     private Map<String, String> params;
+    
+    private String body;
 
     public boolean isWap() {
         return userAgent.contains("wap");

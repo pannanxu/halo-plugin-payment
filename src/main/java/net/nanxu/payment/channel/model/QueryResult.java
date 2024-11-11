@@ -21,6 +21,8 @@ public class QueryResult {
      * 外部订单号
      */
     private String outTradeNo;
+    
+    private String method;
     /**
      * 订单状态
      */

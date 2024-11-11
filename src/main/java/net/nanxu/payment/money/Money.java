@@ -25,6 +25,11 @@ public class Money {
      */
     private ExchangeRate rate;
 
+    public static Money of(Integer amount, String currency) {
+        BigDecimal value = new BigDecimal(amount);
+        return new Money().setAmount(value.multiply(new BigDecimal("0.01"))).setCurrency(currency);
+    }
+    
     public static Money of(BigDecimal amount, String currency) {
         return new Money().setAmount(amount).setCurrency(currency);
     }
@@ -41,6 +46,10 @@ public class Money {
     public static Money ofCNY(Long amount) {
         BigDecimal value = new BigDecimal(amount);
         return of(value.multiply(new BigDecimal("0.01")), null);
+    }
+
+    public Integer getAmountInCNY() {
+        return amount.multiply(new BigDecimal("100.00")).intValue();
     }
 
 }

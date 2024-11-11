@@ -25,5 +25,9 @@ public interface IAccount {
         }
         return (T) this;
     }
+    
+    default String getConfigText(String key) {
+        return getConfig().get(key).asText();
+    }
 
 }

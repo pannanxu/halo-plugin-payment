@@ -3,6 +3,7 @@ package net.nanxu.payment.channel.model;
 import lombok.Builder;
 import lombok.Data;
 import net.nanxu.payment.account.IAccount;
+import net.nanxu.payment.infra.ProtocolPacket;
 import net.nanxu.payment.order.Order;
 
 /**
@@ -22,5 +23,5 @@ public class CallbackRequest {
     
     private IAccount account;
 
-    private String requestBody;
+    private ProtocolPacket packet;
 }

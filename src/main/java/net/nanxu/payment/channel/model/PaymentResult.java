@@ -59,7 +59,7 @@ public class PaymentResult {
         /**
          * 透传给客户端SDK
          */
-        Other
+        Transmission
     }
 
 }

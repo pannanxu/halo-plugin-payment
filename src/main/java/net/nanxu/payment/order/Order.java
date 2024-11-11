@@ -9,7 +9,6 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import net.nanxu.payment.channel.model.PaymentMethod;
 import net.nanxu.payment.money.Money;
 import run.halo.app.extension.AbstractExtension;
 
@@ -234,9 +233,13 @@ public class Order extends AbstractExtension {
          */
         private String name;
         /**
-         * 支付方式
+         * 支付方式.
+         * <p>
+         * 通道：微信支付、支付宝支付
+         * <p>
+         * 支付方式：native、mini
          */
-        private PaymentMethod method;
+        private String method;
         /**
          * 通知地址
          */
@@ -245,7 +248,7 @@ public class Order extends AbstractExtension {
         /**
          * 扩展数据
          */
-        private Map<String, Object> extra;
+        private Map<String, String> extra;
 
         public ChannelRef() {
         }
@@ -254,7 +257,7 @@ public class Order extends AbstractExtension {
             this.name = name;
         }
 
-        public ChannelRef addExtra(String key, Object value) {
+        public ChannelRef addExtra(String key, String value) {
             if (extra == null) {
                 extra = new HashMap<>();
             } else {
@@ -267,7 +270,7 @@ public class Order extends AbstractExtension {
             return new ChannelRef().setName(name);
         }
 
-        public static ChannelRef of(String name, PaymentMethod method) {
+        public static ChannelRef of(String name, String method) {
             return new ChannelRef().setName(name).setMethod(method);
         }
 
