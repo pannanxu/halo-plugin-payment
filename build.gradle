@@ -25,7 +25,13 @@ dependencies {
     // sdks
     implementation 'com.alipay.sdk:alipay-sdk-java:4.34.0.ALL'
     implementation 'com.github.wechatpay-apiv3:wechatpay-java:0.2.14'
-    
+    // https://developer.paypal.com/serversdk/java/getting-started/how-to-get-started
+    implementation 'com.paypal.sdk:paypal-server-sdk:0.5.1'
+    // https://github.com/codewriterbv/lemonsqueezy-java
+    implementation 'be.codewriter:lemonsqueezy-java:0.0.1-beta'
+    // https://github.com/stripe/stripe-java
+    implementation "com.stripe:stripe-java:28.0.1"
+
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

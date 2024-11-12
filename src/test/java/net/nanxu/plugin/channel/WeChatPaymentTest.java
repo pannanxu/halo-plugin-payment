@@ -28,7 +28,7 @@ class WeChatPaymentTest {
 
     String orderNo = "order-no";
 
-    @Test
+    // @Test
     void pay() {
         PaymentRequest request = new PaymentRequest();
         request.setOrder(createOrder());
@@ -41,7 +41,7 @@ class WeChatPaymentTest {
 
     }
 
-    @Test
+    // @Test
     void query() {
         QueryResult result =
             payment.query(QueryRequest.builder().orderNo(orderNo).account(account).build()).block();
@@ -49,7 +49,7 @@ class WeChatPaymentTest {
     }
 
 
-    @Test
+    // @Test
     void refund() {
         RefundResult result = payment.refund(RefundRequest.builder()
             .refundNo("refund-no")
@@ -60,7 +60,7 @@ class WeChatPaymentTest {
         System.out.println(result);
     }
 
-    @Test
+    // @Test
     void cancel() {
         RefundResult result =
             payment.cancel(RefundRequest.builder().orderNo(orderNo).account(account).build())

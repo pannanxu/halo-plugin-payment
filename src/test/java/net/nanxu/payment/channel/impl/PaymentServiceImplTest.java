@@ -1,5 +1,6 @@
 package net.nanxu.payment.channel.impl;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import net.nanxu.payment.account.Account;
 import net.nanxu.payment.account.AccountService;
 import net.nanxu.payment.account.IAccount;
+import net.nanxu.payment.account.IAccountRouter;
 import net.nanxu.payment.account.PaymentAccount;
 import net.nanxu.payment.channel.AbstractPayment;
 import net.nanxu.payment.channel.IPaymentCallback;
@@ -27,11 +29,11 @@ import net.nanxu.payment.channel.model.QueryResult;
 import net.nanxu.payment.channel.model.RefundRequest;
 import net.nanxu.payment.channel.model.RefundResult;
 import net.nanxu.payment.channel.model.SettingField;
+import net.nanxu.payment.infra.ProtocolPacket;
 import net.nanxu.payment.order.Order;
 import net.nanxu.payment.order.OrderService;
 import net.nanxu.payment.security.SecurityRegistry;
 import net.nanxu.payment.utils.QrCodeUtil;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,8 +41,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTest {
@@ -54,51 +56,50 @@ class PaymentServiceImplTest {
     OrderService orderService;
     @Mock
     AccountService accountService;
-
+    @Mock
+    CacheManager cacheManager;
+    @Mock
+    IAccountRouter accountRouter;
     @InjectMocks
     PaymentServiceImpl paymentService;
 
     @BeforeEach
     void setUp() {
         when(paymentRegistry.get("test_channel")).thenReturn(new TestChannel());
-        when(orderService.createOrder(any())).thenReturn(Mono.just(createOrder()));
+        when(orderService.getOrder(any())).thenReturn(Mono.just(createOrder()));
         when(accountService.getAccount("test_account")).thenReturn(
             Mono.just(new TestChannel.TestAccount(
                 new Account().setName("test_account").setChannel("test_channel")
             )));
-    }
-
-    @AfterEach
-    void tearDown() {
+        when(cacheManager.getCache(any())).thenReturn(null);
     }
 
     @Test
     void pay() {
         PaymentRequest request = new PaymentRequest();
         request.setOrder(createOrder());
-        Mono<PaymentResult> pay = paymentService.pay(new PayRequest());
+        PayRequest payRequest = new PayRequest();
+        payRequest.setOrderNo("test");
+        payRequest.setChannel("test_channel");
+        payRequest.setPacket(new ProtocolPacket());
+        PaymentResult pay = paymentService.pay(payRequest).block();
+        assertNotNull(pay);
+        assertTrue(pay.getType().equals(PaymentResult.Type.QRCode)
+            && pay.getContent().startsWith(QrCodeUtil.BASE64_PREFIX));
 
-        pay.subscribe(System.out::println);
-
-        StepVerifier.create(pay)
-            .assertNext(e -> {
-                assertTrue(e.getType().equals(PaymentResult.Type.QRCode)
-                    && e.getContent().startsWith(QrCodeUtil.BASE64_PREFIX));
-            })
-            .verifyComplete();
     }
 
-    @Test
-    void query() {
-    }
-
-    @Test
-    void refund() {
-    }
-
-    @Test
-    void cancel() {
-    }
+    // @Test
+    // void query() {
+    // }
+    //
+    // @Test
+    // void refund() {
+    // }
+    //
+    // @Test
+    // void cancel() {
+    // }
 
     Order createOrder() {
         return Order.createOrder()
