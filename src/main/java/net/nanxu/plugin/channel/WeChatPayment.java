@@ -2,6 +2,8 @@ package net.nanxu.plugin.channel;
 
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
+import com.wechat.pay.java.core.exception.MalformedMessageException;
+import com.wechat.pay.java.core.exception.ServiceException;
 import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.core.http.AbstractHttpClient;
 import com.wechat.pay.java.core.http.DefaultHttpClientBuilder;
@@ -18,8 +20,13 @@ import com.wechat.pay.java.service.payments.nativepay.model.CloseOrderRequest;
 import com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse;
 import com.wechat.pay.java.service.payments.nativepay.model.QueryOrderByOutTradeNoRequest;
+import com.wechat.pay.java.service.refund.RefundService;
+import com.wechat.pay.java.service.refund.model.AmountReq;
+import com.wechat.pay.java.service.refund.model.CreateRequest;
+import com.wechat.pay.java.service.refund.model.Refund;
 import java.time.Instant;
 import java.util.List;
+import com.wechat.pay.java.service.refund.model.Status;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -200,36 +207,93 @@ public class WeChatPayment extends AbstractPayment {
     @Override
     public Mono<QueryResult> query(QueryRequest request) {
         return Mono.defer(() -> {
-            var account = request.getAccount().as(WeChatAccount.class);
-            var queryRequest = new QueryOrderByOutTradeNoRequest();
-            queryRequest.setMchid(account.getMerchantId());
-            queryRequest.setOutTradeNo(request.getOrderNo());
+            try {
+                var account = request.getAccount().as(WeChatAccount.class);
+                var queryRequest = new QueryOrderByOutTradeNoRequest();
+                queryRequest.setMchid(account.getMerchantId());
+                queryRequest.setOutTradeNo(request.getOrderNo());
 
-            var transaction =
-                account.getNativePayService().queryOrderByOutTradeNo(queryRequest);
+                var transaction =
+                    account.getNativePayService().queryOrderByOutTradeNo(queryRequest);
 
-            var builder = QueryResult.builder()
-                .orderNo(transaction.getOutTradeNo())
-                .outTradeNo(transaction.getTransactionId())
-                .method(transaction.getTradeType().name())
-                .money(Money.of(transaction.getAmount().getPayerTotal(),
-                    transaction.getAmount().getPayerCurrency()));
+                var builder = QueryResult.builder()
+                    .orderNo(transaction.getOutTradeNo())
+                    .outTradeNo(transaction.getTransactionId())
+                    .method(transaction.getTradeType().name())
+                    .money(Money.of(transaction.getAmount().getPayerTotal(),
+                        transaction.getAmount().getPayerCurrency()));
 
-            if (transaction.getTradeState().equals(Transaction.TradeStateEnum.SUCCESS)) {
-                return Mono.just(builder.payStatus(Order.OrderStatus.SUCCESS).build());
+                if (transaction.getTradeState().equals(Transaction.TradeStateEnum.SUCCESS)) {
+                    return Mono.just(builder.payStatus(Order.OrderStatus.SUCCESS).build());
+                }
+                if (transaction.getTradeState().equals(Transaction.TradeStateEnum.NOTPAY) ||
+                    transaction.getTradeState().equals(Transaction.TradeStateEnum.USERPAYING)
+                ) {
+                    return Mono.just(builder.payStatus(Order.OrderStatus.WAITING).build());
+                }
+                return Mono.just(builder.payStatus(Order.OrderStatus.CLOSED).build());
+            } catch (ValidationException ex) {
+                log.error("WeChatPayment|查询订单签名验证失败|{},{}", request.getOrderNo(),
+                    ex.getMessage(), ex);
+                return Mono.error(new PaymentException("WeChat查询订单签名验证失败"));
+            } catch (MalformedMessageException ex) {
+                log.error("WeChatPayment|查询订单消息体错误|{},{}", request.getOrderNo(),
+                    ex.getMessage(), ex);
+                return Mono.error(new PaymentException("WeChat查询订单消息体错误"));
+            } catch (ServiceException ex) {
+                log.error("WeChatPayment|查询订单失败|{},{},{}", request.getOrderNo(),
+                    ex.getErrorCode(), ex.getErrorMessage(), ex);
+                return Mono.error(new PaymentException(ex.getErrorMessage()));
+            } catch (Exception ex) {
+                log.error("WeChatPayment|查询订单异常|{},{}", request.getOrderNo(), ex.getMessage(),
+                    ex);
+                return Mono.error(new PaymentException("WeChat查询订单异常"));
             }
-            if (transaction.getTradeState().equals(Transaction.TradeStateEnum.NOTPAY) ||
-                transaction.getTradeState().equals(Transaction.TradeStateEnum.USERPAYING)
-            ) {
-                return Mono.just(builder.payStatus(Order.OrderStatus.WAITING).build());
-            }
-            return Mono.just(builder.payStatus(Order.OrderStatus.CLOSED).build());
         });
     }
 
     @Override
     public Mono<RefundResult> refund(RefundRequest request) {
-        return Mono.empty();
+        return Mono.defer(() -> {
+            var account = request.getAccount().as(WeChatAccount.class);
+            CreateRequest createRequest = new CreateRequest();
+            createRequest.setTransactionId(request.getOutTradeNo());
+            createRequest.setOutTradeNo(request.getOrderNo());
+            createRequest.setOutRefundNo(request.getRefundNo());
+            createRequest.setReason(request.getRemark());
+            createRequest.setNotifyUrl(request.getNotifyUrl());
+            AmountReq amountReq = new AmountReq();
+            amountReq.setRefund(request.getMoney().getAmountInCNY().longValue());
+            amountReq.setCurrency(request.getMoney().getCurrency());
+            amountReq.setTotal(request.getTotal().getAmountInCNY().longValue());
+            createRequest.setAmount(amountReq);
+            try {
+                Refund refund = account.getRefundService().create(createRequest);
+                return Mono.just(RefundResult.builder()
+                    .orderNo(refund.getOutRefundNo())
+                    .outTradeNo(refund.getTransactionId())
+                    .success(List.of(PaymentResult.Status.SUCCESS, Status.PROCESSING).contains(refund.getStatus()))
+                    .refundNo(refund.getRefundId())
+                    .money(Money.ofCNY(refund.getAmount().getRefund()))
+                    .build());
+            } catch (ValidationException ex) {
+                log.error("WeChatPayment|创建退款订单签名验证失败|{},{}", request.getOrderNo(),
+                    ex.getMessage(), ex);
+                return Mono.error(new PaymentException("WeChat查询订单签名验证失败"));
+            } catch (MalformedMessageException ex) {
+                log.error("WeChatPayment|创建退款订单消息体错误|{},{}", request.getOrderNo(),
+                    ex.getMessage(), ex);
+                return Mono.error(new PaymentException("WeChat创建退款订单消息体错误"));
+            } catch (ServiceException ex) {
+                log.error("WeChatPayment|创建退款订单失败|{},{},{}", request.getOrderNo(),
+                    ex.getErrorCode(), ex.getErrorMessage(), ex);
+                return Mono.error(new PaymentException(ex.getErrorMessage()));
+            } catch (Exception ex) {
+                log.error("WeChatPayment|创建退款订单异常|{},{}", request.getOrderNo(), ex.getMessage(),
+                    ex);
+                return Mono.error(new PaymentException("WeChat创建退款订单异常"));
+            }
+        });
     }
 
     @Override
@@ -246,9 +310,22 @@ public class WeChatPayment extends AbstractPayment {
                     .outTradeNo(request.getOutTradeNo())
                     .success(true)
                     .build());
+            } catch (ValidationException ex) {
+                log.error("WeChatPayment|关闭订单签名验证失败|{},{}", request.getOrderNo(),
+                    ex.getMessage(), ex);
+                return Mono.error(new PaymentException("WeChat关闭订单签名验证失败"));
+            } catch (MalformedMessageException ex) {
+                log.error("WeChatPayment|关闭订单消息体错误|{},{}", request.getOrderNo(),
+                    ex.getMessage(), ex);
+                return Mono.error(new PaymentException("WeChat关闭订单消息体错误"));
+            } catch (ServiceException ex) {
+                log.error("WeChatPayment|关闭订单失败|{},{},{}", request.getOrderNo(),
+                    ex.getErrorCode(), ex.getErrorMessage(), ex);
+                return Mono.error(new PaymentException(ex.getErrorMessage()));
             } catch (Exception ex) {
-                log.error("WeChatPayment|关闭订单异常|{}", ex.getMessage());
-                return Mono.error(new PaymentException("WeChat订单关闭失败"));
+                log.error("WeChatPayment|关闭订单异常|{},{}", request.getOrderNo(), ex.getMessage(),
+                    ex);
+                return Mono.error(new PaymentException("WeChat关闭订单异常"));
             }
         });
     }
@@ -281,8 +358,10 @@ public class WeChatPayment extends AbstractPayment {
                         .build();
 
                     // 以支付通知回调为例，验签、解密并转换成 Transaction
-                    Transaction transaction = account.getParser().parse(requestParam, Transaction.class);
-                    return Mono.just(CallbackResult.builder().success(true).render("success").build());
+                    Transaction transaction =
+                        account.getParser().parse(requestParam, Transaction.class);
+                    return Mono.just(
+                        CallbackResult.builder().success(true).render("success").build());
                 } catch (ValidationException ex) {
                     // 签名验证失败，返回 401 UNAUTHORIZED 状态码
                     log.error("WeChatPayment|签名验证失败|{}", ex.getMessage());
@@ -301,6 +380,7 @@ public class WeChatPayment extends AbstractPayment {
         private final JsapiService jsapiService;
         private final AppService appService;
         private final H5Service h5Service;
+        private final RefundService refundService;
 
         private final NotificationParser parser;
 
@@ -332,6 +412,7 @@ public class WeChatPayment extends AbstractPayment {
             this.jsapiService = new JsapiService.Builder().httpClient(client).build();
             this.appService = new AppService.Builder().httpClient(client).build();
             this.h5Service = new H5Service.Builder().httpClient(client).build();
+            this.refundService = new RefundService.Builder().httpClient(client).build();
 
             this.parser = new NotificationParser(notificationConfig);
         }

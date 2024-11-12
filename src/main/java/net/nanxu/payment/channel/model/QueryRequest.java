@@ -1,5 +1,6 @@
 package net.nanxu.payment.channel.model;
 
+import lombok.Builder;
 import lombok.Data;
 import net.nanxu.payment.account.IAccount;
 
@@ -9,6 +10,7 @@ import net.nanxu.payment.account.IAccount;
  * @author: P
  **/
 @Data
+@Builder
 public class QueryRequest {
     /**
      * 订单单号

@@ -182,11 +182,11 @@ public class AliF2FPayment extends AbstractPayment {
             AliF2FAccount account = request.getAccount().as(AliF2FAccount.class);
             TypeReference<Map<String, String>> type = new TypeReference<>() {
             };
-            Map<String, String> body = JsonUtils.jsonToObject(request.getRequestBody(), type);
+            Map<String, String> body = JsonUtils.jsonToObject(request.getPacket().getBody(), type);
             try {
                 if (!AlipaySignature.rsaCheckV1(body, account.getPublicKey(),
                     account.getCharset(), account.getSignType())) {
-                    log.debug("Payment|支付宝当面付|验签失败:{}", request.getRequestBody());
+                    log.debug("Payment|支付宝当面付|验签失败:{}", request.getPacket().getBody());
                     return Mono.just(
                         CallbackResult.builder().success(false).render("failure=verify")
                             .build());

@@ -74,7 +74,7 @@ public class PaymentController {
                     return Mono.just("success");
                 }
                 return callbackService.callback(
-                    CallbackRequest.builder().channel(channel).orderNo(orderNo).requestBody(body)
+                    CallbackRequest.builder().channel(channel).orderNo(orderNo).packet(new ProtocolPacket().setBody(body))
                         .build());
             });
     }

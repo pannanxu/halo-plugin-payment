@@ -2,6 +2,7 @@ package net.nanxu.payment.infra;
 
 import java.util.Map;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * ProtocolPacket.
@@ -9,6 +10,7 @@ import lombok.Data;
  * @author: P
  **/
 @Data
+@Accessors(chain = true)
 public class ProtocolPacket {
     /**
      * Http Header UserAgent
